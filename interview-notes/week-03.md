@@ -2,6 +2,10 @@
 
 Concurrency + tests: double-booking, `@Transactional`, locking.
 
+**Packed:** two Part 1 topics per weekday (Fri = long board). Full calendar: [part1-map.md](part1-map.md).
+
+Wed 2026-09-02 pulled Thu into the same day (test + wait on `book()` + title PATCH). **Next weekday = Fri HLD.**
+
 Each day’s **Quick recall** is **general** (any Spring app) → **here** → **trap**. You can read a day without the chat.
 
 ---

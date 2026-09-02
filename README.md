@@ -6,6 +6,7 @@ Study notes for the Event Booking Platform and Java/Spring interview prep.
 
 | Path | What |
 |---|---|
+| `interview-notes/part1-map.md` | Two Spring topics per weekday (weeks 3–8) |
 | `interview-notes/week-NN.md` | That week’s recall |
 | `interview-notes/lc-patterns.md` | LC pattern table |
 | `interview-notes/cheats.md` | Annotations / statuses |
