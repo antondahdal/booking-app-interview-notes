@@ -529,4 +529,197 @@ Then the 99 Book again.
 
 > Race test = full context + real DB. No `@Transactional` on the test. Latch starts together; `join` before you check. Login is per thread. Passing = no oversell. Last-seat `book()` waits. Title PATCH uses `findById` + stamp. First security match wins — do not use `POST /api/events/**` for organizer.
 
-**Still today:** Part 2 LC (#11, then #15) + Part 3. **Calendar Thu:** already pulled into today. **Fri:** long HLD. **Sat/Sun off.**
+---
+
+### Part 2 — two LCs — passed
+
+---
+
+#### How to notice “sort then two pointers”
+
+You need **two values that add to a target**, and the list is **not** already sorted.
+
+After sort: too small → throw left; too big → throw right (same as **#167**). Equal neighbors = easy unique pairs/triplets.
+
+**Not this:** unsorted one pair + map OK → **#1 HashMap**. Already sorted one pair → **#167** only (no sort). Two **ends** because of **width** (walls), not a sum → **#11** (do not sort; indexes *are* the x-axis).
+
+**One line:** If you would write “for each `i`, find a pair for a target,” sort first and use two ends — not a worker, not a map.
+
+---
+
+### LC 11 Container With Most Water (Medium) — passed
+
+`height[i]` is a wall at x = `i`. Pick two walls. Water = **shorter wall × distance**. Return the **biggest** water. Not slanted.
+
+`[1,8,6,2,5,4,8,3,7]` → `49` (`8` at index 1 and `7` at index 8: `min(8,7) × 7`).
+
+---
+
+#### Why two pointers (general → here → trap)
+
+**General:** two ends. Each step **throws one side away**. Width always gets smaller, so you only move if you can get a **taller short side**.
+
+**Here:** `left = 0`, `right = last`. Area = `min(height[left], height[right]) × (right - left)`. Keep a best. Throw the **shorter** wall (`left++` or `right--`). Equal → move either one.
+
+**Trap:** `left` is not “the min value” and `right` is not “the max value.” They are only indexes. Also: **prefix** (#238) is a running product. **#121** is best buy so far, then sell later. Neither picks two walls.
+
+---
+
+#### Why not the cousins
+
+| Pattern | Why not today |
+|---|---|
+| **Prefix (#238)** | Running product while you walk. No two walls. No width. |
+| **Index + worker** | Every pair. Correct, **O(n²)**. No throw-away rule. |
+| **Running min (#121)** | Time order, one buy then one sell. Width does not count. |
+
+---
+
+#### The walk (learn this)
+
+`[1, 8, 6, 2, 5, 4, 8, 3, 7]`
+
+- walls `1` and `7`, area `1 × 8 = 8` → throw `1` (short)
+- walls `8` and `7`, area `7 × 7 = 49` → throw `7` (short)
+- keep going until they meet. Best stays **49**.
+
+**O(n)** time, **O(1)** extra. `while (left < right)` is enough (same index = no water).
+
+---
+
+#### Cousin
+
+Must check every pair / no throw rule → worker, **O(n²)**. Two values that sum to a target, array sorted → **#167** (throw by **sum**, not by shorter wall).
+
+---
+
+#### Interview sentence
+
+> I start at both ends. Area is the short wall times width. Width only shrinks, so I throw the shorter wall away and keep the taller one. One pass.
+
+---
+
+#### Gate (weak spots)
+
+- **Move glued to `else if`:** updating best and moving are **two** steps. Old code only moved when the area was *not* a new best. Tests still passed (next lap moved). Interview: always compute area, **then** throw the shorter wall.
+- Names `min` / `max` for indexes — say `left` / `right`.
+
+---
+
+### LC 15 3Sum (Medium) — passed
+
+Return every triplet of **different indexes** whose values add to **0**. Same three values only **once**. Order does not matter.
+
+`[-1,0,1,2,-1,-4]` → `[[-1,-1,2],[-1,0,1]]`. `[0,0,0]` → `[[0,0,0]]`.
+
+---
+
+#### Why sort then two pointers (general → here → trap)
+
+**General:** freeze one number. You still need a **pair** that sums to `-that`. Sorted pair = **#167**.
+
+**Here:** `Arrays.sort`. For each `i`: `left = i + 1`, `right = last`. Sum of three: `0` → save, move both; too small → `left++`; too big → `right--`. Skip the same value on `i` / `left` / `right` so duplicates are not recorded twice.
+
+**Trap:** calling the outer `i` a **worker**. A worker walks every `j` with no throw rule (**O(n³)** if a third loop). Inside, you still throw one side per step.
+
+---
+
+#### Why not the cousins
+
+| Pattern | Why not today |
+|---|---|
+| **Index + worker** | For each `i`, every `j`, every `k`. **O(n³)**. Worker **restarts**. |
+| **HashMap (#1)** | Unsorted pair. Duplicate triplets are messy (`[0,0,0,0]` must be **one** result). Extra O(n) map. |
+| **Neighbors only** | After sort, `j` and `j+1` only. Misses `[-4,1,3]` in `[-4,0,1,2,3]`. First tests were **lucky**. |
+
+---
+
+#### The walk (learn this)
+
+`[-1, 0, 1, 2, -1, -4]` → sort `[-4, -1, -1, 0, 1, 2]`
+
+`i` on **-4**, need pair sum **4**. `left` = next, `right` = last. Never get 4. No triplet.
+
+`i` on first **-1**, need **1**:
+
+- `-1 + 2 = 1` → `[-1,-1,2]`. Move both.
+- `0 + 1 = 1` → `[-1,0,1]`
+
+Next `i` is the **second** `-1` → **skip** (same first number → same triplets).
+
+**O(n²)** time. Extra besides the answer list: **O(1)**.
+
+---
+
+#### Cousin
+
+Two numbers, unsorted → **#1**. Two numbers, already sorted → **#167** only. Four numbers → same picture with two frozen indexes, then ends.
+
+---
+
+#### Interview sentence
+
+> Sort. For each `i` I two-pointer the rest for `-nums[i]`. Too small I throw left; too big I throw right. Skip duplicate values so each triplet is once.
+
+---
+
+#### Gate (weak spots)
+
+- **First guess:** index + worker. That is the brute cousin, not the interview pattern.
+- **Neighbor scan:** `j` and `j+1` after sort. Five tests passed by luck. `[-4,0,1,2,3]` needs `[-4,1,3]` (not neighbors) → `[]`.
+- **Hang:** `left = 0` plus `left != i` on every branch. When `i` is 0, **nothing moves**. `left` must start at **`i + 1`**. Drop `left != i`. Use `while (left < right)`.
+- **Skip duplicates:** not in the code yet. Tests use a Set, so extra `[0,0,0]` copies can still pass. Interview: skip same value; do not `contains` on the result list.
+- Drop `System.out.println`.
+
+---
+
+### Part 3 — OOP + design
+
+**Map:** [oop-design-map.md](oop-design-map.md). Do not repeat SRP / who owns `book()`.
+
+**Encapsulation**
+
+- **General:** hide inventory insides. The client sends the change they are allowed to make. Seats and stamp stay on the server.
+- **Here:** `EventUpdateRequestDto` is **title only**. Organizer must not send `version` or `availableSeats` (fake `999` stock, or a fake stamp).
+- **Trap:** this is not SRP. SRP = which class owns Book vs title. Encapsulation = the body cannot set those fields.
+
+**Java threads**
+
+- **General:** latch = start gun (`await` until `countDown` to 0). `join` = **the caller** waits until that worker **finished**. `synchronized` = this JVM only. `ExecutorService` = a pool; you **submit** work instead of `new Thread()`.
+- **Here:** both workers `await()`, test `countDown()`, then both `book()`. `concTest` does `t1.join()` / `t2.join()` before assert. `synchronized` on `book()` + two app servers still oversell — lock is the DB row.
+- **Trap:** `join` means t1 waits for t2. Latch locks the event row.
+
+**Two tools, one row**
+
+- **General:** pick the tool by **job**. Hot counter → wait now. Quiet field → stamp on save. Same entity can use both.
+- **Here:** `book()` = `FOR UPDATE`. Title PATCH = `findById` + `@Version`. **Name who commits first.** Book first → **201** + **409 stale** (retry PATCH can be 200). PATCH first → **200** + Book **201** (seats still 1).
+- **Trap:** organizer 409 = sold out. PATCH with `FOR UPDATE` (rename stands in the seat line).
+
+**Isolation (see vs write)**
+
+- **General:** default reads can both see `1` while two transactions are open. `@Transactional` is not a wait.
+- **Here:** keep two pictures apart. `findById` lab → both **see** `1`; version does **not** stop the read (it fails the **save**). `FOR UPDATE` → second **waits**, then **loads `0`**. No refresh.
+- **Trap:** version stops the read. Refresh stops the race. Mixing the lab (`findById`) with production (`FOR UPDATE`) in one answer.
+
+**PUT vs PATCH + click id**
+
+- **General:** PATCH = only the fields you send. PUT = full replace (omit a field → wipe or you must send the whole resource). POST create is **not** safe to retry unless you send a click id.
+- **Here:** title is PATCH. Two Book clicks, no click id → **two** attempts (two bookings if seats exist). JWT is who you are, not which click.
+- **Trap:** JWT twice = same click.
+
+**403 ≠ 409 (first matcher)**
+
+- **General:** first security line that fits wins. **403** = we know you, you may not. **409** = `book()` ran, state clash (sold out or stale).
+- **Here:** `POST /api/events/**` above bookings also matches `POST /api/events/{id}/bookings`. Attendee never reaches the attendee line → **403**. `book()` never ran.
+- **Trap:** 403 means sold out.
+
+### Gate (Part 3 weak spots)
+
+- **`join`:** thought t1 waits for t2. `join` = **test thread** waits until that worker finished.
+- **Isolation:** first said version / refresh stop the read. Version stops the **write**. Refresh is GET.
+
+### 60-sec (Part 3)
+
+> PATCH body is title only — client does not set seats or version. Latch starts together; `join` is the test waiting, not t1 waiting for t2. Java `synchronized` is not the seat lock. Book waits; title uses the stamp — say who commits first. `findById` both see 1; `FOR UPDATE` waits then sees 0. Two Book clicks without a click id = two attempts. `POST /api/events/**` above Book → 403, not 409.
+
+**Calendar:** Day 3 closed. **Fri:** long HLD. **Sat/Sun off.**
