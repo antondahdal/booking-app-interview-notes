@@ -443,4 +443,86 @@ Then the 99 Book again.
 
 > Stamp lives on the inventory object, not the API. Last seat, no wait: 201 and 409 stale; retry Book is sold out; refresh GET can show 0. Two seats: retry can be 201. Two servers: still one DB. Title bump: stale 409, seats remain. Retry on the server only if the write can still succeed. 100 last-seat Books: wait, or you pay 99 clashes plus 99 more POSTs. Failed event write rolls the booking back.
 
-**Tomorrow:** `Start Week 3 Day 3` — two-thread test. **Sat/Sun off.**
+---
+
+## Week 3 Day 3 — Two-thread test + wait back + title PATCH
+
+**Date:** 2026-09-02  
+**Goal:** Prove two overlapping `book()` calls cannot both take the last seat. Put wait back on `book()`. Quiet title change uses the stamp, not the seat lock.
+
+### Quick recall (Spring — Part 1)
+
+**Which test slice**
+
+- **General:** `@WebMvcTest` = HTTP layer + mocked service. `@DataJpaTest` = repositories only. `@SpringBootTest` = full app, real beans, real DB. A mock returns what you programmed. It cannot oversell.
+- **Here:** `ConcurrentBookingTest` is `@SpringBootTest`. Real `BookingServiceImpl`, real H2, two threads on one event row. `BookingControllerTest` cannot prove this.
+- **Trap:** calling `book` twice in a controller test with a mocked service.
+
+**Constructor vs field `@Autowired` (when)**
+
+- **General:** both are DI. Production bean (`@Service`, `@RestController`) → constructor (one constructor, annotation optional). Spring test class → field `@Autowired` is the usual short form. `@Autowired` on a constructor only if there are two constructors and you mark which one.
+- **Here:** `BookingServiceImpl` = constructor. `ConcurrentBookingTest.bookingService` = field `@Autowired`.
+- **Trap:** `@Autowired` vs constructor as opposites. `@Autowired` is the marker; constructor vs field is where the bean goes in.
+
+**`@Transactional` on the test method**
+
+- **General:** a transactional test wraps the **whole method** in one bucket on the **test thread**. Inserts are not committed until that method ends (then tests usually roll back). Other threads start their own transactions and only see committed rows.
+- **Here:** `save` and the two `book()` calls are **inside** `concTest()`. No `@Transactional` on the test. Each `save()` commits; then workers can load the event.
+- **Trap:** thinking `concTest` finishes, then a later test calls `book()`. The race is in the same method, after the saves, before the method returns.
+
+**Latch vs `join`**
+
+- **General:** latch = workers wait for a start gun. `join` = the caller waits until a worker thread has finished.
+- **Here:** `CountDownLatch(1)` so both enter `book()` together. `t1.join()` / `t2.join()` so `concTest` does not check seats until both `book()` calls are done.
+- **Trap:** latch locks the event row. It only starts Java threads together. `join` is not t1 waiting for t2.
+
+**Who is logged in (per thread)**
+
+- **General:** “current user” is stored **per thread**. Setting it on the test thread does not copy to workers.
+- **Here:** `book()` does `SecurityContextHolder` → email → `findByEmail`. Each worker sets `anton@test.com` before `book()`.
+- **Trap:** one `@WithMockUser` / one set on `concTest` is enough for background threads.
+
+**What the test proves**
+
+- **General:** you assert the **invariant**: no extra tickets, stock not negative. You do not always prove *which* failure (stale stamp vs already `0`).
+- **Here:** 1 seat → 1 success, 1 failure, seats `0`, booking count `1`. With wait: second loads `0` after the first commits.
+- **Trap:** “the test proved optimistic locking.” It proved we do not oversell.
+
+**Wait back on `book()`**
+
+- **General:** last-item write → wait **now**, then read the real number. Keep the stamp on the row for quiet updates (title). Two tools, one entity.
+- **Here:** `book()` uses `findByIdForUpdate` again. `@Version` stays on `Event`. GET still `findById`. Second waiter loads **0** → sold-out 409.
+- **Trap:** deleting `@Version` because book waits again.
+
+**Title PATCH (quiet write)**
+
+- **General:** rename is not the hot counter. Load without `FOR UPDATE`. Stamp is checked on `save`. Clash → 409 stale, not sold out. Retry can be 200.
+- **Here:** `PATCH /api/events/{id}`, `EventUpdateRequestDto` (title only), `findById` + `setTitle` + `save`. Organizer/admin. Attendee Book unchanged.
+- **Trap:** `POST /updateTitle/{id}` (verb in the URL). `FOR UPDATE` on title (puts rename in the seat line).
+
+**Security: first match wins**
+
+- **General:** Spring uses the **first** matcher that fits, not the most specific.
+- **Here:** `POST /api/events/**` for organizer also matched `POST /api/events/5/bookings`. Attendee never reached the bookings line → **403**. Create is `POST /api/events` (no `**`). PATCH is its own line. Bookings matcher stays attendee.
+- **Trap:** “I also have a bookings line, so Book is fine.” Dead if a broader POST sits above it. Trailing slash `/api/events/` is not `POST /api/events`.
+
+### What I built
+
+- `ConcurrentBookingTest` — `@SpringBootTest`, 1-seat event, two threads + latch + `join`
+- `BookingServiceImpl.book()` — `findByIdForUpdate` again
+- `PATCH /api/events/{id}` — title only, stamp on save
+- `SecurityConfig` — PATCH organizer; POST create exact path; POST bookings attendee
+
+### Gate (weak spots)
+
+- **Q1:** Race is two threads. Slice is `@SpringBootTest` (real `book()` + real H2), not a mocked controller `book`.
+- **Q2:** Correct — `@Transactional` on `concTest` → workers do not see uncommitted event.
+- **Q3:** Latch = workers wait for start. `join` = **test thread** waits until a worker **finished**.
+- **Q4 (fixed after):** Wait → second does **not** pass `checkSeats` on `1`. After commit, second loads **0** → sold-out 409.
+- **Q5:** First matching security line wins. `POST /api/events/**` ate Book.
+
+### 60-sec
+
+> Race test = full context + real DB. No `@Transactional` on the test. Latch starts together; `join` before you check. Login is per thread. Passing = no oversell. Last-seat `book()` waits. Title PATCH uses `findById` + stamp. First security match wins — do not use `POST /api/events/**` for organizer.
+
+**Still today:** Part 2 LC (#11, then #15) + Part 3. **Calendar Thu:** already pulled into today. **Fri:** long HLD. **Sat/Sun off.**
