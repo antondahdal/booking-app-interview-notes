@@ -12,9 +12,9 @@ If a day feels thin, **pull the next map day’s Spring into today**. Do not inv
 |---|---|---|
 | Mon | Row lock on `book()` | Done |
 | Tue | `@Version` lab (`findById`) | Done |
-| Wed 2026-09-02 | Two-thread test **+** `findByIdForUpdate` back on `book()` **+** title `PATCH` (Thu pulled in) | Done (Part 1) |
-| Thu | *(pulled into Wed)* | Done |
-| Fri | Long HLD board | Next weekday |
+| Wed 2026-09-02 | Two-thread test **+** `findByIdForUpdate` back on `book()` **+** title `PATCH` | Done |
+| Thu 2026-09-03 | **`WebClient` bean** + **Booking calls Event over HTTP** (next unused code pair; do not empty the day) | Today |
+| Fri | Long HLD board (last seat 1 / 10 / 100) | Next weekday |
 
 ---
 
@@ -22,7 +22,7 @@ If a day feels thin, **pull the next map day’s Spring into today**. Do not inv
 
 | Day | Topic 1 | Topic 2 |
 |---|---|---|
-| Mon | Booking calls Event over HTTP | `WebClient` bean |
+| Mon | Booking calls Event over HTTP | `WebClient` bean | *(pulled to W3 Thu)* |
 | Tue | Third service (auth/users) | Correlation-id header |
 | Wed | Downstream 4xx/5xx mapping | Client timeout |
 | Thu | Remaining split glue | One integration test for the call |

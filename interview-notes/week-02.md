@@ -1,8 +1,8 @@
-# Interview notes — Week 2 
+# Interview notes — Week 2
 
 Auth + booking v1: register, JWT (Day 2), roles.
 
-Each day's **Quick recall** is **general** (any Spring app) → **here** → **trap**. You can read a day without the chat.
+You can reread a day without the chat. These notes are written in plain English.
 
 ---
 ## Week 2 Day 1 — User + register + BCrypt
@@ -12,28 +12,41 @@ Each day's **Quick recall** is **general** (any Spring app) → **here** → **t
 
 ### Quick recall (Spring — Part 1)
 
-**Unique + 409**  
-- **General:** A DB **unique** index stops two identical keys, including races. Unique alone with no handler often becomes **500**. **409** = the API: request is valid, **current state** says no (email taken, sold out, already booked — same meaning, different resources).  
-- **Here:** Unique on email + `DuplicateException` → 409.  
-- **Trap:** 409 ≠ “duplicate email only.”
+**Unique + 409**
 
-**Role**  
-- **General:** The client must not pick their own privilege. Server sets the default role. Permission is checked **per request**, not once at signup.  
-- **Here:** Service sets `ATTENDEE`. Never on the JSON.  
-- **Trap:** “I blocked create-event at register” — register is not create-event.
+A unique index in the database stops two identical keys, including when two requests race. Unique alone with no handler often becomes **500**. **409** is the API: the request is valid, but **current state** says no — email taken, sold out, already booked. Same meaning, different resources.
 
-**BCrypt / `encode` / `matches` / salt**  
-- **General:** Never store plaintext. Fast hashes are guessable. BCrypt is **slow on purpose**. **Salt** = random extra, stored **inside** the hash. Same password → different hashes. **No decode.** Register: `encode(raw)`. Login: `matches(raw, storedHash)`.  
-- **Here:** `BCryptPasswordEncoder` bean; hash never in the 201 body.  
-- **Trap:** Login must not `encode` again and compare strings. Unknown email and bad password → same **401**.
+Here, unique on email plus `DuplicateException` maps to 409.
 
-**`@Bean` vs `@Service`**  
-- **General:** `@Service` is for **your** class. Library types (`BCryptPasswordEncoder`) cannot wear it. `@Configuration` + `@Bean` = method **return value** is the bean. Inject the **interface**.  
-- **Here:** `PasswordEncoderConfig` → `PasswordEncoder` into `AuthServiceImpl`.
+The mix-up: thinking 409 only means “duplicate email.”
 
-**HTTP register**  
-- **General:** Create resource **201**. Bad JSON **400**. State clash **409**.  
-- **Here:** Register 201; email taken 409.
+**Role**
+
+The client must not pick their own privilege. The server sets the default role. Permission is checked **per request**, not once at signup.
+
+Here, the service sets `ATTENDEE`. It is never on the JSON.
+
+The mix-up: “I blocked create-event at register.” Register is not create-event.
+
+**BCrypt / `encode` / `matches` / salt**
+
+Never store plaintext. Fast hashes are guessable. BCrypt is **slow on purpose**. **Salt** is random extra, stored **inside** the hash. Same password → different hashes. There is **no decode**. Register calls `encode(raw)`. Login calls `matches(raw, storedHash)`.
+
+Here, a `BCryptPasswordEncoder` bean hashes the password, and the hash never appears in the 201 body.
+
+The mix-up: login must not `encode` again and compare strings. Unknown email and bad password both return the same **401**.
+
+**`@Bean` vs `@Service`**
+
+`@Service` is for **your** class. Library types (`BCryptPasswordEncoder`) cannot wear it. `@Configuration` plus `@Bean` means the method **return value** is the bean. Inject the **interface**.
+
+Here, `PasswordEncoderConfig` exposes `PasswordEncoder`, and that goes into `AuthServiceImpl`.
+
+**HTTP register**
+
+Create a resource → **201**. Bad JSON → **400**. State clash → **409**.
+
+Here, register is 201; email taken is 409.
 
 ### What I built
 
@@ -78,12 +91,11 @@ Walk: `push(3)` mins `[3]` → `push(5)` mins still `[3]` → `push(2)` mins `[3
 
 **Idea (plain):** one shared `AuthService` for the whole app. I call register → you store me on the service. Someone else calls register → **same object** → they see me, or they overwrite me and my request sees them.
 
-**Technical:**
+Spring beans default to **singleton**: **one instance per application context**, reused for every HTTP request. A **field** on that class is **shared mutable state**. Two requests = two threads (or overlapping calls) writing and reading the **same** field → **race**: mixed users, lost updates.
 
-- Spring beans default to **singleton**: **one instance per application context**, reused for every HTTP request.
-- A **field** on that class is **shared mutable state**. Two requests = two threads (or overlapping calls) writing/reading the **same** field → **race**: mixed users, lost updates.
-- Request data belongs in **method parameters** and local variables (the `RegisterRequestDto` lives only for that call). Those are not shared.
-- This is **thread-safety**, not “wrong role.” `PasswordEncoder` as a singleton is fine: `encode` / `matches` have **no per-user fields**.
+Request data belongs in **method parameters** and local variables (the `RegisterRequestDto` lives only for that call). Those are not shared.
+
+This is **thread-safety**, not “wrong role.” `PasswordEncoder` as a singleton is fine: `encode` / `matches` have **no per-user fields**.
 
 **Model answer:**
 
@@ -93,11 +105,15 @@ Walk: `push(3)` mins `[3]` → `push(5)` mins still `[3]` → `push(2)` mins `[3
 
 **OOP — interface vs abstract class** (picture was right; names were mixed)
 
-- **Abstraction** (the idea) = hide how, show what. Two Java tools:
-- **Abstract class** = is-a + shared **fields/code**. B and C `extends` A so they don’t copy. One parent.
-- **Interface** = **contract** (methods). `implements`, many allowed. No instance fields to inherit.
-- If B and C do the **same** work, put the **body** on the abstract class. Empty methods = they do it **differently**, or you only need a contract → interface.
-- `AuthService` is an **interface** because of **DIP / mock** (controller + `@WebMvcTest`), not because two subclasses share User fields.
+**Abstraction** (the idea) = hide how, show what. Two Java tools:
+
+**Abstract class** = is-a + shared **fields/code**. B and C `extends` A so they don’t copy. One parent.
+
+**Interface** = **contract** (methods). `implements`, many allowed. No instance fields to inherit.
+
+If B and C do the **same** work, put the **body** on the abstract class. Empty methods = they do it **differently**, or you only need a contract → interface.
+
+`AuthService` is an **interface** because of **DIP / mock** (controller + `@WebMvcTest`), not because two subclasses share User fields.
 
 ---
 
@@ -107,7 +123,7 @@ This is **not** “draw Kafka.” Mid-level **design materials** (Friday boards 
 
 **The prompt:** `POST /api/events` already exists (create event DTO: title, seats, venue, …). Register is public. Later, create-event must be **organizer-only**. The controller does **not** take user/role on that DTO — and it must not.
 
-**Wrong instinct:** “At register I check role; if not organizer I block create-event.”  
+**Wrong instinct:** “At register I check role; if not organizer I block create-event.”
 Register **always** sets `ATTENDEE`. You are not calling create-event yet. Permission is not a one-time gate at signup.
 
 **Right design**
@@ -131,7 +147,7 @@ Body: { title, seats, venueId } ← the event only
 | **409 Conflict** | Valid request, state clash | Duplicate email, oversell |
 | **201** | Created | Organizer create succeeds |
 
-**Authn vs authz (say these words)**  
+**Authn vs authz (say these words)**
 **Authentication** = who are you? (login, JWT). **Authorization** = are you allowed to do **this**? (role on this URL). 401 is authn failure; 403 is authz failure.
 
 **Why this belongs in design materials (not “only Spring”)**
@@ -158,29 +174,43 @@ JWT / `@PreAuthorize` is **how** you implement it (Day 2). The **design** is: DT
 
 ### Quick recall
 
-**JWT parts vs claims**  
-- **General:** Three Base64 pieces: **header.payload.signature**. **Claims** (`sub`, `exp`, role) live **inside** the payload. Payload is **readable**, not encrypted. Safety = **signature** (stops edits, not copying).  
-- **Here:** Login `generateToken` HS256. No password in the token.  
-- **Trap:** “JWT is subject, time, and signature” mixes parts with claims.
+**JWT parts vs claims**
 
-**`matches` vs `encode`**  
-- **General:** `encode` = store a new hash (register). `matches` = check login. No decode.  
-- **Here:** `AuthServiceImpl.login` uses `matches` only.
+A JWT is three Base64 pieces: **header.payload.signature**. **Claims** (`sub`, `exp`, role) live **inside** the payload. The payload is **readable**, not encrypted. Safety is the **signature** — it stops edits, not copying.
 
-**401 vs 403**  
-- **General:** **Authentication** = who are you? Fail → **401** (missing/bad/expired). **Authorization** = may you do this? Fail → **403** (we know you, not allowed).  
-- **Here:** Bad login / no token → 401. Attendee `POST /api/events` → 403.  
-- **Trap:** HTTP says “Unauthorized” for 401. Spoken: 401 = we don’t know you.
+Here, login’s `generateToken` uses HS256. No password in the token.
 
-**`permitAll` + `SecurityFilterChain`**  
-- **General:** Filters run **before** the controller. `permitAll` = ignore the identity box (public URL), **not** a role. Login must be public or nobody can get a token. First matcher wins; `anyRequest()` last.  
-- **Here:** `/api/auth/**` public. Config writes **URL rules**, it does not store this user’s role.  
-- **Trap:** `/error` not public can turn a real 400 into an empty 403.
+The mix-up: saying “JWT is subject, time, and signature” mixes **parts** with **claims**.
 
-**STATELESS + CSRF**  
-- **General:** STATELESS = no server session; JWT **is** the session. CSRF targets **cookie** auto-send. Bearer in a header is not that — copied JWT still works until `exp`. Password change does not kill today’s tokens (no denylist).  
-- **Here:** CSRF off, STATELESS on.  
-- **Trap:** CSRF does not block Postman with a pasted `Authorization`.
+**`matches` vs `encode`**
+
+`encode` stores a new hash (register). `matches` checks login. There is no decode.
+
+Here, `AuthServiceImpl.login` uses `matches` only.
+
+**401 vs 403**
+
+**Authentication** = who are you? Fail → **401** (missing, bad, or expired). **Authorization** = may you do this? Fail → **403** (we know you, not allowed).
+
+Here, bad login or no token → 401. Attendee `POST /api/events` → 403.
+
+The mix-up: HTTP labels 401 “Unauthorized.” Spoken: 401 = we don’t know you.
+
+**`permitAll` + `SecurityFilterChain`**
+
+Filters run **before** the controller. `permitAll` means ignore the identity box (public URL). It is **not** a role. Login must be public or nobody can get a token. First matcher wins; `anyRequest()` last.
+
+Here, `/api/auth/**` is public. Config writes **URL rules**. It does not store this user’s role.
+
+The mix-up: if `/error` is not public, a real 400 can turn into an empty 403.
+
+**STATELESS + CSRF**
+
+STATELESS means no server session; the JWT **is** the session. CSRF targets **cookie** auto-send. Bearer in a header is not that — a copied JWT still works until `exp`. Password change does not kill today’s tokens (no denylist).
+
+Here, CSRF is off and STATELESS is on.
+
+The mix-up: CSRF does not block Postman with a pasted `Authorization`.
 
 ### What I built
 
@@ -233,7 +263,7 @@ JWT / `@PreAuthorize` is **how** you implement it (Day 2). The **design** is: DT
 
 Walk: `push(1) push(2)` in=`[1,2]`. `pop()` pours → out=`[2,1]` then pop `1`; leave `2` on out. `push(3)` stays on in. Next `pop` is still `2` (out). When out is empty, pour `3,4,5,6` in one `while` loop — Java `Stack` has **no** built-in pour.
 
-**`peek` vs `pop`:** same pour rule. `peek` = look (`peek`). `pop` = remove (`pop`). Same trap as Min Stack `top`.
+**`peek` vs `pop`:** same pour rule. `peek` = look (`peek`). `pop` = remove (`pop`). Same mix-up as Min Stack `top`.
 
 **Interview sentence:** “I push on an in-stack and only reverse onto an out-stack when out is empty, so each element moves twice and ops are amortized O(1).”
 
@@ -306,7 +336,7 @@ Three actions (do not collapse them): **see** = GET · **create account** = regi
 
 **Gap until Wed:** no JWT filter yet → `POST /api/events` is 401 even with a valid token.
 
-**Bookings status (trap: 401 ≠ bad input, 409 ≠ duplicate email)**
+**Bookings status (the mix-up: 401 ≠ bad input, 409 ≠ duplicate email)**
 
 | Status | Book means |
 |---|---|
@@ -341,24 +371,35 @@ Three actions (do not collapse them): **see** = GET · **create account** = regi
 
 ### Quick recall
 
-**Why a filter (any servlet app)**  
-- **General:** Security runs **before** the dispatcher/controller. If identity is only checked inside the controller, URL rules already rejected (empty box → 401).  
-- **Here:** `JwtAuthenticationFilter` parses Bearer, fills the box, always `doFilter`. It does **not** pick 403.  
-- **Trap:** “Thin controller” is SRP, not why create-event failed without the filter.
+**Why a filter (any servlet app)**
 
-**The box (`SecurityContextHolder`)**  
-- **General:** A singleton filter cannot store “current user” in a **field** (mixed requests). Identity lives in a **per-request** box Spring clears at the end.  
-- **Here:** `setAuthentication` with email + `ROLE_ATTENDEE`. `getName()` later is that email.  
-- **Trap:** A local variable in `doFilterInternal` dies when the method continues; the box must outlive that.
+Security runs **before** the dispatcher/controller. If identity is only checked inside the controller, URL rules already rejected (empty box → 401).
 
-**`ROLE_` prefix**  
-- **General:** `hasRole("ORGANIZER")` looks for authority `ROLE_ORGANIZER`. JWT claim can stay `ORGANIZER`; the filter adds the prefix. Skip it → organizer still 403. Parse is fine.  
-- **Here:** Claim `ORGANIZER` → authority `ROLE_ORGANIZER`.
+Here, `JwtAuthenticationFilter` parses Bearer, fills the box, always `doFilter`. It does **not** pick 403.
 
-**GET public / POST organizer**  
-- **General:** Same path, different rules per **HTTP method**. First match wins. Public GET is a product choice (catalog).  
-- **Here:** `GET /api/events/**` permitAll (guests). `POST /api/events` organizer (create, **not** book).  
-- **Trap:** POST events ≠ book. `anyRequest` last is a fallback, not a bundle.
+The mix-up: “thin controller” is SRP, not why create-event failed without the filter.
+
+**The box (`SecurityContextHolder`)**
+
+A singleton filter cannot store “current user” in a **field** (mixed requests). Identity lives in a **per-request** box Spring clears at the end.
+
+Here, `setAuthentication` with email + `ROLE_ATTENDEE`. `getName()` later is that email.
+
+The mix-up: a local variable in `doFilterInternal` dies when the method continues; the box must outlive that.
+
+**`ROLE_` prefix**
+
+`hasRole("ORGANIZER")` looks for authority `ROLE_ORGANIZER`. The JWT claim can stay `ORGANIZER`; the filter adds the prefix. Skip it → organizer still 403. Parse is fine.
+
+Here, claim `ORGANIZER` → authority `ROLE_ORGANIZER`.
+
+**GET public / POST organizer**
+
+Same path, different rules per **HTTP method**. First match wins. Public GET is a product choice (catalog).
+
+Here, `GET /api/events/**` is permitAll (guests). `POST /api/events` is organizer (create, **not** book).
+
+The mix-up: POST events ≠ book. `anyRequest` last is a fallback, not a bundle.
 
 ---
 
@@ -492,34 +533,34 @@ Client
 
 ### The pieces (enough to explain, not one line)
 
-**`JwtService.generateToken`**  
+**`JwtService.generateToken`**
 Called from **login** (`AuthServiceImpl`), not from the filter. Writes id (`sub`), email, role, `exp`, then signs with the HMAC key. Returns one string — the ticket the client keeps.
 
-**`JwtService.parseToken`**  
+**`JwtService.parseToken`**
 Called from **`JwtAuthenticationFilter`**, not from `SecurityConfig`. `verifyWith(key)` checks signature and expiry. The payload is Base64 and **readable** without the secret; skip verify and anyone can send `"role":"ADMIN"`. Maps claims into `JwtPrincipal`. If it throws, the filter catches and leaves the box empty.
 
-**`JwtPrincipal`**  
+**`JwtPrincipal`**
 Our type: id, email, `Role`. Not a REST DTO (client never sees it). Not a Spring class. The filter uses it to build `ROLE_…` authorities.
 
-**`JwtAuthenticationFilter`**  
+**`JwtAuthenticationFilter`**
 Servlet filter (`OncePerRequestFilter` = once per request). Header → parse → fill the box → always `doFilter`. No Bearer (login, GET catalog) is normal: skip parse, continue. It does **not** pick 401 vs 403 — that is `AuthorizationFilter`.
 
-**`SecurityConfig`**  
+**`SecurityConfig`**
 Startup-only recipe. Constructor **receives** `JwtService`. `filterChain` **gives** it to the JWT filter and **writes URL rules**. Those rules run later inside `AuthorizationFilter`. You never “call SecurityConfig” from a controller.
 
-**`SecurityContextHolder`**  
+**`SecurityContextHolder`**
 Spring’s per-thread box. `setAuthentication` means “this request is this user.” `AuthorizationFilter` / `hasRole` read the same box. Cleared when the request ends.
 
-**`UsernamePasswordAuthenticationToken`**  
+**`UsernamePasswordAuthenticationToken`**
 The object **inside** the box: email + `ROLE_ATTENDEE` (or ORGANIZER). Password is `null` because JWT already proved identity. This is **not** a filter.
 
-**`UsernamePasswordAuthenticationFilter`**  
+**`UsernamePasswordAuthenticationFilter`**
 Old form-login filter in the chain. Form login is off. We use this **class** as the slot: put JWT **before** it. Different from Token.
 
-**`hasAnyRole("ORGANIZER", "ADMIN")`**  
+**`hasAnyRole("ORGANIZER", "ADMIN")`**
 URL rule in `SecurityConfig`, executed by `AuthorizationFilter`. Spring looks for `ROLE_ORGANIZER` / `ROLE_ADMIN` — that is why the filter adds `"ROLE_"`. Attendee in the box → **403**. Empty box → no identity.
 
-**`permitAll` / `authenticated()`**  
+**`permitAll` / `authenticated()`**
 `permitAll` = ignore the box (GET events, `/api/auth/**`, `/error`). `authenticated()` = box must have a user (POST venue). First matching matcher wins; `anyRequest()` stays **last**.
 
 ---
@@ -550,11 +591,11 @@ Identity vs permission vs input vs state — four different meanings.
 | **400** | Bad JSON / `@Valid` | Body missing fields |
 | **401** | No identity | No header, bad/expired JWT, no filter (header ignored) |
 | **403** | We know who; not allowed | Attendee hits `POST /api/events` |
-| **409** | **Conflict:** request is valid and allowed, but it **clashes with current server state** (cannot create/update this way right now). Not 400 (bad JSON) and not 401/403 (who / permission). | **Examples:** email already taken (register). **Later:** last seat gone, already booked (oversell). Trap: 409 is not “duplicate email only.” |
+| **409** | **Conflict:** request is valid and allowed, but it **clashes with current server state** (cannot create/update this way right now). Not 400 (bad JSON) and not 401/403 (who / permission). | **Examples:** email already taken (register). **Later:** last seat gone, already booked (oversell). The mix-up: 409 is not “duplicate email only.” |
 
-Trap we hit in the terminal: PowerShell broke JSON → real answer was **400** → Spring forwarded to `/error` → `/error` was locked → **empty 403**. `permitAll` on register does **not** cover `/error`. Matcher: `.requestMatchers("/error").permitAll()`.
+The mix-up we hit in the terminal: PowerShell broke JSON → real answer was **400** → Spring forwarded to `/error` → `/error` was locked → **empty 403**. `permitAll` on register does **not** cover `/error`. Matcher: `.requestMatchers("/error").permitAll()`.
 
-Another trap: `hasRole` with an **empty** box sometimes shows **403** (anonymous is a weird “user”). Interview answer still: missing identity **should** be 401; wrong role is 403.
+Another mix-up: `hasRole` with an **empty** box sometimes shows **403** (anonymous is a weird “user”). Interview answer still: missing identity **should** be 401; wrong role is 403.
 
 ---
 
@@ -593,33 +634,43 @@ Role is copied into the JWT **at login**. `UPDATE USERS SET ROLE = 'ORGANIZER'` 
 
 **1. Where the user lives — you said “local thread”**
 
-- **General:** A singleton bean is one object for the whole process. Request data cannot live on its fields if two requests can overlap (two threads). Per-request data goes in ThreadLocal, method args, or the request object. Spring’s name for the identity box is **`SecurityContextHolder`**. It uses ThreadLocal internally. After the request, Spring clears it.
-- **Here:** `JwtAuthenticationFilter` calls `SecurityContextHolder.getContext().setAuthentication(...)`. That is “current user” for this HTTP call.
-- **Trap:** “Local thread” is the right picture; say the class name in the interview. A local **variable** inside `doFilterInternal` dies when the method continues to `doFilter` — we need the user to **stay** until the controller finishes, which ThreadLocal does.
+A singleton bean is one object for the whole process. Request data cannot live on its fields if two requests can overlap (two threads). Per-request data goes in ThreadLocal, method args, or the request object. Spring’s name for the identity box is **`SecurityContextHolder`**. It uses ThreadLocal internally. After the request, Spring clears it.
+
+Here, `JwtAuthenticationFilter` calls `SecurityContextHolder.getContext().setAuthentication(...)`. That is “current user” for this HTTP call.
+
+The mix-up: “local thread” is the right picture; say the class name in the interview. A local **variable** inside `doFilterInternal` dies when the method continues to `doFilter` — we need the user to **stay** until the controller finishes, which ThreadLocal does.
 
 **2. Filter vs controller — you said thin controller**
 
-- **General:** In a servlet app, **filters run before the dispatcher / controller**. Authorization that looks at “is this user authenticated?” must see identity **already set**. If you only check the token inside the controller, the security layer has already decided.
-- **Here:** `AuthorizationFilter` uses `SecurityConfig` matchers. `POST /api/events` needs `ROLE_ORGANIZER`. Empty box → reject. Controller never runs → `parseToken` never runs. A valid `Authorization` header is ignored (yesterday’s 401).
-- **Trap:** Thin controller is true (SRP) but not why create-event would fail. The reason is **order**.
+In a servlet app, **filters run before the dispatcher / controller**. Authorization that looks at “is this user authenticated?” must see identity **already set**. If you only check the token inside the controller, the security layer has already decided.
+
+Here, `AuthorizationFilter` uses `SecurityConfig` matchers. `POST /api/events` needs `ROLE_ORGANIZER`. Empty box → reject. Controller never runs → `parseToken` never runs. A valid `Authorization` header is ignored (yesterday’s 401).
+
+The mix-up: thin controller is true (SRP) but not why create-event would fail. The reason is **order**.
 
 **3. 401 vs 403 — you said 401 = bad JWT, 403 = not allowed**
 
-- **General:** **401 Unauthorized** = **authentication** failed: we do not have a valid identity. **403 Forbidden** = **authorization** failed: identity is known, this action is not allowed. 401 is not “malformed JSON” (that is 400).
-- **Here:** no header / bad token / **expired** token → 401. Attendee `POST /api/events` → 403.
-- **Trap:** 401 is not only “bad JWT.” Missing header and expiry are 401 too. Expired is not 403.
+**401 Unauthorized** = **authentication** failed: we do not have a valid identity. **403 Forbidden** = **authorization** failed: identity is known, this action is not allowed. 401 is not “malformed JSON” (that is 400).
+
+Here, no header / bad token / **expired** token → 401. Attendee `POST /api/events` → 403.
+
+The mix-up: 401 is not only “bad JWT.” Missing header and expiry are 401 too. Expired is not 403.
 
 **4. `ROLE_` prefix — you said it would mess up parsing**
 
-- **General:** Spring distinguishes **roles** vs **authorities**. `hasRole("X")` / `hasAnyRole("X")` look for a granted authority named **`ROLE_X`**. `hasAuthority("X")` looks for exactly `X`. This is Spring Security’s convention, not JWT’s.
-- **Here:** JWT claim is `"role":"ORGANIZER"`. After `parseToken`, the filter adds `"ROLE_"` when creating `SimpleGrantedAuthority`. Parse does not use `ROLE_`.
-- **Trap:** Skipping the prefix does not break JJWT. The organizer is still “logged in” but `hasAnyRole("ORGANIZER")` does not match → **403**.
+Spring distinguishes **roles** vs **authorities**. `hasRole("X")` / `hasAnyRole("X")` look for a granted authority named **`ROLE_X`**. `hasAuthority("X")` looks for exactly `X`. This is Spring Security’s convention, not JWT’s.
+
+Here, JWT claim is `"role":"ORGANIZER"`. After `parseToken`, the filter adds `"ROLE_"` when creating `SimpleGrantedAuthority`. Parse does not use `ROLE_`.
+
+The mix-up: skipping the prefix does not break JJWT. The organizer is still “logged in” but `hasAnyRole("ORGANIZER")` does not match → **403**.
 
 **5. GET public / POST organizer — you mixed create-event with book; `anyRequest` “wraps”**
 
-- **General:** The same URL path can have different rules per **HTTP method**. Matchers are checked **in order**; **first match wins**. A catch-all (`anyRequest`) must be last or it shadows the specific rules. Public GET is a product choice (catalog); mutating POST is a different contract.
-- **Here:** `GET /api/events/**` `permitAll` — **guests** (no token), not only attendees. `POST /api/events` `hasAnyRole("ORGANIZER", "ADMIN")` — **create an event**, not book. Book will be `POST /api/events/{id}/bookings` (attendee). `anyRequest().authenticated()` last = default for unlisted URLs (e.g. POST venue).
-- **Trap:** POST events ≠ book. `anyRequest` last is not “it wraps like a bundle” — it is the **fallback** because first match wins.
+The same URL path can have different rules per **HTTP method**. Matchers are checked **in order**; **first match wins**. A catch-all (`anyRequest`) must be last or it shadows the specific rules. Public GET is a product choice (catalog); mutating POST is a different contract.
+
+Here, `GET /api/events/**` `permitAll` — **guests** (no token), not only attendees. `POST /api/events` `hasAnyRole("ORGANIZER", "ADMIN")` — **create an event**, not book. Book will be `POST /api/events/{id}/bookings` (attendee). `anyRequest().authenticated()` last = default for unlisted URLs (e.g. POST venue).
+
+The mix-up: POST events ≠ book. `anyRequest` last is not “it wraps like a bundle” — it is the **fallback** because first match wins.
 
 ---
 
@@ -647,15 +698,11 @@ You return an **array** (one answer per day), not one number.
 
 #### Why Stack is picked (read this first)
 
-**General — when an interviewer wants a stack**
-
 Pick a stack when the thing you still need to finish is the **most recent unfinished item**, and a later event **resolves it first** (LIFO). You do not need random lookup (HashMap). You do not need oldest-first (queue). You need “last waiting, first answered.”
 
 Notice the wording: **next** greater / next warmer / matching closer / undo last. That “next” is in **time order** to the right, and it always answers the **nearest** waiting item before ones further back.
 
-**Here — why #739 is that**
-
-Each day is unfinished until a **later hotter** day exists. The waiting days must stay in time order. A new hot day answers the **nearest** colder days first (the ones just before it), then maybe older ones. That is exactly LIFO → stack of **indexes**.
+Here, each day is unfinished until a **later hotter** day exists. The waiting days must stay in time order. A new hot day answers the **nearest** colder days first (the ones just before it), then maybe older ones. That is exactly LIFO → stack of **indexes**.
 
 You pick stack because:
 
@@ -684,7 +731,7 @@ You pick stack because:
 
 That is **correct**. It is also **O(n²)**. The worker **re-reads** the same later days for every `i`. Two integer variables do not make this the Two Pointers pattern.
 
-**Interview Two Pointers (general):** the array is **sorted**, or you start at **both ends**. Each pointer only moves **forward** (or inward) and **never resets**. Total work O(n). Example: two-sum on a sorted array.
+**Interview Two Pointers:** the array is **sorted**, or you start at **both ends**. Each pointer only moves **forward** (or inward) and **never resets**. Total work O(n). Example: two-sum on a sorted array.
 
 **New thinking for this problem (stack):** do **not** stand on a day and look into the future. Walk through the calendar **once**, left → right. Days that have no answer yet **come with you** on a pile. When a **hotter** day arrives, it turns around and answers the waiting days.
 
@@ -699,7 +746,7 @@ Same inversion as **parentheses**: you do not, from each `(`, scan forward for `
 
 ---
 
-#### What a stack is (general, any problem)
+#### What a stack is (any problem)
 
 A stack is LIFO: you only see the **top**. Interview use: **the last item that is not finished yet**.
 
@@ -708,7 +755,7 @@ A stack is LIFO: you only see the **top**. Interview use: **the last item that i
 - Queue from stacks (#232): reverse order.
 - **Next greater (#739):** last day that still has no hotter day.
 
-**Next greater (general):** for each value, find the next element to the **right** that is **bigger**. #739 is that, plus the **distance** (`j - i`) instead of the bigger value itself.
+**Next greater:** for each value, find the next element to the **right** that is **bigger**. #739 is that, plus the **distance** (`j - i`) instead of the bigger value itself.
 
 People call this a **monotonic stack**: temperatures on the pile go **decreasing** toward the top (hotter days sit **under** colder recent ones). You only compare with the top. If today cannot beat the top, it cannot beat anyone **under** the top either — so you stop the `while` and just push.
 
@@ -754,7 +801,7 @@ The “current + worker that resets” version **re-visits** later days. That is
 
 ---
 
-#### Bugs from today (trap)
+#### Bugs from today
 
 - **`answer[i] = …`** — `i` is the **hot** day that arrived. The wait belongs to **`old`** (the waiting day). Write `answer[old]`.
 - **`stack.push(temperatures[i])`** — then `stack.peek()` is `73`, and `temperatures[73]` is the wrong slot. Push **`i`**.
@@ -780,13 +827,11 @@ If they want the **next greater value** (not the wait) → same stack, store `te
 
 #### OOP — one class, one job (SRP)
 
-**General**
-
 Single Responsibility means a class has **one reason to change**. “Prove who this request is” and “decide if that person may call this URL” change for different reasons: crypto/JWT vs product rules. If one class does both, you cannot explain 401 vs 403, and a public GET can start returning 403 because you treated “attendee” as forbidden everywhere.
 
 HTTP status for **auth** is not the service layer. Services throw domain problems (not found, duplicate, no seats). `@RestControllerAdvice` maps those to 404/409. **401/403 happen in the filter chain**, before the controller. The service never runs.
 
-**Here**
+Here, the jobs split like this:
 
 | Piece | Job | When it “fails” |
 |---|---|---|
@@ -802,7 +847,7 @@ Same token, three URLs, three outcomes — the filter cannot own 403:
 - `POST /api/venues` → 201 today (`authenticated()` only)
 - `POST /api/events` → 403 (organizer)
 
-**Trap:** “The filter throws, the service picks the HTTP code.” Wrong exception, wrong layer. Catch in the filter = bad ticket = empty box. 403 = URL rule.
+The mix-up: “The filter throws, the service picks the HTTP code.” Wrong exception, wrong layer. Catch in the filter = bad ticket = empty box. 403 = URL rule.
 
 ---
 
@@ -824,19 +869,15 @@ Weekday Part 3 is **not** “draw Kafka.” Mid-level interviews (and Friday’s
 2. **Where does the truth live?** — identity in the token, rules in the API config, event/venue rows in the DB. Not `role` on the JSON body.
 3. **What does the API return when it goes wrong?** — 401 / 403 / 400 / 409 are **part of the contract**, not afterthoughts.
 
-Monday’s drill: create-event is organizer-only; role not in the DTO; 401 vs 403.  
-Tuesday’s board: GET catalog public; login 200 / register 201; book later 409 if seats gone.  
+Monday’s drill: create-event is organizer-only; role not in the DTO; 401 vs 403.
+Tuesday’s board: GET catalog public; login 200 / register 201; book later 409 if seats gone.
 Friday: oversell — valid request, state clash, **409**, lock the **row**. Same idea: **named failure**, not a generic 500.
 
 Today’s question is that family on a **hole in the current API**. We listed GET events and POST events on purpose. We **did not** list POST venue. The catch-all said “if you have any identity, OK.” That is a **default**, not “we decided attendees own the venue list.”
 
-| Idea | General (any API) | This app |
-|---|---|---|
-| Public vs protected | Catalog vs mutate | GET events vs POST events / venues |
-| Explicit vs default | Spell out who may create | `hasAnyRole` vs leftover `anyRequest` |
-| 401 vs 403 | No identity vs wrong role | No token vs attendee on create-venue |
-| 409 | Valid + allowed, **state** clash | Email taken; later no seats — not this drill |
-| Trust boundary | Body = resource, token = actor | Venue JSON has no `role` |
+On any API, catalog vs mutate is public vs protected. Spell out who may create instead of leaving a leftover default. 401 is no identity; 403 is wrong role. 409 is valid + allowed, **state** clash.
+
+Here, GET events vs POST events / venues is that split. `hasAnyRole` vs leftover `anyRequest` is explicit vs default. No token vs attendee on create-venue is 401 vs 403. Email taken (and later no seats) is 409 — not this drill. Venue JSON has no `role` — body is the resource, token is the actor.
 
 Eventbrite-style product (say this in a design interview):
 
@@ -860,7 +901,7 @@ It did **not** cover: locking the event row, 10× traffic, Kafka. Those stay Fri
 .requestMatchers(HttpMethod.POST, "/api/venues").hasAnyRole("ORGANIZER", "ADMIN")
 ```
 
-`addFilterBefore(...)` before `return http.build()` is only “put the JWT filter in the chain.” That is not where URL policy goes. Mixing those two “ends of the method” is the trap.
+`addFilterBefore(...)` before `return http.build()` is only “put the JWT filter in the chain.” That is not where URL policy goes. Mixing those two “ends of the method” is the mix-up.
 
 ---
 
@@ -887,28 +928,41 @@ It did **not** cover: locking the event row, 10× traffic, Kafka. Those stay Fri
 
 ### Quick recall (the pictures — enough to say out loud)
 
-**Booking row**  
-- **General:** A sale is its own record (who, what, how many), not only a number on inventory.  
-- **Here:** `Booking`: event, user, seats.
+**Booking row**
 
-**Three sources**  
-- **General:** Body = the resource. URL = which resource. Token = who. Never put who/role/id in JSON if the client could fake it.  
-- **Here:** Body = `{ seats }`. URL = event id. Box = user.  
-- **Trap:** Body `eventId` + URL id can disagree — one source: the path.
+A sale is its own record (who, what, how many), not only a number on inventory.
 
-**The box / `getName()`**  
-- **General:** Filter already put identity in Spring’s static box. Service reads it; you do not inject “current user.” `getName()` is whatever was stored as the principal name.  
-- **Here:** We stored **email** → `findByEmail`.  
-- **Trap:** Not a bean. Not ThreadLocal as a spoken requirement (the picture is enough).
+Here, `Booking` holds event, user, seats.
 
-**400 vs 409 vs 401 vs 403**  
-- **General:** **400** = junk input. **409** = valid, **state** says no. **401** = we don’t know you. **403** = we know you, this URL is not for your role.  
-- **Here:** `seats: 0` → 400. Sold out → 409. No token → 401. Organizer on book → 403. Attendee **may** book.  
-- **Trap:** 409 is not “duplicate email.” 403 is security; 409 is the service.
+**Three sources**
 
-**One DB bucket (`@Transactional`)**  
-- **General:** Check + insert + decrement in one commit; throw → undo **that request**. Does **not** lock Maria’s request.  
-- **Here:** On `book()`. Lock = Week 3.
+Body = the resource. URL = which resource. Token = who. Never put who/role/id in JSON if the client could fake it.
+
+Here, body = `{ seats }`. URL = event id. Box = user.
+
+The mix-up: body `eventId` + URL id can disagree — one source: the path.
+
+**The box / `getName()`**
+
+The filter already put identity in Spring’s static box. The service reads it; you do not inject “current user.” `getName()` is whatever was stored as the principal name.
+
+Here, we stored **email** → `findByEmail`.
+
+The mix-up: it is not a bean. ThreadLocal is optional reread, not a spoken requirement — the picture is enough.
+
+**400 vs 409 vs 401 vs 403**
+
+**400** = junk input. **409** = valid, **state** says no. **401** = we don’t know you. **403** = we know you, this URL is not for your role.
+
+Here, `seats: 0` → 400. Sold out → 409. No token → 401. Organizer on book → 403. Attendee **may** book.
+
+The mix-up: 409 is not “duplicate email.” 403 is security; 409 is the service.
+
+**One DB bucket (`@Transactional`)**
+
+Check + insert + decrement in one commit; throw → undo **that request**. It does **not** lock Maria’s request.
+
+Here, that sits on `book()`. Lock = Week 3.
 
 ### What I built
 
@@ -927,7 +981,7 @@ It did **not** cover: locking the event row, 10× traffic, Kafka. Those stay Fri
 
 *(Names like ThreadLocal are optional reread, not required to say.)*
 
-### Traps from today (keep)
+### Mix-ups from today (keep)
 
 - Body `eventId` + URL event id → mismatch. One source: the path.
 - Skip the seats check → booking rows grow, inventory never moves.
@@ -948,13 +1002,13 @@ Tokens are numbers and `+ - * /`, already in **postfix**: the operator comes **a
 
 ---
 
-#### Why Stack (general → here → trap)
+#### Why Stack
 
-**General:** pick a stack when the thing you still need is the **last unfinished item**, and the next event uses that first.
+Pick a stack when the thing you still need is the **last unfinished item**, and the next event uses that first.
 
-**Here:** unfinished items are **numbers** waiting for an operator. A `+` (or `-` `*` `/`) always takes the **last two**, puts one result back. More than two numbers can sit on the pile; the operator still only takes two.
+Here, unfinished items are **numbers** waiting for an operator. A `+` (or `-` `*` `/`) always takes the **last two**, puts one result back. More than two numbers can sit on the pile; the operator still only takes two.
 
-**Trap:** “total amount” / one running number. That is #121. Here several numbers wait. One `*` is **not** `7*3*8*9` — only the last two. You do **not** need “exactly two numbers then an operator” every time (`4, 13, 5, /, +` has three numbers before `/`).
+The mix-up: “total amount” / one running number. That is #121. Here several numbers wait. One `*` is **not** `7*3*8*9` — only the last two. You do **not** need “exactly two numbers then an operator” every time (`4, 13, 5, /, +` has three numbers before `/`).
 
 ---
 
@@ -1024,22 +1078,31 @@ Infix (`2 + 1 * 3`, operator **between**, precedence) is not this scan. Nested u
 
 ### Quick recall (tests)
 
-**`@WebMvcTest` + `@MockitoBean`**  
-- **General:** Web slice: controller + MockMvc, no JPA. Fake the **service**. Does not prove login, DB, or two people grabbing the last seat.  
-- **Here:** `BookingControllerTest` mocks `BookingService`.
+**`@WebMvcTest` + `@MockitoBean`**
 
-**`@WithMockUser`**  
-- **General:** Test-only. Fills the **same box** the JWT filter would. No token. Unnamed `@WithMockUser("X")` is **username** (who). `roles = "ATTENDEE"` is **allowed**. Empty box on a protected POST → **401**; skip the stub (controller never runs).  
-- **Here:** 201 and 409 tests use `roles = "ATTENDEE"`. `doBooking1` has no annotation → 401.  
-- **Trap:** `spring-boot-starter-security-test` is only the jar.
+A web slice is the controller plus MockMvc, no JPA. Fake the **service**. It does not prove login, DB, or two people grabbing the last seat.
 
-**`@Import(GlobalExceptionHandler)`**  
-- **General:** `@WebMvcTest` does not load `@RestControllerAdvice`. Thrown domain exception → **500** unless you import the advice.  
-- **Here:** `InsufficientSeatsException` → 409 only with the import.
+Here, `BookingControllerTest` mocks `BookingService`.
 
-**`.with(csrf())`**  
-- **General:** App may turn CSRF off in `SecurityConfig`. The slice often does **not** load that config. Default MockMvc still wants CSRF on POST.  
-- **Here:** All book POSTs in the test use `csrf()`.
+**`@WithMockUser`**
+
+This is test-only. It fills the **same box** the JWT filter would. No token. Unnamed `@WithMockUser("X")` is **username** (who). `roles = "ATTENDEE"` is **allowed**. Empty box on a protected POST → **401**; skip the stub (controller never runs).
+
+Here, 201 and 409 tests use `roles = "ATTENDEE"`. `doBooking1` has no annotation → 401.
+
+The mix-up: `spring-boot-starter-security-test` is only the jar.
+
+**`@Import(GlobalExceptionHandler)`**
+
+`@WebMvcTest` does not load `@RestControllerAdvice`. A thrown domain exception becomes **500** unless you import the advice.
+
+Here, `InsufficientSeatsException` → 409 only with the import.
+
+**`.with(csrf())`**
+
+The app may turn CSRF off in `SecurityConfig`. The slice often does **not** load that config. Default MockMvc still wants CSRF on POST.
+
+Here, all book POSTs in the test use `csrf()`.
 
 ### What I built
 
@@ -1052,7 +1115,7 @@ Infix (`2 + 1 * 3`, operator **between**, precedence) is not this scan. Nested u
 - **Q3:** No advice in the slice → 500. `@Import` the handler.
 - 409 on book = sold out (state), not “duplicate email.” 401 = we don’t know you, not 403.
 
-### Traps
+### Mix-ups
 
 - `@WithMockUser("ATTENDEE")` ≠ role.
 - Two test methods, two stories. Don’t comment out the 201 annotation to make a 401 test.
@@ -1093,5 +1156,3 @@ Infix (`2 + 1 * 3`, operator **between**, precedence) is not this scan. Nested u
 **Next:** LC in the other chat (stack). Then **Sat/Sun off.** Monday: `Start Week 3 Day 1` — lock in code.
 
 ---
-
-

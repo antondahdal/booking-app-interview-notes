@@ -6,8 +6,8 @@ Microservices split: 3 services, WebClient, correlation IDs.
 
 | Day | Topic 1 | Topic 2 |
 |---|---|---|
-| Mon | Booking calls Event over HTTP | `WebClient` bean |
-| Tue | Third service (auth/users) | Correlation-id header |
+| Mon | Booking calls Event over HTTP | `WebClient` bean | **Pulled to W3 Thu** |
+| Tue | Third service (auth/users) | Correlation-id header | Next after W3 Fri |
 | Wed | Downstream 4xx/5xx mapping | Client timeout |
 | Thu | Remaining split glue | One integration test for the call |
 | Fri | HLD of the three boxes | — |
