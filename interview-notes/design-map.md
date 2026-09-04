@@ -55,6 +55,7 @@ Every weekday prompt and every Friday board is one of these. If a prompt is not 
 | Isolation see vs write | Truth | W3 D3 | `findById` both see `1`. `FOR UPDATE` waits then sees `0` | Version stops the **read**. Refresh stops the race |
 | PUT vs PATCH + click id | API | W3 D3 | PATCH = title only. PUT = full replace. Two Books = two attempts | JWT is the click id |
 | First matcher 403 ≠ 409 | Who / Status | W3 D3 | `POST /api/events/**` ate Book → **403**. `book()` never ran | 403 = sold out |
+| HLD last seat at 1 / 10 / 100 | 10× / HLD | W3 Fri | Row waiters hold pool doors. Stamp ≠ sold-out 409. Don’t stamp Book because concert 9 starves | Maria waits before HTTP. Every 409 = sold out. Wait on Event → 503 |
 
 **Asked, not built (keep as interview words only until code exists):** click id / idempotency key. Do not pretend it is in the app.
 
@@ -66,7 +67,6 @@ Same shape as the OOP “still need” table. Must-have on a mid-level board. Ea
 
 | # | Topic | Family | Why they ask | Slot |
 |---|---|---|---|---|
-| 5 | **HLD last seat at 1 / 10 / 100** | 10× / HLD | Wait vs stamp vs pool. Boxes. | **W3 Fri** |
 | 6 | **Truth across HTTP** | Truth / Slow hop | Seats in Event **service**. What if Event is slow / 503? No 2PC. | W4 Mon |
 | 7 | **Correlation id** | Slow hop | You log it. User does not send it. | W4 Tue |
 | 8 | **Map downstream failure** | Status / Slow hop | Event 404 / 409 / 503 / timeout → Booking’s status. Retry or not. | W4 Wed |
@@ -118,8 +118,6 @@ Bank and rules: [oop-design-map.md](oop-design-map.md) (bottom). Do **not** star
 
 ---
 
-## Next session — W3 Fri
+## Next session — Week 4 (after W3 Fri)
 
-**Long HLD.** Last seat at 1 / 10 / 100. Wait vs stamp. Pool. Title clash. Boxes.
-
-Sat/Sun **off**.
+**Sat/Sun off.** Next weekday: auth/users cut + correlation-id. Design: seats in Event over HTTP / slow hop (do not repeat W3 Fri last-seat board).

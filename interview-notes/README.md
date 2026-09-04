@@ -24,7 +24,7 @@ Cheat sheets for the 8-week Event Booking Platform plan. **One file per week** s
 | [design-map.md](design-map.md) | Design done vs still need (five families) |
 | [week-01.md](week-01.md) | Monolith: entities, REST, JPA, pagination, slice tests |
 | [week-02.md](week-02.md) | Auth: register, BCrypt, JWT (from Day 2) |
-| [week-03.md](week-03.md) | Concurrency — lock, `@Version`, race test, title PATCH, Day 3 Part 3 |
+| [week-03.md](week-03.md) | Concurrency — lock, `@Version`, HTTP to Event, Fri HLD 1/10/100 |
 | [week-04.md](week-04.md) | Microservices split *(not started)* |
 | [week-05.md](week-05.md) | Gateway + resilience *(not started)* |
 | [week-06.md](week-06.md) | Async + observability; **LLD class-design drills start** *(not started)* |

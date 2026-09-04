@@ -16,7 +16,7 @@ If a day feels thin, **pull the next map day’s Spring into today**. Do not inv
 | Tue | `@Version` lab (`findById`) | Done |
 | Wed 2026-09-02 | Two-thread test **+** `findByIdForUpdate` back on `book()` **+** title `PATCH` | Done |
 | Thu 2026-09-03 | **`WebClient` bean** + **Booking calls Event over HTTP** (next unused code pair; do not empty the day) | Done |
-| Fri | Long HLD board (last seat 1 / 10 / 100) | Next weekday |
+| Fri | Long HLD board (last seat 1 / 10 / 100) | Done |
 
 ---
 

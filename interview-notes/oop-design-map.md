@@ -43,6 +43,7 @@ Days marked **longer** in the calendar: do both items. Anton asked to be safe, n
 | Stamp ownership | W3 D2 Q1 | `@Version` on the inventory object, not Booking, not GET JSON | “JPA mapping” as the OOP answer |
 | Encapsulation | W3 D3 | PATCH body = title. Client must not set seats / `version` | Calling this SRP |
 | Java threads | W3 D3 | Latch = start. `join` = caller waits. Not `synchronized` on `book()` (two JVMs) | `join` = t1 waits for t2 |
+| Strategy (job picks wait vs stamp) | W3 Thu, W3 Fri HLD | Book waits. Title PATCH stamps. Pool pain ≠ switch Book to stamp | Re-ask “which method / the job” |
 
 **SOLID so far:** S, I, D, encapsulation. **Not yet:** O, L.
 
@@ -54,7 +55,6 @@ Must-have. Includes **Java core** (collections, threads) — mid interviews ask 
 
 | # | Topic | Why they ask | Slot |
 |---|---|---|---|
-| 3 | **Strategy** | Wait now vs stamp later. Pick by **job**, not crowd size. | W4 Mon |
 | 4 | **Adapter** | `WebClient` / `EventClient` hides HTTP. | W4 Tue |
 | 5 | **OCP** | New downstream error → new mapping, not a giant `if` in `book()`. | W4 Wed |
 | 6 | **LSP** | Timeout / fallback must not look like **201 booked**. | W4 Thu + W5 Wed |
@@ -77,13 +77,13 @@ Do not repeat prompts in **design-map.md → Done**. The five families are: **wh
 | Day | Design prompt (~45 min) | OOP that day |
 |---|---|---|
 | **W3 D3** | **Two tools, one row** + **PUT vs PATCH** + **isolation** + first matcher (403 ≠ 409). | Encapsulation **+ Java threads** — **done** |
-| **W3 Fri** | **Long HLD.** Last seat at 1 / 10 / 100. Wait vs stamp. Pool. Title clash. Boxes. | 2 min: lock read stays in BookingService |
+| **W3 Fri** | **Long HLD.** Last seat at 1 / 10 / 100. Wait vs stamp. Pool. Title clash. Boxes. **Done.** | Strategy already on the board — **do not re-ask** |
 
 ### Week 4 (three processes)
 
 | Day | Design prompt | OOP |
 |---|---|---|
-| Mon | Seats live in **Event service**. Booking calls HTTP. Who is source of truth? What if Event is slow? | Strategy |
+| Mon | Seats live in **Event service**. Booking calls HTTP. Who is source of truth? What if Event is slow? | Strategy **done** W3 Thu/Fri — skip; do not re-ask |
 | Tue | Correlation id: what you log, what you return, why the user never sends it | Adapter |
 | Wed | Downstream 404 vs 409 vs 503 vs timeout — what Booking returns. Retry or not. | OCP |
 | Thu | What an HTTP integration test proved vs a mock | LSP (client contract) |
@@ -124,8 +124,6 @@ Name the product → actors → 4–8 classes → fields + 2–4 methods each �
 
 ---
 
-## Next session — W3 Fri Part 3
+## Next session — Week 4
 
-**Long HLD** (~60–75 min). Last seat at 1 / 10 / 100. Wait vs stamp. Pool. Title clash. Boxes.
-
-Sat/Sun **off**.
+**Sat/Sun off.** Next weekday: auth/users + correlation-id. OOP: **Adapter** (W4 Tue). Do not re-ask Strategy / “the job.”

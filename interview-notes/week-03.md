@@ -4,7 +4,7 @@ Concurrency + tests: double-booking, `@Transactional`, locking.
 
 **Packed:** two Part 1 topics per weekday (Fri = long board). Full calendar: [part1-map.md](part1-map.md).
 
-Wed 2026-09-02: test + wait on `book()` + title PATCH. **Thu 2026-09-03:** two **new** code topics (`WebClient` bean + Booking calls Event over HTTP). Do not empty a weekday. **Fri 2026-09-04:** LC first (#3 + #49). Then long HLD (Part 2 / Part 3 still open).
+Wed 2026-09-02: test + wait on `book()` + title PATCH. **Thu 2026-09-03:** two **new** code topics (`WebClient` bean + Booking calls Event over HTTP). Do not empty a weekday. **Fri 2026-09-04:** LC first (#3 + #49). Then long HLD (1 / 10 / 100) — **done**.
 
 You can reread a day without the chat. These notes are written in plain English.
 
@@ -1003,4 +1003,73 @@ Anagram **inside a longer string** → sliding window (#438), not this map. Same
 
 > Unique substring: grow right, peel left, set = this band only — do not reset. Group anagrams: map from sorted letters to the original words — not a window, not a set of the raw word.
 
-**Calendar:** Part 1 closed. **Part 2** = Friday HLD (last seat 1 / 10 / 100). **Part 3** = same board + 2 min lock stays in BookingService. **Sat/Sun off.**
+**Calendar:** Part 1 closed. Part 2 / Part 3 = HLD below.
+
+---
+
+### Part 2 / Part 3 — last seat HLD (1 / 10 / 100)
+
+**Date:** 2026-09-04  
+**Goal:** One board. Boxes, last seat at 1 / 10 / 100, wait vs stamp, pool, title clash. No new code.
+
+---
+
+#### Boxes
+
+Phone → BookingController → `book()` → HTTP (`WebClient`) → Event `reserveSeats` → **concert row**.
+
+**General:** the oversell line is the inventory row, not “the first service you typed.”  
+**Here:** Booking waits on `.block()` for **its** call. Maria is already in Event; she waits on concert 5’s `FOR UPDATE`, then sees 0.  
+**Trap:** “Maria waits in Booking before HTTP.” Two Books can both be inside `book()` at once.
+
+---
+
+#### 1 and 10
+
+**General:** one winner; the rest wait on **that** row, then state-clash.  
+**Here:** one **201**. Nine **409** (no seats). Other concerts = other rows.  
+**Trap:** lining people up in Booking instead of on the event row.
+
+---
+
+#### 100, pool of 10
+
+**General:** row lock ≠ connection pool. Waiters on the row still **hold** a door.  
+**Here:** 10 inside (1 holds the lock, 9 wait on the row) occupy all doors. 90 wait at the pool. Concert 9 does not wait on concert 5’s lock; it waits for a **door**. Other shows can starve.  
+**Trap:** “Other concerts are always fine.” Also: switch Book to stamp because concert 9 hurts — that is a **pool** problem, not a new locking style.
+
+---
+
+#### Wait vs stamp (this board)
+
+Book stays **wait** at 100. Title PATCH stays **stamp**. Crowd size / pool pain does not pick the tool.
+
+---
+
+#### 409 two doors
+
+**General:** 409 = valid request, **conflicts with current server state**. The **body** says which conflict.  
+**Here:** no seats → stop. Stale version → retry the PATCH.  
+**Trap:** the number `409` = sold out. Stamp fail is **stale**, not tickets gone.
+
+---
+
+#### `@Transactional` + `.block()`
+
+**General:** do not hold a DB door across a slow hop.  
+**Here:** `book()` loads the user first, then waits on Event, so Booking can hold a door the whole time. At 100 you can fill **both** pools.  
+**Trap:** that wait is automatically **503** for Anton. Anton sits until Event answers (201 or 409 sold out). 503 is a mapping you add for timeout / no doors — not Spring’s default, not sold out.
+
+---
+
+#### OOP (2 min)
+
+Wait lives with leftover seats (`reserveSeats`). Ticket save stays in `book()`. **Do not re-ask** “the job vs crowd / vs who you typed first” — answered W3 Thu and on this board.
+
+### 60-sec (HLD)
+
+> Lock the event row. 409 sold out vs 409 stale. At 100, pool doors are the bottleneck. Do not stamp Book because other shows wait. Do not hold a DB connection across HTTP.
+
+**Weak spots:** Maria waits before HTTP. Stamp Book if other concerts starve. Every 409 = sold out. Waiting on Event → 503 for Anton.
+
+**Calendar:** Week 3 closed. **Sat/Sun off.** Next weekday: Week 4 — auth/users cut + correlation-id.
