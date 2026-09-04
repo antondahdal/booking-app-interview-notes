@@ -4,7 +4,7 @@ Concurrency + tests: double-booking, `@Transactional`, locking.
 
 **Packed:** two Part 1 topics per weekday (Fri = long board). Full calendar: [part1-map.md](part1-map.md).
 
-Wed 2026-09-02: test + wait on `book()` + title PATCH. **Thu 2026-09-03:** two **new** code topics (`WebClient` bean + Booking calls Event over HTTP). Do not empty a weekday. **Fri:** long HLD.
+Wed 2026-09-02: test + wait on `book()` + title PATCH. **Thu 2026-09-03:** two **new** code topics (`WebClient` bean + Booking calls Event over HTTP). Do not empty a weekday. **Fri 2026-09-04:** LC first (#3 + #49). Then long HLD (Part 2 / Part 3 still open).
 
 You can reread a day without the chat. These notes are written in plain English.
 
@@ -861,4 +861,146 @@ What Event returns is JSON (`EventResponseDto`). That is not a table row. Do not
 
 **Q3:** Booking’s transaction does not undo Event’s seats. Event already committed. You need a later undo or hold. We did not build that.
 
-**Gate is in the chat.** Next weekday: Fri HLD. Sat/Sun off.
+**Gate is in the chat.** Next: Fri LC then HLD. Sat/Sun off.
+
+---
+
+## Week 3 Day 5 — Longest unique substring + group anagrams
+
+**Date:** 2026-09-04  
+**Goal:** Two LCs (Friday). Sliding window on one string, then bucket many words by letter pattern. Spring HLD is later today.
+
+Day order from today: **LC first**, then Spring, then Part 3. Cover / Why never names the pattern — Anton names it in the gate.
+
+### Part 1 — two LCs — passed
+
+---
+
+#### How to notice “sliding window”
+
+You need a **contiguous** piece of **one** string (or array), and a **rule** that piece must keep (no repeated char, at most K distinct, …).
+
+`right` eats the next index. When the piece is illegal, `left` walks **forward** (never back) until the piece is legal again. The set / counts only describe what sits **between** `left` and `right`.
+
+**Not this:** two **ends** of the whole string walking in (#11, #167). Wiping the whole structure and starting over (#53 Kadane / reset the set). “Have I **ever** seen this?” for the whole input (#217).
+
+**One line:** If the answer is a band that grows on the right and shrinks on the left, it is a window — not two ends, not a reset.
+
+---
+
+### LC 3 Longest Substring Without Repeating Characters (Medium) — passed
+
+Return the **length** of the longest substring with **no repeated character**. Substring = contiguous. `"pwke"` is a subsequence, not a substring.
+
+`"abcabcbb"` → `3`. `"bbbbb"` → `1`. `"pwwkew"` → `3` (`"wke"`). `"dvdf"` → `3` (`"vdf"`).
+
+---
+
+#### Why sliding window
+
+One band. `right` grows. Duplicate → peel from `left` until that char is gone from the set, then add the new char. Photo `maxLen` after each legal band.
+
+Here, HashSet = chars **in the brackets**. `left` is an int on the **string** (`s.charAt(left)`), not an index stored in the set. Code used `if` / `else` on the outer loop: duplicate → remove left only (do not move `right`); else add and `right++`. Same as an inner `while`.
+
+The mix-up: **Prefix / Kadane** — wipe the set when you see a duplicate. That throws away letters that still belong with what comes next (`"dvdf"` drops `v`, misses `"vdf"`). Also: HashSet as the **pattern** (#217 = seen **anywhere**). Also: `set.remove(only the duplicate)` and keep the letters to its left — that is a subsequence (`"pwke"` size 4, answer is 3).
+
+---
+
+#### Why not the cousins
+
+| Pattern | Why not today |
+|---|---|
+| **Prefix / Kadane (#53)** | Restart the stretch; old left is gone forever. Safe for a **sum**. Here you only drop from the left until the duplicate is gone. |
+| **Two ends (#11)** | Ends walk in. The answer can sit in the **middle**. |
+| **HashSet (#217)** | “Ever in the whole string?” Here “in **this** window?” |
+
+---
+
+#### The walk (learn this)
+
+`"dvvdf"` — second `v` is already in `[d v]`. Window has **no holes**. To kick the first `v`, `left` must pass it, so **`d` leaves too**. Peel `d`, then first `v`, then add the new `v`. Later `"vdf"` is length **3**.
+
+`"dvdf"` is the trap for reset: the useful `v` sits **between** the two `d`s.
+
+**O(n)** time (each index enters / leaves at most once), extra **O(n)** for the set.
+
+---
+
+#### Cousin
+
+Longest substring with **at most K distinct** chars → same window; peel when the set is bigger than K. HashMap char → last index and **jump** `left` → same window, no one-by-one peel.
+
+---
+
+#### Interview sentence
+
+> I grow `right`. When the new char is already in the window I slide `left` until it isn’t. The set only holds the current substring — I do not wipe it.
+
+---
+
+#### Gate (weak spots)
+
+- First pattern guess: prefix + reset the set + `maxLen = set.size()`. Reset ≠ window. `"dvdf"` fails.
+- HashSet named as the pattern. The set is the **box**.
+- “Just remove `v` and keep `d`.” Band must stay contiguous; `"pwwkew"` would count `"pwke"`.
+- “The set has no indexes.” `left` lives on `s`, not in the HashSet.
+
+---
+
+### LC 49 Group Anagrams (Medium) — passed
+
+Many words. Put together the ones that are the **same letters** in a different order. Group order does not matter.
+
+`["eat","tea","tan","ate","nat","bat"]` → `[["eat","tea","ate"],["tan","nat"],["bat"]]`.
+
+---
+
+#### Why HashMap
+
+One map. Key = letter-pattern of **that word** (here: sort the chars, `String.valueOf`). Value = **list** of the original words. Walk `strs` once.
+
+The mix-up: sorting **`strs` as a list** (ate / eat / tea do not stay a block). HashSet of the **raw** word (#217) — `eat` and `tea` look different. Sliding window — that is one slice of **one** string, not grouping many whole words.
+
+---
+
+#### Why not the cousins
+
+| Pattern | Why not today |
+|---|---|
+| **Sliding window (#3)** | Contiguous slice of one string. Here each input is already a whole word. |
+| **HashSet of the word (#217)** | Exact string. Anagrams are different strings with the same letters. |
+
+---
+
+#### The walk (learn this)
+
+`eat` → key `aet` → new list `[eat]`. `tea` → `aet` → append. `tan` → `ant` → new list. Same for the rest. Return the map’s values.
+
+Time **O(n · k log k)** if you sort each word (`k` = word length). Extra **O(n)**. Count-array key is the same map, no sort.
+
+Empty `strs` should be `List.of()`, not `null`. Drop `System.out.println`.
+
+---
+
+#### Cousin
+
+Anagram **inside a longer string** → sliding window (#438), not this map. Same #49 with a count key instead of sort → still HashMap.
+
+---
+
+#### Interview sentence
+
+> I sort each word into a signature key and append the original into that bucket.
+
+---
+
+#### Gate (weak spots)
+
+- Cover/Why leaked HashMap once — rule now: never name the pattern before the gate.
+- Empty input → `null` (tests did not hit it).
+
+### 60-sec (Part 1)
+
+> Unique substring: grow right, peel left, set = this band only — do not reset. Group anagrams: map from sorted letters to the original words — not a window, not a set of the raw word.
+
+**Calendar:** Part 1 closed. **Part 2** = Friday HLD (last seat 1 / 10 / 100). **Part 3** = same board + 2 min lock stays in BookingService. **Sat/Sun off.**

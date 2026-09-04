@@ -171,6 +171,14 @@ JPA spec: entity must have a no-arg constructor. If you only add `@AllArgsConstr
 | 155 | Min Stack | Two stacks (values + mins) | O(1) ops / O(n) |
 | 167 | Two Sum II (sorted) | Two pointers (ends) | O(n) / O(1) |
 | 125 | Valid Palindrome | Two pointers (ends, skip junk) | O(n) / O(1) |
+| 238 | Product Except Self | Prefix | O(n) / O(1) extra |
+| 26 | Remove Duplicates Sorted | Two pointers (write+read) | O(n) / O(1) |
+| 11 | Container With Most Water | Two pointers (ends) | O(n) / O(1) |
+| 15 | 3Sum | Sort then two pointers | O(n²) / O(1) extra |
+| 53 | Maximum Subarray | Prefix / Kadane | O(n) / O(1) |
+| 88 | Merge Sorted Array | Two pointers (tails) | O(m+n) / O(1) |
+| 3 | Longest Substring No Repeat | Sliding window + HashSet | O(n) / O(n) |
+| 49 | Group Anagrams | HashMap (sorted-letter key) | O(n k log k) / O(n) |
 | — | Two Sum, Valid Parentheses | (earlier — still passed) | — |
 
 ---

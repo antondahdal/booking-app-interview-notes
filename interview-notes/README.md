@@ -4,7 +4,7 @@ Cheat sheets for the 8-week Event Booking Platform plan. **One file per week** s
 
 **Repos:** Spring = [SpringBoot-bookingApp](https://github.com/antondahdal/SpringBoot-bookingApp). LC = `leetcode-practice`. Notes = this private repo.
 
-**Part 1 size (from 2026-09-02):** **two** Spring topics per weekday. Friday = one long board. See **[part1-map.md](part1-map.md)**.
+**From Fri 2026-09-04:** start with LC — [part1-map.md](part1-map.md). Then Spring — [part2-map.md](part2-map.md).
 
 ## How to use
 
@@ -18,7 +18,8 @@ Cheat sheets for the 8-week Event Booking Platform plan. **One file per week** s
 
 | File | What’s in it |
 |---|---|
-| [part1-map.md](part1-map.md) | Upcoming days/weeks — **two topics** each weekday |
+| [part1-map.md](part1-map.md) | **Part 1 LC** — from Fri 2026-09-04, start the day here |
+| [part2-map.md](part2-map.md) | **Part 2 Spring** — two topics each weekday |
 | [oop-design-map.md](oop-design-map.md) | Part 3 calendar — OOP done vs still need |
 | [design-map.md](design-map.md) | Design done vs still need (five families) |
 | [week-01.md](week-01.md) | Monolith: entities, REST, JPA, pagination, slice tests |

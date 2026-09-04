@@ -1,79 +1,51 @@
-# Part 1 map — two topics per weekday
+# Part 1 map — LC (two per weekday)
 
-Anton asked (2026-09-02): a day is **two map topics**, not one small lab. Friday = **one** long board. Sat/Sun **off**.
+**Day order (from Fri 2026-09-04):** start here. Then Spring ([part2-map.md](part2-map.md)). Then Part 3. Sat/Sun **off**.
 
-If a day feels thin, **pull the next map day’s Spring into today**. Do not invent extra hover on the same code.
+Pattern gate before code: [lc-patterns.md](lc-patterns.md). Pick only Blind 75 / Grind 75 / NeetCode 150. Skip anything already in `leetcode-practice`.
 
----
-
-## Week 3 — concurrency
-
-| Day | Topics (2, or Fri = 1 board) | Status |
-|---|---|---|
-| Mon | Row lock on `book()` | Done |
-| Tue | `@Version` lab (`findById`) | Done |
-| Wed 2026-09-02 | Two-thread test **+** `findByIdForUpdate` back on `book()` **+** title `PATCH` | Done |
-| Thu 2026-09-03 | **`WebClient` bean** + **Booking calls Event over HTTP** (next unused code pair; do not empty the day) | Today |
-| Fri | Long HLD board (last seat 1 / 10 / 100) | Next weekday |
+From Week 3 Day 1: **two** LCs each weekday. Weeks 6–8: **three**.
 
 ---
 
-## Week 4 — split + WebClient
+## Week 3 — two pointers / arrays
 
-| Day | Topic 1 | Topic 2 |
+| Day | LCs | Status |
 |---|---|---|
-| Mon | Booking calls Event over HTTP | `WebClient` bean | *(pulled to W3 Thu)* |
-| Tue | Third service (auth/users) | Correlation-id header |
-| Wed | Downstream 4xx/5xx mapping | Client timeout |
-| Thu | Remaining split glue | One integration test for the call |
-| Fri | HLD of the three boxes | — |
+| Mon | #167 Two Sum II, #125 Valid Palindrome (#283 extra) | Done |
+| Tue | #238 Product Except Self, #26 Remove Duplicates | Done |
+| Wed | #11 Container With Most Water, #15 3Sum | Done |
+| Thu 2026-09-03 | #53 Maximum Subarray, #88 Merge Sorted Array | Done |
+| Fri 2026-09-04 | #3 Longest Substring Without Repeating, #49 Group Anagrams | Done |
 
 ---
 
-## Week 5 — gateway + resilience + Docker
+## Week 4 — sliding window + hash
 
-| Day | Topic 1 | Topic 2 |
-|---|---|---|
-| Mon | Gateway routes | First service behind it |
-| Tue | Resilience4j timeout | Retry (which calls, which not) |
-| Wed | Circuit breaker on the hot call | Fallback status |
-| Thu | Docker Compose for the set | One health check |
-| Fri | HLD traffic through gateway | — |
+#128 Longest Consecutive, #424 Long Repeating Char. (#3 and #49 done W3 Fri.)
 
 ---
 
-## Week 6 — async + observability
+## Week 5 — linked list
 
-| Day | Topic 1 | Topic 2 |
-|---|---|---|
-| Mon | Async event | Outbox idea in code |
-| Tue | Notification send | Actuator health |
-| Wed | Metrics on `book()` | One dashboard query |
-| Thu | Remaining async glue | Test |
-| Fri | HLD | — |
-
-Part 3 from this week: LLD class-design drills start.
+#206 Reverse, #141 Cycle, #21 Merge Two Lists, #19 Remove Nth, #143 Reorder.
 
 ---
 
-## Week 7 — polish + performance
+## Week 6 — trees (+ 3rd LC)
 
-| Day | Topic 1 | Topic 2 |
-|---|---|---|
-| Mon | N+1 fix | Index on hot FK |
-| Tue | Security pass (secrets/CORS) | README |
-| Wed | One perf check | Leftover polish |
-| Thu | Remaining polish | Test |
-| Fri | HLD/recap | — |
+#104 Max Depth, #226 Invert, #102 Level Order, #98 Validate BST, #230 Kth Smallest.
 
 ---
 
-## Week 8 — interview ready
+## Week 7 — heap / intervals / binary search
 
-| Day | Topic 1 | Topic 2 |
-|---|---|---|
-| Mon | Demo path | Architecture recap notes |
-| Tue | Weak-topic drill | One fix |
-| Wed | Mock prep | Leftover |
-| Thu | Dry-run answers | Polish |
-| Fri | Long mock (HLD + LLD) | — |
+#347 Top K Frequent, #56 Merge Intervals, #33 Rotated Search, #153 Min Rotated, #215 Kth Largest.
+
+---
+
+## Week 8 — graph / DP classics
+
+#200 Number of Islands, #207 Course Schedule, #70 Climbing Stairs, #198 House Robber, #322 Coin Change, #146 LRU.
+
+Short extras if a day needs them (only if not done): #344 Reverse String.
