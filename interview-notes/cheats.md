@@ -179,6 +179,8 @@ JPA spec: entity must have a no-arg constructor. If you only add `@AllArgsConstr
 | 88 | Merge Sorted Array | Two pointers (tails) | O(m+n) / O(1) |
 | 3 | Longest Substring No Repeat | Sliding window + HashSet | O(n) / O(n) |
 | 49 | Group Anagrams | HashMap (sorted-letter key) | O(n k log k) / O(n) |
+| 128 | Longest Consecutive Sequence | HashSet; start if `x-1` missing | O(n) / O(n) |
+| 424 | Long Repeating Char Replace | Sliding window; length − maxFreq ≤ k | O(n) / O(1) |
 | — | Two Sum, Valid Parentheses | (earlier — still passed) | — |
 
 ---

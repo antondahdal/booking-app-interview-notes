@@ -32,7 +32,8 @@ Before coding, say in your own words:
 **Week 3 Day 3:** **#11** two ends, throw shorter wall. **#15** sort then two pointers (`left = i+1`).  
 **Week 3 Day 4:** **#53** Kadane (current stretch vs best photo). **#88** two pointers from the tails.  
 **Week 3 Day 5:** **#3** sliding window — peel `left`, do not reset the set. **#49** HashMap, key = sorted letters. Cover/Why never names the pattern.  
-**Cadence (from Week 3 Day 1):** 2 LCs/weekday through Week 5; **3**/weekday Weeks 6–8. Blind 75 / Grind 75 / NeetCode 150 only.  
+**Week 4 Day 1:** **#128** HashSet — start a value-run only if `x-1` missing; not sort; not window. **#424** sliding window — `length - maxFreq ≤ k`; peel left; not #3-on-repeat; not #128. Coding lists: Top 150 + Blind 75 only (#424 was last off-list). Part 1 Design: course **Chapter + topic**; explain then question.  
+**Cadence (from Week 3 Day 1):** 2 LCs/weekday through Week 5; **3**/weekday Weeks 6–8. **Top Interview 150 + Blind 75 only.**  
 **Do not** call #121 “two pointers.” Compare `Integer` with `intValue()`/`equals`, not `!=`. Do not pour back on every `pop` (#232). Do not write `answer[i]` or push temperatures (#739). **Never name the pattern / HashMap / window / two pointers before Anton names it in the gate** (not in Cover, not in Why). Two pointers **never** reset a worker. `else` binds to the nearest `if`.
 
 *(Same list lives in `leetcode-practice/.cursor/rules/lc-pattern-recognition.mdc`.)*

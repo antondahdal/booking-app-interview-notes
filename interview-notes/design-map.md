@@ -118,6 +118,8 @@ Bank and rules: [oop-design-map.md](oop-design-map.md) (bottom). Do **not** star
 
 ---
 
-## Next session — Week 4 (after W3 Fri)
+**LC-SD (from W4, Part 1 only):** talk from [System Design for Interviews and Beyond](https://leetcode.com/explore/interview/card/system-design-for-interviews-and-beyond), ~15 min, Mon–Thu. Always **Chapter N + topic**. From W4 Tue: explain a bit, then the question. Calendar: [lc-sd-map.md](lc-sd-map.md). Do not run the same product again in Part 3 that day. **URL shortener** stays **W7 Fri Part 3**, not Part 1.
 
-**Sat/Sun off.** Next weekday: auth/users cut + correlation-id. Design: seats in Event over HTTP / slow hop (do not repeat W3 Fri last-seat board).
+## Next session — Week 4 Day 1 leftover
+
+Part 1 done. Spring: auth/users + correlation-id. Part 3: seats in Event over HTTP / slow hop. Do not re-ask Strategy.

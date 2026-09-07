@@ -2,9 +2,11 @@
 
 **Day order (from Fri 2026-09-04):** start here. Then Spring ([part2-map.md](part2-map.md)). Then Part 3. Sat/Sun **off**.
 
-Pattern gate before code: [lc-patterns.md](lc-patterns.md). Pick only Blind 75 / Grind 75 / NeetCode 150. Skip anything already in `leetcode-practice`.
+Pattern gate before code: [lc-patterns.md](lc-patterns.md). Pick **only** LeetCode **Top Interview 150** and **Blind 75**. Skip anything already in `leetcode-practice`. No NeetCode-only / Grind-only.
 
-From Week 3 Day 1: **two** LCs each weekday. Weeks 6–8: **three**.
+From Week 3 Day 1: **two** coding LCs each weekday. Weeks 6–8: **three**.
+
+**From Week 4 (Anton 2026-09-07):** Mon–Thu, after the coding LCs, **one ~15 min talk** from [System Design for Interviews and Beyond](https://leetcode.com/explore/interview/card/system-design-for-interviews-and-beyond). Bank: [lc-sd-map.md](lc-sd-map.md). Friday = coding LCs only. Not Design-tag code.
 
 ---
 
@@ -22,7 +24,7 @@ From Week 3 Day 1: **two** LCs each weekday. Weeks 6–8: **three**.
 
 ## Week 4 — sliding window + hash
 
-#128 Longest Consecutive, #424 Long Repeating Char. (#3 and #49 done W3 Fri.)
+Mon 2026-09-07: #128 Longest Consecutive, #424 Long Repeating Char (off-list; last NeetCode-only) + Ch 11 rate limit. **Done.** Next coding: #209, #76, #219.
 
 ---
 
