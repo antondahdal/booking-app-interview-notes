@@ -73,4 +73,4 @@ Skip if that product is **already** that day’s Part 3 or Friday HLD.
 
 | Slot | Course piece |
 |---|---|
-| **W4 Mon** | Ch 11 — Rate limiting (board dumped; from Tue: explain then question) |
+| **W4 Mon** | Ch 11 — Rate limiting (explained in notes; not a drill) |

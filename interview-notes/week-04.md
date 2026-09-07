@@ -112,26 +112,54 @@ Contiguous slice of **one** string + a budget of k changes. `right` grows. Count
 
 ### Part 1 Design — Chapter 11 How to protect servers from clients — Rate limiting
 
-Talk. No Java. Course card, not Design-tag code (#146 LRU stubs exist, not this slot).
+**Not a drill today.** The board was walked for him. There is **no Design weak-spot list** — he did not answer a question. From Tue: explain a bit, then ask.
 
-**Product:** cap how often one caller may hit an endpoint.
+Talk. No Java. Same course card as [System Design for Interviews and Beyond](https://leetcode.com/explore/interview/card/system-design-for-interviews-and-beyond). Not the Design **tag** (that is code: LRU).
 
-**Actors / calls:** Anton `POST /api/bookings`; anyone `POST /api/auth/login`; browse `GET /api/events` (looser).
+#### What this chapter is
 
-**Boxes:** Client → API/gateway → **shared counter** → app → DB. Key = user id or IP.
+**Protect servers from clients** means: one person (or a bot) must not be able to melt the API by sending the same call as fast as they can.
 
-**10×:** two pods with local counts double the cap. Counter is shared. Do not use the event row lock for this.
+**Rate limiting** is the tool: you allow only **N calls per key per time window**. Extra calls are refused **before** `book()` or login runs.
 
-**Status:** over cap → **429**. Sold out → **409**. Bad token → **401**. Trap: 429 = 409.
+It is **not** sold out. Sold out is “this concert has 0 seats.” Rate limit is “you already asked too many times.” Different doors.
 
-**Interview sentence:** Rate-limit at the edge with a shared counter; over the cap is 429. Sold out stays 409.
+#### How it works (plain)
 
-**Next Design talks:** explain the topic a bit, then the **question** — Anton talks first (do not dump the board). Always say Chapter + topic.
+1. Pick a **key**: user id if they are logged in, otherwise IP.
+2. Pick a **window**: e.g. 10 `POST /api/bookings` per minute, tighter on `POST /api/auth/login`, looser on `GET /api/events`.
+3. Each allowed call **adds 1** to that key’s counter.
+4. If the counter is already at N → **do not** run the handler. Return **429 Too Many Requests** (try later).
+5. When the window ends, the count goes back toward 0 (or you use a sliding window — same idea).
+
+The counter must live in **one shared place** (gateway or Redis). If each Booking **pod** keeps its own count in memory, two pods = double the cap. That is the 10× point.
+
+Do **not** use `FOR UPDATE` on the event row for this. That lock is seats. This is “too many HTTP calls.”
+
+#### Status (learn this)
+
+| Code | Meaning here |
+|---|---|
+| **429** | Too many calls. Wait. The concert may still have seats. |
+| **409** | Valid call, **state clash** (no seats / stale). They were allowed in. |
+| **401** | We do not know who you are. Not a rate-limit. |
+
+Trap if they mix them: every 429 = sold out. Wrong.
+
+#### Interview sentence
+
+> I rate-limit at the edge with a shared counter. Over the cap is 429. Sold out stays 409.
+
+#### Next Design talks
+
+Explain the topic a bit → then the **interview question**. He talks. No dump. Always **Chapter N + topic**.
+
+---
 
 ### 60-sec (Part 1)
 
-> #128: set, start only if `x-1` missing, walk forward, max run. #424: window, `length - maxFreq ≤ k`, peel left. Rate limit: shared counter, 429 ≠ 409.
+> #128: set, start only if `x-1` missing, walk forward, max run. #424: window, `length - maxFreq ≤ k`, peel left. Ch 11: shared counter, 429 ≠ 409.
 
-**Weak spots:** two runs / one counter. Window restart. 429 vs 409.
+**Weak spots (coding only):** two runs / one counter. Window restart / ends-only. Design was not practiced.
 
 **Calendar:** Part 1 closed. **Next:** Spring in booking-app — auth/users + correlation-id. Then Part 3: seats in Event over HTTP / slow hop. Do not re-ask Strategy.
