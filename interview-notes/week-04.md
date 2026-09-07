@@ -162,4 +162,42 @@ Explain the topic a bit → then the **interview question**. He talks. No dump. 
 
 **Weak spots (coding only):** two runs / one counter. Window restart / ends-only. Design was not practiced.
 
-**Calendar:** Part 1 closed. **Next:** Spring in booking-app — auth/users + correlation-id. Then Part 3: seats in Event over HTTP / slow hop. Do not re-ask Strategy.
+**Calendar:** Part 1 closed. Part 2 Spring **done**. **Next:** git, then Part 3 — seats over HTTP / slow hop. Do not re-ask Strategy.
+
+---
+
+### Part 2 — Auth over HTTP + correlation id
+
+**Date:** 2026-09-07
+
+#### Users live in Auth, not in Booking
+
+If two services each have their own database, Booking cannot open the users table. It asks Auth over HTTP. Auth answers with JSON (id, email, role). That JSON is **not** a `User` row — no password hash, not something JPA should save.
+
+Here: `book()` used to `findByEmail`. That was Auth’s table. Now `GET /api/users/me`. Booking takes the **id** from the JSON. We still have one H2, so `findById` only hangs the FK (same leftover as Event after seats HTTP). Later Auth’s own DB: just store `userId`, no `User` in Booking.
+
+What I mixed up: `new User()` from the DTO. Missing hash. Fake object. Don’t copy JSON into an entity.
+
+#### Token on the second call
+
+A WebClient call is a **new** request. Auth does not see that Booking already logged in. Copy `Authorization` or Auth returns **401**.
+
+`/me` is not `permitAll`. Register/login have to be open (no token yet). `/me` falls through to “everything else needs a login.” I had put `GET /api/users/**` as `permitAll` — that would let `/me` run with nobody logged in (crash/500, not 401).
+
+What I mixed up: copy the token “to get the email.” I already had the email. Copy it so **Auth** has a token. Internal ≠ skip JWT.
+
+#### Correlation id = log sticker
+
+One string per Book tap. If the caller already sent `X-Correlation-Id`, keep it. If not, mint a UUID. Copy it onto Auth and Event. Grep that string, see the whole tap.
+
+It does **not** change seats, who you are, or 409. Code only creates / keeps / copies it. Put it on the response so you can quote it.
+
+A UUID you mint is **not** on `getHeader` — only on the attribute you set. That’s why clients read the attribute. Forget to copy: Auth mints a **second** id. App still works. **No throw.** Logs just don’t match.
+
+Filter runs **before** JWT so a 401 still has an id.
+
+### 60-sec
+
+> Booking asks Auth who this token is over HTTP. JSON is not a User — take the id. Copy the Bearer; new request is not logged in. Correlation id is a sticker for logs, not business. Forget it → another UUID, no error.
+
+**Weak:** token copy ≠ fetch email. `/me` = `anyRequest().authenticated()`. Missing sticker does not throw.
