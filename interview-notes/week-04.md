@@ -9,7 +9,7 @@ Microservices split: 3 services, WebClient, correlation IDs.
 | Day | Topic 1 | Topic 2 |
 |---|---|---|
 | Mon | Booking calls Event over HTTP | `WebClient` bean | **Pulled to W3 Thu** |
-| Tue | Third service (auth/users) | Correlation-id header | **Next (Spring)** |
+| Tue | Third service (auth/users) | Correlation-id header | **Done W4 Day 1** |
 | Wed | Downstream 4xx/5xx mapping | Client timeout |
 | Thu | Remaining split glue | One integration test for the call |
 | Fri | HLD of the three boxes | — |
@@ -201,3 +201,143 @@ Filter runs **before** JWT so a 401 still has an id.
 > Booking asks Auth who this token is over HTTP. JSON is not a User — take the id. Copy the Bearer; new request is not logged in. Correlation id is a sticker for logs, not business. Forget it → another UUID, no error.
 
 **Weak:** token copy ≠ fetch email. `/me` = `anyRequest().authenticated()`. Missing sticker does not throw.
+
+---
+
+## Week 4 Day 2 — Shortest stretch ≥ target + nearby duplicate + timeout/retry
+
+**Date:** 2026-09-08 (Tue)  
+**Tired cut:** Anton asked 1 coding LC + 1 design. He then did a second Easy (#219) and chose **Part 1 LC Design** (not Part 3).
+
+**Where each “part” is (read this first)**
+
+| Name | What it is | Today |
+|---|---|---|
+| **Part 1 coding** | LeetCode in `leetcode-practice` | #209 + #219. **Done.** |
+| **Part 1 Design (LC-SD)** | ~15 min **talk** from the LeetCode course card, after the coding LCs. **Still Part 1.** Not Spring. Not LRU code. | **Chapter 8.** **Done.** |
+| **Part 2** | Spring in `event-booking-platform` | **Nothing done today.** Opener only — no code, no mapping, no timeout. Tue topics (auth HTTP + correlation-id) were **Done** on Day 1. **Next Spring = Wed, from scratch:** downstream 4xx/5xx + client timeout. |
+| **Part 3** | OOP + **this-app** design (~45 min) | **Not today.** Map: correlation id as a **design talk** + Adapter. Also leftover from Mon: seats over HTTP / slow hop. |
+
+Do **not** call Chapter 8 “Part 3.” Part 3 is a later block the same weekday.
+
+---
+
+### Part 1 — two LCs — passed
+
+---
+
+#### How to notice “shortest stretch that clears a floor” (#209)
+
+Positive numbers. Contiguous. Shortest length whose **sum ≥ target**. `n ≈ 10⁵` → nested every-stretch is too slow → **O(n)**. Extra space **O(1)**.
+
+`right - left + 1` = how many cells when **both ends count** (6..9 is 4). Record that **before** `left++`.
+
+**Memorize this:** outer `for right` (grow / add). Inner `while` peels `left` (drop). `left` has no own `for`.
+
+**Not this:** prefix array + binary search (right math, **O(n log n)** follow-up). Kadane (#53) = best **sum**, not shortest **length**. Two ends (#167) = throw a side of a sorted pair.
+
+#### LC 209 Minimum Size Subarray Sum (Medium) — passed
+
+`target = 7`, `[2,3,1,2,4,3]` → `2` (`[4,3]`). No stretch → `0` (keep `best` as `MAX_VALUE`, then return 0).
+
+First code moved `right` inside the peel loop and never saved `minarr`. Inner must be `while (sum >= target)`: record length, `sum -= nums[left]`, `left++`. One right-tick can peel 0, 1, or many.
+
+Cousin: numbers may be **negative** → window is not monotonic → prefix, not this peel.
+
+**Interview sentence:** Positive numbers, grow right, peel left while the sum is already enough — each index in and out once, O(n).
+
+---
+
+#### LC 219 Contains Duplicate II (Easy) — passed
+
+Same value at `i` and `j` with `|i-j| <= k`. Not #217 (duplicate **anywhere**).
+
+**Memorize this:** one `for i`. Map **value → last index so far**. If seen and `i - last <= k` → true. Then **always** `put(value, i)`.
+
+Trap: fill the map with **last** indexes first, then scan. `[1,1,3,4,5,1]`, `k=1` is true (indexes 0 and 1) but last `1` is at 5, so that two-pass misses. Check **then** overwrite.
+
+Cousin: drop `k` → #217 HashSet, no indexes.
+
+**Interview sentence:** Store the last index of each value; a hit counts only if this index is within `k`.
+
+---
+
+### Part 1 Design — Chapter 8 How to deliver data reliably — Timeout / retry / idempotency
+
+**This is Part 1.** Same course: [System Design for Interviews and Beyond](https://leetcode.com/explore/interview/card/system-design-for-interviews-and-beyond). Talk only. No Java.
+
+It is **not** Part 3. It is **not** the correlation-id sticker (that is logs; already built in Spring Day 1).
+
+Anton **did** answer (unlike Day 1 Ch 11). First answer: timeout on Event, retry X times, stop on success. That is right for a **read**. Trap is **Book**.
+
+#### What this chapter is (three tools, one lie)
+
+The network can say “no answer” **after** Event already took the seat. You need three words:
+
+1. **Timeout** — stop **waiting**. You did not undo the other side.
+2. **Retry** — call again. Safe on a **GET**. Dangerous on **Book** unless the same click is tagged.
+3. **Idempotency** — same click id = **one** intent. Event applies it once.
+
+#### Where the timeout lives (this was the mix-up)
+
+Put the timeout on **Booking**, on the **HTTP client / WebClient** that **calls Event**.
+
+- Booking is the one waiting for a response.
+- “Timeout on Event” as the main answer is vague. Event can still **finish the write** after Booking hung up.
+- Timeout ≠ Event failed. Timeout ≠ seat is free. Timeout = **we stopped listening**.
+
+#### What to retry
+
+| Call | Retry? |
+|---|---|
+| GET / browse seats | Yes. A few times. Read-only. |
+| `book()` / take a seat | **Only with the same click id.** |
+| Sold out **409** | **No.** Stop. |
+
+Blind “retry Book X times until 200” can take **two** seats if the first call succeeded and Booking only saw a timeout.
+
+#### How click id fixes it (UUID in Event’s DB)
+
+The **browser** mints one UUID for **that Book tap**. Booking sends it every try of **that** tap. A later tap = **new** UUID.
+
+**Event** stores that id **with the result** when the seat is taken (unique constraint so two in-flight retries cannot both insert).
+
+On retry:
+
+| DB has this click id? | Meaning | What Event does |
+|---|---|---|
+| **Yes** | First call **did** finish. Booking only lost the HTTP answer. | Return the **same** result. Do **not** take another seat. |
+| **No** | Event never applied it (or not yet). | Take the seat **once**, then save the id. |
+
+That is idempotency. JWT is **who**. Click id is **which tap**. Correlation id is **which log line**. Do not mix them.
+
+#### Status (don’t mix with Ch 11)
+
+| Code | Here |
+|---|---|
+| Timeout / no body | Booking does not know. Retry Book **only** with click id. |
+| **409** sold out | State clash. **Stop.** Not “try again.” |
+| **429** | Too many calls (Ch 11). Not this chapter. |
+| **201** / same payload on replay | Click already applied. Success. Stop. |
+
+#### Interview sentence
+
+> Timeout means Booking stopped listening, not that the seat is free. I retry `book()` only with a click id stored on Event.
+
+#### Gate (weak spots)
+
+- Timeout “on Event” instead of on Booking’s HTTP wait.
+- Retry Book X times with **no** click id.
+- Click id = JWT (“same user, so reject”). Hours later is a **new** tap.
+- Click id = correlation id (logs vs intent).
+- 409 sold out → retry anyway.
+
+---
+
+### 60-sec (Part 1)
+
+> #209: window, add `right`, peel `left` while sum ≥ target, length = `right-left+1`, else 0. #219: map value→last index, check `i-last<=k` then put. Ch 8: timeout on **Booking’s** call; GET may retry; Book only with click id in Event DB; timeout ≠ Event failed.
+
+**Weak:** peel `right` / two-pass last-index map. Design: timeout belongs on the **caller**.
+
+**Calendar:** Part 1 **closed** (coding + Ch 8). Part 2 **nothing done** (no `EventClient` change). Part 3 **not today**. **Next:** W4 Wed — LC first, then Spring from scratch (map Event 4xx/5xx + client timeout), then Part 3 leftover.

@@ -124,8 +124,10 @@ Name the product → actors → 4–8 classes → fields + 2–4 methods each �
 
 ---
 
-## Next session — Week 4 Day 1 leftover (Spring + Part 3)
+## Next session — Week 4 Day 3
 
-Part 1 **done** (2026-09-07). Next in booking-app: Spring **auth/users + correlation-id**. Part 3: seats in Event over HTTP / slow hop. OOP: skip Strategy; Adapter is **W4 Tue**.
+Part 1 **done** 2026-09-08 (#209, #219, **Ch 8**). Part 2 Spring on Day 2: **nothing done** (opener only). Tue auth HTTP + correlation-id **done** Day 1. **Next Spring (Wed, from scratch):** downstream 4xx/5xx + client timeout.
+
+**Part 3 still open:** Mon leftover — seats in Event over HTTP / slow hop. Tue slot — correlation id **talk** (log vs return vs user never sends it) + **Adapter**. Do not re-ask Strategy. Do not rerun Ch 8 (click id) as Part 3.
 
 Classic product HLD lite lives in **Part 1** ([lc-sd-map.md](lc-sd-map.md)). Part 3 stays this app until W6 LLD. URL shortener stays **W7 Fri Part 3**.
