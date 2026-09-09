@@ -341,3 +341,157 @@ That is idempotency. JWT is **who**. Click id is **which tap**. Correlation id i
 **Weak:** peel `right` / two-pass last-index map. Design: timeout belongs on the **caller**.
 
 **Calendar:** Part 1 **closed** (coding + Ch 8). Part 2 **nothing done** (no `EventClient` change). Part 3 **not today**. **Next:** W4 Wed — LC first, then Spring from scratch (map Event 4xx/5xx + client timeout), then Part 3 leftover.
+
+---
+
+## Week 4 Day 3 — Sudoku go-over + isomorphic map + RandomizedSet + sync vs queue
+
+**Date:** 2026-09-09 (Wed)
+
+**Where each “part” is (read this first)**
+
+| Name | What it is | Today |
+|---|---|---|
+| **Part 1 coding** | LeetCode in `leetcode-practice` | **#36** go-over (not a grind). **#205** he coded. **#380** he coded. Skipped **#76** Hard. Skipped **#383** as a second Easy. **Done.** |
+| **Part 1 Design (LC-SD)** | ~15 min talk from the course card. **Still Part 1.** | **Chapter 3 + Chapter 5** — sync vs queue. **Done.** |
+| **Part 2** | Spring in `event-booking-platform` | **Not this chat.** Next Spring: downstream 4xx/5xx + client timeout. |
+| **Part 3** | OOP + this-app design | **Not this chat.** Map: OCP + Event 404/409/503/timeout. Leftover: seats over HTTP, correlation-id talk + Adapter. Do **not** rerun this queue talk as Part 3. |
+
+Do **not** call Chapter 3/5 “Part 3.” Full outbox / at-least-once mail is **W6 Mon** (still Ch 5, deeper).
+
+Coding lists: Top 150 + Blind 75. #76 is on both — skipped because Hard. #36 and #380 are Top 150. #205 is Top 150 (not Blind 75).
+
+---
+
+### Part 1 — LCs
+
+---
+
+#### LC 36 Valid Sudoku (Medium) — go-over (Anton did not grind)
+
+Not a puzzle to solve live. Pattern is **HashSet**: “have I already seen this digit in this group?”
+
+One pass. Skip `'.'`. For each filled cell, three tickets into **one** set:
+
+- `"5 in row 0"`
+- `"5 in col 3"`
+- `"5 in box 1"` — `box = (row / 3) * 3 + (col / 3)`
+
+`add` returns false → duplicate in that group → invalid. **Do not solve** the grid.
+
+**Memorize this:** one pass; skip dots; one set; three keys (row / col / box).
+
+**Cousin:** fill the empties → backtracking, not this.
+
+**Interview sentence:** I don’t solve it — I stamp each filled digit into its row, column, and box; a second stamp is invalid.
+
+---
+
+#### How to notice “translation, not tally” (#205)
+
+Two strings, same length. Each `s` letter glues to **one** `t` letter, and no two `s` letters share a `t` letter. Walk the **same index**.
+
+**Not this:** counts / “how many times” — that is **#242**. `"abab"` / `"aabb"` have the same counts and are still **false**.
+
+**Memorize this:** map `s[i] → t[i]`. If `s[i]` already mapped, it must still be this `t[i]`. A `t` letter is taken by at most one `s` letter (second map, or “taken” set). `"foo"` / `"bar"` = same letter, two partners. `"ab"` / `"aa"` = two letters, one partner.
+
+#### LC 205 Isomorphic Strings (Easy) — passed
+
+Anton named HashMap + O(n). First “why” was counts — corrected before code.
+
+His code: one `HashMap<Character,Character>` + `containsValue` for the reverse rule. Tests pass (including `"abab"` / `"aabb"`).
+
+Interview note: `containsValue` is O(n) per step → **O(n²)**. Two maps (`s→t` and `t→s`) is **O(n)** and what you say out loud.
+
+**Cousin:** drop the taken check → `"ab"` / `"aa"` wrongly passes.
+
+**Interview sentence:** I glue each `s` letter to one `t` letter and refuse a second glue in either direction.
+
+---
+
+#### LC 380 Insert Delete GetRandom O(1) (Medium) — passed (shape)
+
+Set **behavior** (insert twice is still one). Java `HashSet` cannot `getRandom` in O(1).
+
+**Memorize this:** **List** = values (random index). **HashMap** = `value → index`. Insert: append + record index. Remove: swap victim with **last** slot, update **that one** moved value in the map, drop tail. `getRandom` = `list.get(random.nextInt(size))`. `getRandom` does **not** remove.
+
+Do **not** `list.remove(0)` and rewrite the whole map. Do **not** `list.contains` / `indexOf` (O(n) — undoes the problem). Check = `map.containsKey`.
+
+Anton mixed count-map (Ransom Note) and “remove 2 twice.” This problem stores **no duplicates**. Second `insert(2)` is `false`. One `remove(2)` clears it. Bag-with-counts is a follow-up (`RandomizedCollection`).
+
+His tests passed. Weak: still `list.contains` on insert/remove — **fix to `map.containsKey`**. Last-element special case is optional (swap-with-last works on the tail too). Duplicate insert must return **false**.
+
+**Cousin:** allow duplicates → map becomes `value → list of indexes`.
+
+**Interview sentence:** List for O(1) random pick; map for O(1) “where is this value”; remove is swap with the last slot so I never shift.
+
+---
+
+### Part 1 Design — Chapter 3 Foundations of reliable, scalable, and fast communication + Chapter 5 Why queues matter in distributed systems — Sync vs queue
+
+**This is Part 1.** Same course card. Talk only. No Java. Not Kafka.
+
+Prompt: `POST /api/bookings` takes a seat, then the user must get a confirmation email. Sync on the request, or queue?
+
+#### What Anton said
+
+Email is slow → extra wait for the **client**. Put that work on a **queue** so it can be delayed and the client is not charged that time.
+
+Then he sharpened it: **booking is fully done** → call enqueue → return **201**. Do not wait on the **email send**. He also said do not wait on the enqueue **response**.
+
+First half is right. The enqueue-ack half is the trap.
+
+#### Sync vs queue (why the chapter exists)
+
+**Sync** = this request waits until the other side finishes (HTTP to Event, SMTP). Fine when the hop is short.
+
+**Queue** = write down “send this mail,” return. A worker does Gmail later. `201` is “we took the seat,” not “inbox has the mail.”
+
+Chapter 3: communication has a cost (thread, lock, client time). Chapter 5: a queue so you stop paying the **slow** hop on the user request.
+
+#### Order (memorize)
+
+1. Take the seat. **Commit.** Release the DB door.
+2. Enqueue the mail job (cheap). Wait for **job accepted**, or write the job in the **same DB commit** (outbox — W6).
+3. Return **201**.
+
+Never: send mail (or call Gmail) **inside** the seat lock. Never: hold `FOR UPDATE` while SMTP runs.
+
+#### Wait vs don’t wait
+
+| Hop | Wait on `book()`? |
+|---|---|
+| Gmail / SMTP / worker send | **No.** That is the slow hop. |
+| “Job is on the queue” (ack) or outbox row in the same commit | **Yes** (or same transaction). Cheap. |
+| Fire-and-forget enqueue, then `201` with no ack | **No.** Network blip → seat taken, **no job**, no mail, client already got success. |
+
+#### Status
+
+| Code | Meaning here |
+|---|---|
+| **201** | Seat saved. Mail may still be in the queue. |
+| Mail not in inbox yet | Not a failed book. Worker lag. |
+| Enqueue failed after commit | Booking exists; mail job missing → retry/outbox (W6), not “pretend 201 and drop it.” |
+
+Do not invent Kafka in this slot. “A queue” is enough.
+
+#### Interview sentence
+
+> Offload the slow hop; never hold the DB door across email. `201` after the seat is saved; wait on enqueue ack (or outbox), never on the mailbox.
+
+#### Gate (weak spots)
+
+- Email (or any slow hop) **inside** the seat lock.
+- `201` means Gmail already sent.
+- Fire-and-forget enqueue with no ack / no outbox.
+- Calling this Part 3. Outbox drill is **W6 Mon**.
+
+---
+
+### 60-sec (Part 1)
+
+> #36: one set, three keys (row/col/box), skip dots, don’t solve. #205: map `s→t` and refuse a taken `t`; not counts. #380: list + map `val→index`; remove = swap with last; `containsKey` not `list.contains`. Ch 3+5: commit book, enqueue, 201; don’t wait on Gmail; do wait on enqueue ack or outbox; never lock across mail.
+
+**Weak:** #205 `containsValue` O(n²). #380 `list.contains`. Design: “don’t wait for enqueue” ≠ drop the job.
+
+**Calendar:** Part 1 **closed** (coding + Ch 3/5). Part 2 / Part 3 **not this chat**. **Next:** Spring Wed (map Event 4xx/5xx + client timeout), then Part 3 leftover. Next LC (Thu): not another Easy pair; **#76** still skipped unless he asks Hard; remaining Top 150 hash: **#383 / #290 / #202**.

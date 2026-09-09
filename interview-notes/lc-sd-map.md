@@ -48,7 +48,7 @@ Skip if that product is **already** that day’s Part 3 or Friday HLD.
 |---|---|---|---|
 | **W4 Mon** | Ch 11 — Rate limiting | 429 = too many calls | Call this sold-out **409** | **Done** |
 | **W4 Tue** | Ch 8 — Timeout / retry / idempotency | Event HTTP is slow; retry only with a click id | Retry `book()` blindly | **Done 2026-09-08** |
-| **W4 Wed** | Ch 3 + 5 — Sync vs queue | Do not hold a DB door across a slow hop | Email inside the lock |
+| **W4 Wed** | Ch 3 + 5 — Sync vs queue | Do not hold a DB door across a slow hop | Email inside the lock | **Done 2026-09-09** |
 | **W4 Thu** | Ch 12 — Circuit breaker | Open circuit ≠ **201 ticket** | Fallback looks like booked |
 | **W4 Fri** | — | — | — |
 | **W5 Mon** | Ch 4 — Cache (aside, TTL) | Speed browse; book is still truth | Cache “1 seat left” as gospel. **Skip** if Part 3 is already cache |
@@ -74,3 +74,5 @@ Skip if that product is **already** that day’s Part 3 or Friday HLD.
 | Slot | Course piece |
 |---|---|
 | **W4 Mon** | Ch 11 — Rate limiting (explained in notes; not a drill) |
+| **W4 Tue** | Ch 8 — Timeout / retry / idempotency |
+| **W4 Wed** | Ch 3 + 5 — Sync vs queue (commit, then enqueue, then 201; ack ≠ Gmail) |

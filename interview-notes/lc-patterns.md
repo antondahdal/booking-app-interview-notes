@@ -30,7 +30,10 @@ Say the pattern first (that’s the round). Then write this shape.
 |---|---|
 | HashMap | One `for i`. Need = target − `nums[i]`. If map has need → return. Else put value→i. |
 | HashMap (#219 nearby) | One `for i`. Value → **last index**. If `i - last <= k` → true. Then **put** (check, then overwrite). |
+| HashMap (#205 glue) | Walk same index. Map `s[i]→t[i]`. Clash or `t` already taken → false. Not counts (#242). |
+| HashMap + list (#380) | Map `val→index`. Insert append. Remove: swap with **last**, update that one index, drop tail. Random = `list.get(rand)`. Check = `containsKey`, not `list.contains`. |
 | HashSet | One `for`. `contains` → yes. Else `add`. |
+| HashSet (#36 board) | Skip `'.'`. Three keys: row / col / `box=(r/3)*3+(c/3)`. `add` fail → invalid. Don’t solve. |
 | Stack (match) | Open → push. Close → pop and match. Leftover stack → false. |
 | Running min | One `for`. Track `minSoFar`. Answer = best `x - minSoFar`. Not two pointers. |
 | Two pointers (ends) | `while (left < right)`. Throw **one** side per step. Never reset a worker. |
@@ -53,6 +56,7 @@ Say the pattern first (that’s the round). Then write this shape.
 **Week 3 Day 5:** **#3** sliding window — peel `left`, do not reset the set. **#49** HashMap, key = sorted letters. Cover/Why never names the pattern.  
 **Week 4 Day 1:** **#128** HashSet — start a value-run only if `x-1` missing; not sort; not window. **#424** sliding window — `length - maxFreq ≤ k`; peel left; not #3-on-repeat; not #128. Coding lists: Top 150 + Blind 75 only (#424 was last off-list). Part 1 Design: course **Chapter + topic**; explain then question.  
 **Week 4 Day 2:** **#209** sliding window — outer `right`, inner peel `left`, `right-left+1`. **#219** HashMap value→last index; check then put. **Part 1 Design = Chapter 8** (timeout / retry / click id). Still Part 1, **not** Part 3. Timeout on **Booking’s** WebClient. GET may retry. Book only with click id in Event DB. Correlation id ≠ click id. **Anton 2026-09-08:** after he names the pattern, give the **Memorize this** template *before* he codes.  
+**Week 4 Day 3:** **#36** HashSet three keys (go-over). **#205** HashMap glue both ways, not counts. **#380** list + map `val→index`, swap-with-last. Skipped **#76** Hard. **Part 1 Design = Chapter 3 + 5** (sync vs queue). Commit book → enqueue → 201. Don’t wait on Gmail; do wait on enqueue ack or outbox. Never lock across mail. Still Part 1, **not** Part 3. Outbox drill = **W6 Mon**.  
 **Cadence (from Week 3 Day 1):** 2 LCs/weekday through Week 5; **3**/weekday Weeks 6–8. **Top Interview 150 + Blind 75 only.**  
 **Do not** call #121 “two pointers.” Compare `Integer` with `intValue()`/`equals`, not `!=`. Do not pour back on every `pop` (#232). Do not write `answer[i]` or push temperatures (#739). **Never name the pattern / HashMap / window / two pointers before Anton names it in the gate** (not in Cover, not in Why). Two pointers **never** reset a worker. `else` binds to the nearest `if`.
 

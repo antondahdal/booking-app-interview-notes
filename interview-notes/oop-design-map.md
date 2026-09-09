@@ -124,10 +124,12 @@ Name the product → actors → 4–8 classes → fields + 2–4 methods each �
 
 ---
 
-## Next session — Week 4 Day 3
+## Next session — Week 4 Day 3 leftover (Spring + Part 3)
 
-Part 1 **done** 2026-09-08 (#209, #219, **Ch 8**). Part 2 Spring on Day 2: **nothing done** (opener only). Tue auth HTTP + correlation-id **done** Day 1. **Next Spring (Wed, from scratch):** downstream 4xx/5xx + client timeout.
+Part 1 **done** 2026-09-09 (#36 go-over, #205, #380, **Ch 3 + 5** sync vs queue). Do **not** rerun the queue/email talk as Part 3 (outbox is **W6 Mon**).
 
-**Part 3 still open:** Mon leftover — seats in Event over HTTP / slow hop. Tue slot — correlation id **talk** (log vs return vs user never sends it) + **Adapter**. Do not re-ask Strategy. Do not rerun Ch 8 (click id) as Part 3.
+**Next Spring (Wed, from scratch):** downstream 4xx/5xx + client timeout. Day 2 Spring was opener only. Tue auth HTTP + correlation-id **done** Day 1.
+
+**Part 3 still open:** Mon leftover — seats in Event over HTTP / slow hop. Tue slot — correlation id **talk** (log vs return vs user never sends it) + **Adapter**. Wed slot when you get there: OCP + map Event 404/409/503/timeout. Do not re-ask Strategy. Do not rerun Ch 8 (click id) as Part 3.
 
 Classic product HLD lite lives in **Part 1** ([lc-sd-map.md](lc-sd-map.md)). Part 3 stays this app until W6 LLD. URL shortener stays **W7 Fri Part 3**.

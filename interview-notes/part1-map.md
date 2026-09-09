@@ -25,7 +25,8 @@ From Week 3 Day 1: **two** coding LCs each weekday. Weeks 6–8: **three**.
 ## Week 4 — sliding window + hash
 
 Mon 2026-09-07: #128 Longest Consecutive, #424 Long Repeating Char (off-list; last NeetCode-only) + Ch 11 rate limit. **Done.**  
-Tue 2026-09-08: #209 Min Size Subarray Sum, #219 Contains Duplicate II + **Ch 8** timeout / retry / idempotency (still **Part 1**, not Part 3). **Done.** Next coding: #76 Min Window Substring.
+Tue 2026-09-08: #209 Min Size Subarray Sum, #219 Contains Duplicate II + **Ch 8** timeout / retry / idempotency (still **Part 1**, not Part 3). **Done.**  
+Wed 2026-09-09: #36 Valid Sudoku (go-over), #205 Isomorphic Strings, #380 Insert Delete GetRandom + **Ch 3 + 5** sync vs queue. Skipped **#76** Hard. **Done.** Next coding: not another Easy pair; #76 still skipped unless he asks; remaining Top 150 hash **#383 / #290 / #202**.
 
 ---
 
