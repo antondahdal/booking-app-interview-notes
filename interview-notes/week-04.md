@@ -354,8 +354,8 @@ That is idempotency. JWT is **who**. Click id is **which tap**. Correlation id i
 |---|---|---|
 | **Part 1 coding** | LeetCode in `leetcode-practice` | **#36** go-over (not a grind). **#205** he coded. **#380** he coded. Skipped **#76** Hard. Skipped **#383** as a second Easy. **Done.** |
 | **Part 1 Design (LC-SD)** | ~15 min talk from the course card. **Still Part 1.** | **Chapter 3 + Chapter 5** — sync vs queue. **Done.** |
-| **Part 2** | Spring in `event-booking-platform` | **Not this chat.** Next Spring: downstream 4xx/5xx + client timeout. |
-| **Part 3** | OOP + this-app design | **Not this chat.** Map: OCP + Event 404/409/503/timeout. Leftover: seats over HTTP, correlation-id talk + Adapter. Do **not** rerun this queue talk as Part 3. |
+| **Part 2** | Spring in `event-booking-platform` | Map Event 409/404/5xx + 3s wait on the `WebClient` bean. **Done** (same day, second chat). |
+| **Part 3** | OOP + this-app design | Tue leftover **done** this chat: Adapter + correlation-id talk. Wed OCP + statuses still open. Mon leftover: seats over HTTP. Do **not** rerun the queue talk as Part 3. |
 
 Do **not** call Chapter 3/5 “Part 3.” Full outbox / at-least-once mail is **W6 Mon** (still Ch 5, deeper).
 
@@ -494,4 +494,72 @@ Do not invent Kafka in this slot. “A queue” is enough.
 
 **Weak:** #205 `containsValue` O(n²). #380 `list.contains`. Design: “don’t wait for enqueue” ≠ drop the job.
 
-**Calendar:** Part 1 **closed** (coding + Ch 3/5). Part 2 / Part 3 **not this chat**. **Next:** Spring Wed (map Event 4xx/5xx + client timeout), then Part 3 leftover. Next LC (Thu): not another Easy pair; **#76** still skipped unless he asks Hard; remaining Top 150 hash: **#383 / #290 / #202**.
+**Calendar:** Part 1 **closed** (coding + Ch 3/5). Part 2 **closed** (see below). Part 3 **not yet.** Next LC (Thu): not another Easy pair; **#76** still skipped unless he asks Hard; remaining Top 150 hash: **#383 / #290 / #202**.
+
+---
+
+### Part 2 — Map Event’s HTTP answers + wait cap on the client
+
+**Date:** 2026-09-09 (Wed, after Part 1)
+
+#### Downstream status is a new HTTP response
+
+When service B returns 4xx/5xx, the caller’s HTTP client does **not** turn that into B’s Java exception. `retrieve()` throws. If you do not map it, the phone sees **500** (caller crashed), not B’s 409/404.
+
+Here: Event already returns 409 for sold out and 404 for a missing event. `EventClient.reserveSeats` `.block()`s. Catch `WebClientResponseException`, read `getStatusCode()`, throw **our** types so the existing handler can speak: 409 → `InsufficientSeatsException`, 404 → `ResourceNotFoundException`. Map in the **client**, not in `book()`, not on the shared `WebClient` bean (Auth’s 401 would share that bucket).
+
+The mix-up: Event’s handler already ran. That does not help the phone. The phone talks to **Booking**.
+
+#### 5xx from Event is not sold out
+
+Event **500** means Event broke. Booking **409** means no seats. Mixing them makes the user stop as if the concert is full. Booking’s door for “the other service failed” is **502**.
+
+Here: `is5xxServerError()` → `DownstreamServiceException` → handler **502**. Else `throw e` so 401 is not swallowed into `null`.
+
+The mix-up: 5xx → seats exception.
+
+#### Timeout = we stopped listening, not “Event wrote nothing”
+
+A timeout is **no HTTP status**. Different throw: `WebClientRequestException`, not `WebClientResponseException`. 409 = we **saw** current state (0 seats). Hang-up = **we don’t know**. Event is another process; Booking’s clock does not undo Event’s row. Event may already have subtracted, still be in the lock, or never have started.
+
+Here: `HttpClient.responseTimeout(3s)` plugged into the `WebClient` bean via `ReactorClientHttpConnector`. Catch request-exception → `DownstreamServiceException` (same 502 for now, not seats). Cap is on the **caller**, not on `@Transactional`.
+
+The mix-up: timeout = nothing stored in the DB. That is the lie. Same as Ch 8: hang-up ≠ Event failed.
+
+### 60-sec (Part 2)
+
+> Event 409/404/5xx is a new response; `retrieve()` throws; map in `EventClient` to our exceptions (409 seats, 404 missing, 5xx → 502). Timeout is no status — cap on the `WebClient` engine; not 409; we do not know if Event wrote.
+
+**Weak:** timeout = “DB stored nothing.”
+
+**Calendar:** Part 2 **closed**. Part 3 Adapter + correlation-id talk **done** (same day).
+
+---
+
+### Part 3 — Adapter + correlation id (Tue leftover)
+
+**Date:** 2026-09-09 (Wed, after Part 2)
+
+#### Adapter
+
+`EventClient` **uses** `WebClient`. It is not a WebClient. `book()` says take seats. HTTP (`post` / `uri` / `.block()` / status map) stays in the client. Moving that into `BookingServiceImpl` is two jobs on one class. It does **not** un-split the microservices — Event is still another HTTP door.
+
+The mix-up: HTTP in `book()` = we failed the service cut.
+
+#### Correlation id
+
+General: one string per incoming request so logs across services grep as **one tap**. Keep the header if the caller sent it; else mint. Copy it on the next hop. Put it on the response so the **frontend can see** that same string.
+
+Here: `CorrelationIdFilter` (before JWT). `EventClient` / `AuthClient` copy the attribute. Forget to copy → Event mints a second id. Book still works. Logs do not stitch. **No throw.** 401 still has the sticker because the filter ran first.
+
+JWT = who. Click id = which tap (not in the app). Correlation id = log sticker. Two real clicks, same user = two tickets.
+
+The mix-up: click id = “monitor.” Returning the sticker = “make the call unique.”
+
+### 60-sec (Part 3)
+
+> Adapter: `EventClient` uses `WebClient`; `book()` does not speak HTTP. Correlation id: keep or mint, copy, return for the phone to see; forget copy → two ids, no crash. Filter before JWT so 401 still has the sticker.
+
+**Weak:** timeout = Event wrote nothing (Part 2). Click id vs sticker. Returning the id ≠ unique tap.
+
+**Calendar:** Day 3 **closed**. **Next weekday:** Week 4 Thu — LC first (#383 / #290 / #202; skip #76 unless he asks Hard). Then Spring: remaining split glue + one integration test. Part 3: LSP + what the test proved. OCP still open. Mon leftover: seats over HTTP. Sat/Sun **off**.

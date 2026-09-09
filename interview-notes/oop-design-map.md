@@ -44,6 +44,7 @@ Days marked **longer** in the calendar: do both items. Anton asked to be safe, n
 | Encapsulation | W3 D3 | PATCH body = title. Client must not set seats / `version` | Calling this SRP |
 | Java threads | W3 D3 | Latch = start. `join` = caller waits. Not `synchronized` on `book()` (two JVMs) | `join` = t1 waits for t2 |
 | Strategy (job picks wait vs stamp) | W3 Thu, W3 Fri HLD | Book waits. Title PATCH stamps. Pool pain ≠ switch Book to stamp | Re-ask “which method / the job” |
+| Adapter | W4 Day 3 leftover (Tue slot) | `EventClient` **uses** `WebClient`. `book()` says reserve seats, not `post`/`.block()` | HTTP in `book()` = two services merged |
 
 **SOLID so far:** S, I, D, encapsulation. **Not yet:** O, L.
 
@@ -55,7 +56,6 @@ Must-have. Includes **Java core** (collections, threads) — mid interviews ask 
 
 | # | Topic | Why they ask | Slot |
 |---|---|---|---|
-| 4 | **Adapter** | `WebClient` / `EventClient` hides HTTP. | W4 Tue |
 | 5 | **OCP** | New downstream error → new mapping, not a giant `if` in `book()`. | W4 Wed |
 | 6 | **LSP** | Timeout / fallback must not look like **201 booked**. | W4 Thu + W5 Wed |
 | 7 | **equals / hashCode + Collections** | Entity id after persist. `HashMap` uses both. `ArrayList` vs `LinkedList` (random access vs middle insert). | **W5 Mon (longer OOP)** |
@@ -124,12 +124,12 @@ Name the product → actors → 4–8 classes → fields + 2–4 methods each �
 
 ---
 
-## Next session — Week 4 Day 3 leftover (Spring + Part 3)
+## Next session — Week 4 Thursday
 
-Part 1 **done** 2026-09-09 (#36 go-over, #205, #380, **Ch 3 + 5** sync vs queue). Do **not** rerun the queue/email talk as Part 3 (outbox is **W6 Mon**).
+Part 1 **done** W4 Day 3. Part 2 **done** (map + timeout). Part 3 Tue leftover **done** (Adapter + correlation id). Do **not** rerun those. Do **not** rerun queue/email (outbox **W6 Mon**). Do not re-ask Strategy.
 
-**Next Spring (Wed, from scratch):** downstream 4xx/5xx + client timeout. Day 2 Spring was opener only. Tue auth HTTP + correlation-id **done** Day 1.
-
-**Part 3 still open:** Mon leftover — seats in Event over HTTP / slow hop. Tue slot — correlation id **talk** (log vs return vs user never sends it) + **Adapter**. Wed slot when you get there: OCP + map Event 404/409/503/timeout. Do not re-ask Strategy. Do not rerun Ch 8 (click id) as Part 3.
+**Thu Spring:** remaining split glue + one integration test for the call.  
+**Thu Part 3:** LSP (timeout/fallback must not look like **201 booked**) + what an HTTP integration test proved vs a mock.  
+**Still open:** Wed OCP. Mon leftover — seats in Event over HTTP / slow hop. Weak: timeout ≠ “Event wrote nothing.”
 
 Classic product HLD lite lives in **Part 1** ([lc-sd-map.md](lc-sd-map.md)). Part 3 stays this app until W6 LLD. URL shortener stays **W7 Fri Part 3**.
