@@ -45,8 +45,9 @@ Days marked **longer** in the calendar: do both items. Anton asked to be safe, n
 | Java threads | W3 D3 | Latch = start. `join` = caller waits. Not `synchronized` on `book()` (two JVMs) | `join` = t1 waits for t2 |
 | Strategy (job picks wait vs stamp) | W3 Thu, W3 Fri HLD | Book waits. Title PATCH stamps. Pool pain ≠ switch Book to stamp | Re-ask “which method / the job” |
 | Adapter | W4 Day 3 leftover (Tue slot) | `EventClient` **uses** `WebClient`. `book()` says reserve seats, not `post`/`.block()` | HTTP in `book()` = two services merged |
+| LSP (timeout ≠ ticket) | W4 Day 4 | Stand-in must not return success if Event did not take a seat. Catch must throw. | Fake DTO → **201** |
 
-**SOLID so far:** S, I, D, encapsulation. **Not yet:** O, L.
+**SOLID so far:** S, I, D, L (timeout ≠ 201). Encapsulation. **Not yet:** O (Wed leftover).
 
 ---
 
@@ -57,7 +58,7 @@ Must-have. Includes **Java core** (collections, threads) — mid interviews ask 
 | # | Topic | Why they ask | Slot |
 |---|---|---|---|
 | 5 | **OCP** | New downstream error → new mapping, not a giant `if` in `book()`. | W4 Wed |
-| 6 | **LSP** | Timeout / fallback must not look like **201 booked**. | W4 Thu + W5 Wed |
+| 6 | **LSP** | Timeout / fallback must not look like **201 booked**. | W4 Thu **done** + W5 Wed (circuit) |
 | 7 | **equals / hashCode + Collections** | Entity id after persist. `HashMap` uses both. `ArrayList` vs `LinkedList` (random access vs middle insert). | **W5 Mon (longer OOP)** |
 | 8 | **Immutability + `Optional`** | Request DTO / `String` don’t mutate. `Event` is mutable (the row). `Optional` = empty box, not empty entity. | W5 Tue |
 | 9 | **Observer / events** | `book()` commits, then outbox — not email inside the lock. | W6 Mon |
@@ -86,7 +87,7 @@ Do not repeat prompts in **design-map.md → Done**. The five families are: **wh
 | Mon | Seats live in **Event service**. Booking calls HTTP. Who is source of truth? What if Event is slow? | Strategy **done** W3 Thu/Fri — skip; do not re-ask |
 | Tue | Correlation id: what you log, what you return, why the user never sends it | Adapter |
 | Wed | Downstream 404 vs 409 vs 503 vs timeout — what Booking returns. Retry or not. | OCP |
-| Thu | What an HTTP integration test proved vs a mock | LSP (client contract) |
+| Thu | What an HTTP integration test proved vs a mock | LSP (client contract) | **Done W4 Day 4** |
 | Fri | **HLD** of the three boxes | — |
 
 ### Week 5 (gateway + resilience)
@@ -124,12 +125,10 @@ Name the product → actors → 4–8 classes → fields + 2–4 methods each �
 
 ---
 
-## Next session — Week 4 Thursday
+## Next session — Week 4 Friday
 
-Part 1 **done** W4 Day 3. Part 2 **done** (map + timeout). Part 3 Tue leftover **done** (Adapter + correlation id). Do **not** rerun those. Do **not** rerun queue/email (outbox **W6 Mon**). Do not re-ask Strategy.
+Part 1 / 2 / 3 Day 4 **done**. Do **not** rerun LSP, IT vs mock, Adapter, correlation id, Ch 12 as Part 3. Do **not** rerun queue/email. Do not re-ask Strategy.
 
-**Thu Spring:** remaining split glue + one integration test for the call.  
-**Thu Part 3:** LSP (timeout/fallback must not look like **201 booked**) + what an HTTP integration test proved vs a mock.  
-**Still open:** Wed OCP. Mon leftover — seats in Event over HTTP / slow hop. Weak: timeout ≠ “Event wrote nothing.”
+**Fri:** LC first (coding only — no LC-SD). Then **HLD of the three boxes** (phone → Booking → Event / Auth). Small OOP: **OCP** leftover (new Event error → mapping in the client, not a giant `if` in `book()`). Weak: WebMvc has no port. Stub seats = SELECT. Concurrent ≠ HTTP hop. Timeout ≠ Event wrote nothing.
 
 Classic product HLD lite lives in **Part 1** ([lc-sd-map.md](lc-sd-map.md)). Part 3 stays this app until W6 LLD. URL shortener stays **W7 Fri Part 3**.

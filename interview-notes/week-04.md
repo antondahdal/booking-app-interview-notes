@@ -10,8 +10,8 @@ Microservices split: 3 services, WebClient, correlation IDs.
 |---|---|---|
 | Mon | Booking calls Event over HTTP | `WebClient` bean | **Pulled to W3 Thu** |
 | Tue | Third service (auth/users) | Correlation-id header | **Done W4 Day 1** |
-| Wed | Downstream 4xx/5xx mapping | Client timeout |
-| Thu | Remaining split glue | One integration test for the call |
+| Wed | Downstream 4xx/5xx mapping | Client timeout | **Done W4 Day 3** |
+| Thu | Remaining split glue | One integration test for the call | **Done W4 Day 4** |
 | Fri | HLD of the three boxes | — |
 
 ---
@@ -494,7 +494,7 @@ Do not invent Kafka in this slot. “A queue” is enough.
 
 **Weak:** #205 `containsValue` O(n²). #380 `list.contains`. Design: “don’t wait for enqueue” ≠ drop the job.
 
-**Calendar:** Part 1 **closed** (coding + Ch 3/5). Part 2 **closed** (see below). Part 3 **not yet.** Next LC (Thu): not another Easy pair; **#76** still skipped unless he asks Hard; remaining Top 150 hash: **#383 / #290 / #202**.
+**Calendar:** Part 1 **closed** (coding + Ch 3/5). Part 2 **closed** (see below). Part 3 that day **done** (Adapter + correlation id). LC Thu is **Day 4** (#383 + #73 + Ch 12).
 
 ---
 
@@ -562,4 +562,131 @@ The mix-up: click id = “monitor.” Returning the sticker = “make the call u
 
 **Weak:** timeout = Event wrote nothing (Part 2). Click id vs sticker. Returning the id ≠ unique tap.
 
-**Calendar:** Day 3 **closed**. **Next weekday:** Week 4 Thu — LC first (#383 / #290 / #202; skip #76 unless he asks Hard). Then Spring: remaining split glue + one integration test. Part 3: LSP + what the test proved. OCP still open. Mon leftover: seats over HTTP. Sat/Sun **off**.
+**Calendar:** Day 3 **closed**. Day 4 Part 1 **done** (see below). Part 2/3 that day still open at the time.
+
+---
+
+## Week 4 Day 4 — Ransom counts + matrix zeros + circuit breaker
+
+**Date:** 2026-09-10 (Thu)
+
+**Where each “part” is (read this first)**
+
+| Name | What it is | Today |
+|---|---|---|
+| **Part 1 coding** | LeetCode in `leetcode-practice` | **#383** he coded. **#73** he coded (Medium). Deleted **#290** (second Easy). **#76** still skipped. **Done.** |
+| **Part 1 Design (LC-SD)** | ~15 min talk from the course card. **Still Part 1.** | **Chapter 12 — How to protect clients from servers** (circuit breaker). **Done.** |
+| **Part 2** | Spring in `event-booking-platform` | Remaining split glue + one HTTP integration test for Booking → Event. **Done.** |
+| **Part 3** | OOP + this-app design | **LSP** (fallback ≠ **201**) + **what the test proved** (HTTP integration vs mock). **Done.** OCP leftover → Fri small OOP. Do **not** rerun the circuit-breaker talk as Part 3 (that board is **W5 Wed**). |
+
+Do **not** call Chapter 12 “Part 3.”
+
+---
+
+### Part 1 — two LCs — passed + Design talk
+
+#### LC 383 Ransom Note (Easy) — passed
+
+Build `ransomNote` from `magazine`; each letter at most once. Extra copies in the magazine are allowed.
+
+First check required **equal** counts (`!=`) — that is **#242 Anagram**. Fail case: `"aa"` / `"aaa"` must be `true`. Fix: note count **≤** magazine count.
+
+Two maps worked. Interview shape: one bag from magazine, spend on the note.
+
+#### LC 73 Set Matrix Zeroes (Medium) — passed
+
+On a `0`, zero that whole row and column. In place = mutate the given matrix, **not** “no extra HashSet.” Two sets of poisoned rows/cols (or stored `(i,j)` pairs) then a second wipe. Do not wipe while scanning.
+
+`O(1)` extra is the **follow-up** (marks in row 0 / col 0). HashSet is **O(m+n)**. Sliding window is wrong.
+
+Anton stored `HashSet<int[]>` pairs then replaced the row / zeroed the col. Passes. Cleaner: two `HashSet<Integer>`.
+
+Test trap: `{1,0,3}/{4,5,6}/{0,8,9}` → col 1 dies, so the `5` becomes `0` (`[[0,0,0],[0,0,6],[0,0,0]]`).
+
+**#290 deleted** (second Easy). Remaining hash easies: **#202**. **#76** still skipped.
+
+#### Part 1 Design — Chapter 12 How to protect clients from servers — Circuit breaker
+
+Talk. No Java. Still Part 1, **not** Part 3 (W5 Wed is circuit on this app).
+
+**Closed:** calls Event. **Open:** Event failed enough; Booking **does not** call Event. **Half-open:** one trial later.
+
+One dead **pod** ≠ open the whole Event circuit (LB skips that box). Open is **Event as a service** sick.
+
+Anton: when open, the client must get a **proper error** — try again later. Not a ticket.
+
+Trap: that error is **503**, not **201**. Not **409** (sold out). Not **429** (rate limit, Ch 11). Fallback that looks like booked is the lie.
+
+#### Interview sentence
+
+> Open circuit = fail fast, **503** try later. Never **201**. We did not take a seat.
+
+### 60-sec (Part 1)
+
+> #383: count magazine, spend on the note; extras allowed (`<=`, not `==`). #73: remember poisoned rows/cols, then wipe; in place ≠ O(1) extra. Ch 12: open = stop calling Event; user gets **503**, not a ticket.
+
+**Weak:** open circuit → 201 / fake success. 503 mixed with 409 or 429.
+
+**Calendar:** Part 1 **closed** (coding + Ch 12). Part 2 **closed** (see below). Part 3 **not yet.**
+
+---
+
+### Part 2 — Event pointer leftover + HTTP integration test
+
+**Date:** 2026-09-10 (Thu, after Part 1)
+
+#### After HTTP, Booking does not reload Event as inventory
+
+Once service A has called service B over HTTP, A must not open B’s table to re-check B’s data. A only stores **B’s id** on its own row.
+
+Here: `reserveSeats` already took seats. `findById` on Event would SELECT title/seats again — still one app. `getReferenceById(id)` is a stub with **only that id** so JPA can write `event_id`. Touch title/seats on that stub → Hibernate SELECTs anyway; then you paid for `findById` late. Two databases later: `Long eventId`, no `EventRepository` in Booking. Extra GET Event just to hang the ticket is a wasted hop — the Book URL already has the id.
+
+The mix-up: stub Event = microservice split. It is still Event’s table. Also: stub is safe to **read** seats. It is not.
+
+#### What an HTTP integration test proved vs a mock
+
+A slice test that mocks the service can return **201** without the other service running. That proves the controller can write Created. It does not prove the hop.
+
+Here: `BookingControllerTest` (`@WebMvcTest` + mock `BookingService`) = 201, Event never ran. `BookingEventCallIT` = real Tomcat, register/login/Book over HTTP, GET event, seats dropped. `WebClient` is a real client — it needs a **listening** port. MockMvc is not that. `${local.server.port}` is set **after** Tomcat starts; the `WebClient` bean is built **before**, so that placeholder dies. Test used a **known** port (8181) on both server and `event.service.base-url`. Boot 4: `@AutoConfigureTestRestTemplate` + `spring-boot-starter-restclient` (test).
+
+The mix-up: controller 201 = Event subtracted seats. Also: “real repo” vs “real HTTP” — the IT’s proof is Event’s `FOR UPDATE` on **another** Tomcat thread.
+
+### 60-sec (Part 2)
+
+> After Event HTTP, Booking hangs `event_id` (`getReferenceById`), does not reload seats. Controller mock 201 ≠ hop. IT: listening port, client URL matches, seats drop.
+
+**Weak:** timeout = Event wrote nothing (Wed). Stub Event = two services. Mock 201 = Event ran.
+
+**Calendar:** Part 2 **closed**. Part 3 LSP + test-vs-mock **done** (same day).
+
+---
+
+### Part 3 — LSP + what the test proved
+
+**Date:** 2026-09-10 (Thu, after Part 2)
+
+#### LSP — stand-in must not look like a ticket
+
+A substitute for Event (`EventClient.reserveSeats`) must keep the same promise: a **return** means seats were taken. Timeout / swallow → fake `EventResponseDto` → `book()` saves → phone **201** with no take. That is a broken stand-in. Catch must **throw** (`DownstreamServiceException` → 502). Covering the exception is a fake ticket, not 409.
+
+W5 Wed does this again on circuit fallback. Do not treat Ch 12 as this slot.
+
+The mix-up: returning a DTO on timeout “keeps going.”
+
+#### What the test proved
+
+Mock 201/409 = you scripted the service. No Event row. Handler only.
+
+`ConcurrentBookingTest`: real H2, real `book()` Java. Default `@SpringBootTest` = **no Tomcat**. Does not prove `EventClient` HTTP.
+
+`BookingEventCallIT`: Tomcat 8181 + client URL 8181 + POST Book. Proved the hop **in this process**. Still one H2 — `EventRepository` in Booking would be wrong on a second DB. Green IT ≠ three microservices.
+
+The mix-up: autowired service = HTTP hop. `@WebMvcTest` uses the property port.
+
+### 60-sec (Part 3)
+
+> Timeout catch must throw or the phone gets a fake ticket. Mock 201 ≠ Event. IT = HTTP in this JVM, not two databases.
+
+**Weak:** `@WebMvcTest` has a port. Stub `getAvailableSeats()` = null (it SELECTs). Concurrent test = EventClient HTTP.
+
+**Calendar:** Day 4 **closed**. **Next weekday:** Week 4 Fri — LC first, then long HLD of the three boxes. Small OOP: OCP leftover. Sat/Sun **off**.

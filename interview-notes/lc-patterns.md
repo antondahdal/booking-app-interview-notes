@@ -4,8 +4,9 @@ Before coding, say in your own words:
 
 1. **Pattern name**
 2. **Why this one** (what state you keep while scanning)
-3. **Why not** the 2 closest wrong patterns
-4. **Time / extra space** target
+3. **Time / extra space** target
+
+**Anton 2026-09-10:** gate has no “why not the 2 closest.” Cousin is after tests pass.
 
 | Pattern | Keep while scanning | Notice when |
 |---|---|---|
@@ -57,6 +58,7 @@ Say the pattern first (that’s the round). Then write this shape.
 **Week 4 Day 1:** **#128** HashSet — start a value-run only if `x-1` missing; not sort; not window. **#424** sliding window — `length - maxFreq ≤ k`; peel left; not #3-on-repeat; not #128. Coding lists: Top 150 + Blind 75 only (#424 was last off-list). Part 1 Design: course **Chapter + topic**; explain then question.  
 **Week 4 Day 2:** **#209** sliding window — outer `right`, inner peel `left`, `right-left+1`. **#219** HashMap value→last index; check then put. **Part 1 Design = Chapter 8** (timeout / retry / click id). Still Part 1, **not** Part 3. Timeout on **Booking’s** WebClient. GET may retry. Book only with click id in Event DB. Correlation id ≠ click id. **Anton 2026-09-08:** after he names the pattern, give the **Memorize this** template *before* he codes.  
 **Week 4 Day 3:** **#36** HashSet three keys (go-over). **#205** HashMap glue both ways, not counts. **#380** list + map `val→index`, swap-with-last. Skipped **#76** Hard. **Part 1 Design = Chapter 3 + 5** (sync vs queue). Commit book → enqueue → 201. Don’t wait on Gmail; do wait on enqueue ack or outbox. Never lock across mail. Still Part 1, **not** Part 3. Outbox drill = **W6 Mon**.  
+**Week 4 Day 4:** **#383** HashMap counts — spend magazine; extras allowed (`<=`, not `#242 ==`). **#73** HashSet poisoned rows/cols, then wipe; in place ≠ O(1); not sliding window. Deleted **#290**. **Part 1 Design = Chapter 12** circuit breaker. Open = **503** try later, never **201**. One dead pod ≠ open Event. Still Part 1, **not** Part 3 (W5 Wed).  
 **Cadence (from Week 3 Day 1):** 2 LCs/weekday through Week 5; **3**/weekday Weeks 6–8. **Top Interview 150 + Blind 75 only.**  
 **Do not** call #121 “two pointers.” Compare `Integer` with `intValue()`/`equals`, not `!=`. Do not pour back on every `pop` (#232). Do not write `answer[i]` or push temperatures (#739). **Never name the pattern / HashMap / window / two pointers before Anton names it in the gate** (not in Cover, not in Why). Two pointers **never** reset a worker. `else` binds to the nearest `if`.
 

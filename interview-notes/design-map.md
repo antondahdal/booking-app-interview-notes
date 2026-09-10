@@ -57,6 +57,7 @@ Every weekday prompt and every Friday board is one of these. If a prompt is not 
 | First matcher 403 ≠ 409 | Who / Status | W3 D3 | `POST /api/events/**` ate Book → **403**. `book()` never ran | 403 = sold out |
 | HLD last seat at 1 / 10 / 100 | 10× / HLD | W3 Fri | Row waiters hold pool doors. Stamp ≠ sold-out 409. Don’t stamp Book because concert 9 starves | Maria waits before HTTP. Every 409 = sold out. Wait on Event → 503 |
 | Correlation id | Slow hop | W4 Day 3 leftover (Tue slot) | Log sticker. Keep if sent, else mint. Copy to Event/Auth. Return so the phone can see it | Mix with JWT / click id. Forget copy → throw |
+| HTTP test vs mock | Truth | W4 Day 4 | Mock 201/409 = handler wiring. IT = hop + seats dropped. Autowired `book()` ≠ Tomcat | Mock = Event ran. Concurrent test = EventClient HTTP |
 
 **Asked, not built (keep as interview words only until code exists):** click id / idempotency key. Do not pretend it is in the app.
 
@@ -70,7 +71,6 @@ Same shape as the OOP “still need” table. Must-have on a mid-level board. Ea
 |---|---|---|---|---|
 | 6 | **Truth across HTTP** | Truth / Slow hop | Seats in Event **service**. What if Event is slow / 503? No 2PC. | W4 Mon |
 | 8 | **Map downstream failure** | Status / Slow hop | Event 404 / 409 / 503 / timeout → Booking’s status. Retry or not. | W4 Wed (OCP talk still open) |
-| 9 | **What the test proved** | Truth | HTTP integration vs mock. Mock cannot oversell. | W4 Thu |
 | 10 | **Three-box HLD** | HLD | Client → Booking → Event (Auth). | W4 Fri |
 | 11 | **JWT at gateway vs service** | Who | Check at the edge? Again inside? | W5 Mon |
 | 12 | **Retry which calls** | Slow hop | GET may retry. Book only with a **click id**. | W5 Tue |
