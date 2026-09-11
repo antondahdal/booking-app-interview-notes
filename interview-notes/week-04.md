@@ -12,7 +12,7 @@ Microservices split: 3 services, WebClient, correlation IDs.
 | Tue | Third service (auth/users) | Correlation-id header | **Done W4 Day 1** |
 | Wed | Downstream 4xx/5xx mapping | Client timeout | **Done W4 Day 3** |
 | Thu | Remaining split glue | One integration test for the call | **Done W4 Day 4** |
-| Fri | HLD of the three boxes | — |
+| Fri | HLD of the three boxes | — | **Done W4 Day 5** |
 
 ---
 
@@ -689,4 +689,99 @@ The mix-up: autowired service = HTTP hop. `@WebMvcTest` uses the property port.
 
 **Weak:** `@WebMvcTest` has a port. Stub `getAvailableSeats()` = null (it SELECTs). Concurrent test = EventClient HTTP.
 
-**Calendar:** Day 4 **closed**. **Next weekday:** Week 4 Fri — LC first, then long HLD of the three boxes. Small OOP: OCP leftover. Sat/Sun **off**.
+**Calendar:** Day 4 **closed**. Day 5 Part 1 + Part 2 **done** (see below). Part 3 OCP leftover still open that day.
+
+---
+
+## Week 4 Day 5 — Happy Number + three-box HLD
+
+**Date:** 2026-09-11 (Fri)
+
+**Where each “part” is (read this first)**
+
+| Name | What it is | Today |
+|---|---|---|
+| **Part 1 coding** | LeetCode in `leetcode-practice` | **#202** Happy Number. **#76** still skipped. **Done.** |
+| **Part 1 Design (LC-SD)** | Course card talk | **Off** (Friday). |
+| **Part 2** | Spring / HLD | **HLD of the three boxes.** No new code. **Done.** |
+| **Part 3** | OOP + this-app design | **OCP leftover** (new Event error → mapping in the client, not a giant `if` in `book()`). **Not yet.** |
+
+Sat/Sun **off**. After Part 3 → Week 5.
+
+---
+
+### Part 1 — coding LC — no LC-SD
+
+#### LC 202 Happy Number (Easy)
+
+Repeat: replace n with the sum of the squares of its digits. Happy if you hit **1**. Unhappy if you loop.
+
+**HashSet:** put seen n. Next already in the set → cycle → false. Hit 1 → true.
+
+Floyd (slow/fast on the same function) also works. Not a sliding window. Not sort.
+
+**#76** still skipped.
+
+### 60-sec (Part 1)
+
+> #202: sum of digit squares. Seen set catches the cycle. 1 = happy. Friday = no Chapter talk.
+
+---
+
+### Part 2 — HLD of the three boxes
+
+**Goal:** One board. Phone → Booking → Event / Auth. Headers, last seat, hang, connection vs lock. No new code. Gateway / retry / circuit stay Week 5.
+
+#### Box = service
+
+A box is a **running service** (own process, own HTTP door, own data). Not a Spring `@Service` class. `BookingServiceImpl` / `EventClient` live **inside** Booking.
+
+| Box | Owns |
+|---|---|
+| **Auth** | Who you are (users, JWT, roles) |
+| **Event** | Leftover seats (the concert row) |
+| **Booking** | The ticket |
+
+Phone talks only to Booking on Book.
+
+#### Flow
+
+Phone → **Booking**. JWT filter runs **inside Booking** (before the controller). That is not the Auth box.
+
+Then `book()` hops HTTP → **Auth** (`/api/users/me`), then HTTP → **Event** (take seats), then save the ticket.
+
+The hop is a **new** request. Copy `Authorization` or Auth returns **401**. Copy `X-Correlation-Id` or Event mints a second id — Book still works, logs do not stitch. **No throw.**
+
+JWT = who. Correlation id = log sticker (keep if sent, else mint). Click id = which tap (**not in the app**).
+
+#### Phone statuses
+
+Event 409 / 404 / 5xx map in `EventClient` to our exceptions. Phone sees **409 / 404 / 502**, not Java type names.
+
+#### Hang
+
+Timeout is **no HTTP status**. `WebClientRequestException` → 502. Event may already have subtracted, still be in `FOR UPDATE`, or never started. **We don’t know.** Timeout ≠ “Event wrote nothing.” Timeout ≠ 409.
+
+Today a second tap is a **new Book**. Same correlation id (if the phone resends it) does not make it one tap. Click id would return the **same ticket** (201), not “already booked.” “Already booked” is a different rule (one ticket per user/event).
+
+#### Last seat
+
+Wait is on **Event’s** row (`findByIdForUpdate`). One **201**, one **409**. Both can already be inside Booking and already on HTTP. Second does not wait in Booking before the call. Booking `.block()`s until Event answers.
+
+#### `@Transactional` vs lock vs HTTP
+
+`@Transactional` is **not** a lock. It wraps Booking SQL: commit all or roll back all. While it is open, Booking **holds a DB connection** from its pool — even during `.block()` with no Booking SQL.
+
+Event’s `FOR UPDATE` is Event’s database, Event’s pool, a **row lock**. Two boxes, two DBs: Booking’s rollback does not undo Event’s seat write.
+
+Here: `book()` opens the transaction, then waits on Auth + Event HTTP, then `save`. Ten Books can occupy ten pool slots on HTTP. Do not keep that connection open across the hop.
+
+The mix-up: JWT filter = Auth box. `EventClient` = a box. Hang = Event wrote nothing. Same correlation UUID = same Book. `@Transactional` = the Event row lock.
+
+### 60-sec (HLD)
+
+> Phone → Booking only. Filter is local JWT; Auth box is a later HTTP hop (copy Bearer). Seats live on Event. 409 sold out, 404 missing, hang/5xx → **502**. Timeout: we don’t know if Event wrote. Wait on Event’s row, not in Booking before HTTP. `@Transactional` holds a connection, not a lock — don’t hold it across HTTP.
+
+**Weak:** Auth filter = Auth service. Timeout = seats unchanged. Correlation id = click id. `@Transactional` = `FOR UPDATE`. Second tap with same sticker = one ticket.
+
+**Calendar:** Part 1 **closed**. Part 2 **closed**. Part 3 OCP leftover **still today**. Sat/Sun **off**. Next after that: Week 5 (gateway).

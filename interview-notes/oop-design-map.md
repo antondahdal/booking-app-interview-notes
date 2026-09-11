@@ -88,7 +88,7 @@ Do not repeat prompts in **design-map.md → Done**. The five families are: **wh
 | Tue | Correlation id: what you log, what you return, why the user never sends it | Adapter |
 | Wed | Downstream 404 vs 409 vs 503 vs timeout — what Booking returns. Retry or not. | OCP |
 | Thu | What an HTTP integration test proved vs a mock | LSP (client contract) | **Done W4 Day 4** |
-| Fri | **HLD** of the three boxes | — |
+| Fri | **HLD** of the three boxes | — | **Done W4 Day 5** |
 
 ### Week 5 (gateway + resilience)
 
@@ -125,10 +125,10 @@ Name the product → actors → 4–8 classes → fields + 2–4 methods each �
 
 ---
 
-## Next session — Week 4 Friday
+## Next session — Week 4 Friday Part 3 leftover
 
-Part 1 / 2 / 3 Day 4 **done**. Do **not** rerun LSP, IT vs mock, Adapter, correlation id, Ch 12 as Part 3. Do **not** rerun queue/email. Do not re-ask Strategy.
+Part 1 + three-box HLD **done**. Do **not** rerun boxes, hang=502, filter vs Auth box, `@Transactional` vs lock. Do **not** rerun LSP / IT vs mock / Adapter / Ch 12 / Strategy.
 
-**Fri:** LC first (coding only — no LC-SD). Then **HLD of the three boxes** (phone → Booking → Event / Auth). Small OOP: **OCP** leftover (new Event error → mapping in the client, not a giant `if` in `book()`). Weak: WebMvc has no port. Stub seats = SELECT. Concurrent ≠ HTTP hop. Timeout ≠ Event wrote nothing.
+**Still today:** **OCP leftover** only (new Event error → mapping in the client, not a giant `if` in `book()`). Then Sat/Sun **off**. Week 5 = gateway + resilience.
 
 Classic product HLD lite lives in **Part 1** ([lc-sd-map.md](lc-sd-map.md)). Part 3 stays this app until W6 LLD. URL shortener stays **W7 Fri Part 3**.

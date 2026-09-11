@@ -28,7 +28,7 @@ If a day feels thin, **pull the next map day’s Spring into today**. Do not inv
 | Tue | Third service (auth/users) | Correlation-id header | **Done W4 Day 1 (2026-09-07)** |
 | Wed | Downstream 4xx/5xx mapping | Client timeout | **Done W4 Day 3 (2026-09-09)** |
 | Thu | Remaining split glue | One integration test for the call | **Done W4 Day 4 (2026-09-10)** |
-| Fri | HLD of the three boxes | — |
+| Fri | HLD of the three boxes | — | **Done W4 Day 5 (2026-09-11)** |
 
 W4 Mon topics were built on **W3 Thu**. Start Week 4 on **Tue** (third service + correlation-id), or say `Start Week 4 Day 1` meaning those.
 

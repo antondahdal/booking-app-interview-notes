@@ -27,7 +27,10 @@ Service throws ResourceNotFoundException
 | 403 | Authenticated, not allowed | Attendee hits `POST /api/events` |
 | 404 | Missing | Unknown id |
 | 409 | Conflict with **current state** (valid request, cannot apply it now) | Email taken; last seat gone; already booked — not “duplicate only” |
+| 502 | Downstream failed / hang (we got no good answer) | Event 5xx or WebClient timeout → `DownstreamServiceException` |
 | 500 | Unhandled server bug | Forgotten exception handler |
+
+**`@Transactional` vs lock (W4 Fri):** wrap = commit all / roll back all. **Not** `FOR UPDATE`. The open transaction still **holds a pool connection**. Don’t keep it open across HTTP `.block()`. Event’s row lock is Event’s DB.
 
 ## Dependency injection (interview)
 
