@@ -704,7 +704,7 @@ The mix-up: autowired service = HTTP hop. `@WebMvcTest` uses the property port.
 | **Part 1 coding** | LeetCode in `leetcode-practice` | **#202** Happy Number. **#76** still skipped. **Done.** |
 | **Part 1 Design (LC-SD)** | Course card talk | **Off** (Friday). |
 | **Part 2** | Spring / HLD | **HLD of the three boxes.** No new code. **Done.** |
-| **Part 3** | OOP + this-app design | **OCP leftover** (new Event error → mapping in the client, not a giant `if` in `book()`). **Not yet.** |
+| **Part 3** | OOP + this-app design | **OCP leftover** (new Event error → mapping in the client, not a giant `if` in `book()`). **Done.** |
 
 Sat/Sun **off**. After Part 3 → Week 5.
 
@@ -784,4 +784,26 @@ The mix-up: JWT filter = Auth box. `EventClient` = a box. Hang = Event wrote not
 
 **Weak:** Auth filter = Auth service. Timeout = seats unchanged. Correlation id = click id. `@Transactional` = `FOR UPDATE`. Second tap with same sticker = one ticket.
 
-**Calendar:** Part 1 **closed**. Part 2 **closed**. Part 3 OCP leftover **still today**. Sat/Sun **off**. Next after that: Week 5 (gateway).
+**Calendar:** Part 2 **closed**. Part 3 **done** (see below).
+
+---
+
+### Part 3 — OCP leftover
+
+**Date:** 2026-09-11 (Fri, after Part 2)
+
+Open to **add**. Closed to **rewrite** working ticket logic.
+
+**General:** a new Event HTTP error is an extension of the **mapping**, not of `book()`.
+**Here:** 403 (may not Book this show) → new `if` in `EventClient`’s `catch (WebClientResponseException)`. Throw a domain exception. If the type is new, one handler so the phone gets **403**. `book()` stays “reserve, save.”
+**Trap:** `if (403)` inside `book()` — then `book()` speaks HTTP. Also: map 403 on the shared `WebClient` bean (Auth’s 401 shares that bucket).
+
+Do **not** code 403 today. Interview words only.
+
+### 60-sec (Part 3)
+
+> OCP: new Event status → extend `EventClient` catch + handler if needed. Do not grow `if`s in `book()`.
+
+**Weak:** 403 in `book()`. Shared WebClient filter for all statuses.
+
+**Calendar:** Day 5 **closed**. Sat/Sun **off**. **Next weekday:** Week 5 Day 1 — LC first, then gateway routes + first service behind it. OOP: equals/hashCode + Collections (longer).

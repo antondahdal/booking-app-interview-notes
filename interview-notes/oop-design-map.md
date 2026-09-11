@@ -46,8 +46,9 @@ Days marked **longer** in the calendar: do both items. Anton asked to be safe, n
 | Strategy (job picks wait vs stamp) | W3 Thu, W3 Fri HLD | Book waits. Title PATCH stamps. Pool pain ≠ switch Book to stamp | Re-ask “which method / the job” |
 | Adapter | W4 Day 3 leftover (Tue slot) | `EventClient` **uses** `WebClient`. `book()` says reserve seats, not `post`/`.block()` | HTTP in `book()` = two services merged |
 | LSP (timeout ≠ ticket) | W4 Day 4 | Stand-in must not return success if Event did not take a seat. Catch must throw. | Fake DTO → **201** |
+| OCP | W4 Fri leftover (Wed slot) | New Event status → mapping in `EventClient` catch (+ handler). `book()` stays closed | Giant `if` in `book()`. Map on shared `WebClient` bean |
 
-**SOLID so far:** S, I, D, L (timeout ≠ 201). Encapsulation. **Not yet:** O (Wed leftover).
+**SOLID so far:** S, O, L, I, D. Encapsulation.
 
 ---
 
@@ -57,7 +58,6 @@ Must-have. Includes **Java core** (collections, threads) — mid interviews ask 
 
 | # | Topic | Why they ask | Slot |
 |---|---|---|---|
-| 5 | **OCP** | New downstream error → new mapping, not a giant `if` in `book()`. | W4 Wed |
 | 6 | **LSP** | Timeout / fallback must not look like **201 booked**. | W4 Thu **done** + W5 Wed (circuit) |
 | 7 | **equals / hashCode + Collections** | Entity id after persist. `HashMap` uses both. `ArrayList` vs `LinkedList` (random access vs middle insert). | **W5 Mon (longer OOP)** |
 | 8 | **Immutability + `Optional`** | Request DTO / `String` don’t mutate. `Event` is mutable (the row). `Optional` = empty box, not empty entity. | W5 Tue |
@@ -86,7 +86,7 @@ Do not repeat prompts in **design-map.md → Done**. The five families are: **wh
 |---|---|---|
 | Mon | Seats live in **Event service**. Booking calls HTTP. Who is source of truth? What if Event is slow? | Strategy **done** W3 Thu/Fri — skip; do not re-ask |
 | Tue | Correlation id: what you log, what you return, why the user never sends it | Adapter |
-| Wed | Downstream 404 vs 409 vs 503 vs timeout — what Booking returns. Retry or not. | OCP |
+| Wed | Downstream 404 vs 409 vs 503 vs timeout — what Booking returns. Retry or not. | OCP | **Done W4 Day 5 leftover** |
 | Thu | What an HTTP integration test proved vs a mock | LSP (client contract) | **Done W4 Day 4** |
 | Fri | **HLD** of the three boxes | — | **Done W4 Day 5** |
 
@@ -125,10 +125,10 @@ Name the product → actors → 4–8 classes → fields + 2–4 methods each �
 
 ---
 
-## Next session — Week 4 Friday Part 3 leftover
+## Next session — Week 5 Day 1
 
-Part 1 + three-box HLD **done**. Do **not** rerun boxes, hang=502, filter vs Auth box, `@Transactional` vs lock. Do **not** rerun LSP / IT vs mock / Adapter / Ch 12 / Strategy.
+Week 4 **closed**. Do **not** rerun three-box HLD, OCP mapping, hang=502, filter vs Auth box, `@Transactional` vs lock, LSP, Adapter, Ch 12, Strategy.
 
-**Still today:** **OCP leftover** only (new Event error → mapping in the client, not a giant `if` in `book()`). Then Sat/Sun **off**. Week 5 = gateway + resilience.
+**Mon:** LC first (linked list bank). Then gateway routes + first service behind it. OOP: equals/hashCode + Collections (**longer**). Sat/Sun **off** before that.
 
 Classic product HLD lite lives in **Part 1** ([lc-sd-map.md](lc-sd-map.md)). Part 3 stays this app until W6 LLD. URL shortener stays **W7 Fri Part 3**.

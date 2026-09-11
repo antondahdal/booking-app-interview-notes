@@ -59,6 +59,7 @@ Every weekday prompt and every Friday board is one of these. If a prompt is not 
 | Correlation id | Slow hop | W4 Day 3 leftover (Tue slot) | Log sticker. Keep if sent, else mint. Copy to Event/Auth. Return so the phone can see it | Mix with JWT / click id. Forget copy → throw |
 | HTTP test vs mock | Truth | W4 Day 4 | Mock 201/409 = handler wiring. IT = hop + seats dropped. Autowired `book()` ≠ Tomcat | Mock = Event ran. Concurrent test = EventClient HTTP |
 | Three-box HLD | HLD | W4 Fri | Phone → Booking → Event (seats) / Auth (who). Filter ≠ Auth box. Hang → 502, unknown if Event wrote. `@Transactional` holds a connection, not `FOR UPDATE` | EventClient is a box. Timeout = Event wrote nothing. Correlation id = click id. Filter = Auth service |
+| OCP new Event error | Status | W4 Fri leftover | New status → `EventClient` catch + handler. `book()` unchanged | `if` in `book()`. Shared WebClient maps Auth 401 |
 
 **Asked, not built (keep as interview words only until code exists):** click id / idempotency key. Do not pretend it is in the app.
 
@@ -71,7 +72,6 @@ Same shape as the OOP “still need” table. Must-have on a mid-level board. Ea
 | # | Topic | Family | Why they ask | Slot |
 |---|---|---|---|---|
 | 6 | **Truth across HTTP** | Truth / Slow hop | Seats in Event **service**. What if Event is slow / 503? No 2PC. | W4 Mon |
-| 8 | **Map downstream failure** | Status / Slow hop | Event 404 / 409 / 503 / timeout → Booking’s status. Retry or not. | W4 Wed (OCP talk still open) |
 | 11 | **JWT at gateway vs service** | Who | Check at the edge? Again inside? | W5 Mon |
 | 12 | **Retry which calls** | Slow hop | GET may retry. Book only with a **click id**. | W5 Tue |
 | 13 | **Circuit + fallback status** | Status | Open circuit ≠ **201 ticket**. | W5 Wed |
@@ -120,8 +120,8 @@ Bank and rules: [oop-design-map.md](oop-design-map.md) (bottom). Do **not** star
 
 **LC-SD (from W4, Part 1 only):** talk from [System Design for Interviews and Beyond](https://leetcode.com/explore/interview/card/system-design-for-interviews-and-beyond), ~15 min, Mon–Thu. Always **Chapter N + topic**. From W4 Tue: explain a bit, then the question. Calendar: [lc-sd-map.md](lc-sd-map.md). Do not run the same product again in Part 3 that day. **URL shortener** stays **W7 Fri Part 3**, not Part 1.
 
-## Next session — Week 4 Friday Part 3 leftover
+## Next session — Week 5 Day 1
 
-Part 1 + Part 2 Day 5 **done**. Do **not** rerun three-box HLD, last-seat wait, hang=502, `@Transactional` vs lock.
+Week 4 **closed**. Do **not** rerun three-box HLD or OCP.
 
-**Still today:** small OOP **OCP leftover** (new Event error → mapping in the client, not a giant `if` in `book()`). Then Sat/Sun **off**. Week 5 = gateway.
+**Mon:** LC first. Then gateway routes + first service behind it. OOP: equals/hashCode + Collections. Sat/Sun **off**.
