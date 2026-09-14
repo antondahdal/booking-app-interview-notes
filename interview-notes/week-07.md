@@ -8,10 +8,10 @@ Polish + performance: security, N+1, indexes, README.
 |---|---|---|
 | Mon | N+1 fix | Index on hot FK |
 | Tue | Security pass (secrets/CORS) | README |
-| Wed | One perf check | Leftover polish |
+| Wed | One perf check **(+ Spring Cache lab if not done)** | Leftover polish |
 | Thu | Remaining polish | Test |
 | Fri | HLD/recap | — |
 
-**Part 3:** continue LLD class-design (started Week 6). Rotate the app; still whiteboard only.
+**Part 3:** continue LLD class-design (started Week 6). **W7 Wed longer:** cache talk on this app ([oop-design-map.md](oop-design-map.md)). Spring `@Cacheable` lab: [week-05.md](week-05.md) (was missing from Part 2).
 
 **Not started yet.** Say `Start Week 7 Day 1` when you get here.

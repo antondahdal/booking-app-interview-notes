@@ -603,7 +603,7 @@ Anton stored `HashSet<int[]>` pairs then replaced the row / zeroed the col. Pass
 
 Test trap: `{1,0,3}/{4,5,6}/{0,8,9}` → col 1 dies, so the `5` becomes `0` (`[[0,0,0],[0,0,6],[0,0,0]]`).
 
-**#290 deleted** (second Easy). Remaining hash easies: **#202**. **#76** still skipped.
+**#290 deleted** that day (second Easy). **#76** still skipped. Fri skipped **#202** and picked **#290** instead.
 
 #### Part 1 Design — Chapter 12 How to protect clients from servers — Circuit breaker
 
@@ -693,7 +693,7 @@ The mix-up: autowired service = HTTP hop. `@WebMvcTest` uses the property port.
 
 ---
 
-## Week 4 Day 5 — Happy Number + three-box HLD
+## Week 4 Day 5 — Word Pattern + three-box HLD
 
 **Date:** 2026-09-11 (Fri)
 
@@ -701,7 +701,7 @@ The mix-up: autowired service = HTTP hop. `@WebMvcTest` uses the property port.
 
 | Name | What it is | Today |
 |---|---|---|
-| **Part 1 coding** | LeetCode in `leetcode-practice` | **#202** Happy Number. **#76** still skipped. **Done.** |
+| **Part 1 coding** | LeetCode in [LC-Practice](https://github.com/antondahdal/LC-Practice) | Skipped **#202**. **#290** Word Pattern. **#76** still skipped. **Done.** |
 | **Part 1 Design (LC-SD)** | Course card talk | **Off** (Friday). |
 | **Part 2** | Spring / HLD | **HLD of the three boxes.** No new code. **Done.** |
 | **Part 3** | OOP + this-app design | **OCP leftover** (new Event error → mapping in the client, not a giant `if` in `book()`). **Done.** |
@@ -712,19 +712,27 @@ Sat/Sun **off**. After Part 3 → Week 5.
 
 ### Part 1 — coding LC — no LC-SD
 
-#### LC 202 Happy Number (Easy)
+Map leftover was **#202 Happy Number**. Anton skipped it. Stayed on Week 4 hash bank: **#290 Word Pattern** (Top Interview 150). **#76** still skipped.
 
-Repeat: replace n with the sum of the squares of its digits. Happy if you hit **1**. Unhappy if you loop.
+#### LC 290 Word Pattern (Easy) — passed
 
-**HashSet:** put seen n. Next already in the set → cycle → false. Hit 1 → true.
+`pattern` letters vs space-separated `s`. 1-to-1 both ways. Length of letters must equal word count.
 
-Floyd (slow/fast on the same function) also works. Not a sliding window. Not sort.
+`"abba"` + `"dog cat cat dog"` → true. `"abba"` + `"dog cat cat fish"` → false. `"abba"` + `"dog dog dog dog"` → false (two letters, one word).
 
-**#76** still skipped.
+**Gate:** HashMap; glue letter → word; O(n) / O(n).
+
+**Memorize this (#205 glue, same as this one):** Split `s`. Length must match `pattern`. Walk the same index. Map letter → word. If that letter already maps to a **different** word → false. If that **word** is already taken by another letter → false. Not counts (#242).
+
+**Weak:** `!=` on `String` (reference). Then `equals` true → `return false` (a match must **keep going**). Fail only when the mapped word is **different**. `containsValue` is O(n) per step → say two maps in the interview (#205 note).
+
+**Cousin:** #205 (already Wed). Do not redo.
+
+**#76** still skipped. **#202** still skipped (not remaining).
 
 ### 60-sec (Part 1)
 
-> #202: sum of digit squares. Seen set catches the cycle. 1 = happy. Friday = no Chapter talk.
+> #290: split words, glue letter↔word both ways, `.equals` not `!=`. Friday = no Chapter talk. Not #202.
 
 ---
 

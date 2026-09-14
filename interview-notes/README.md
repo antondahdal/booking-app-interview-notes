@@ -2,7 +2,7 @@
 
 Cheat sheets for the 8-week Event Booking Platform plan. **One file per week** so you reread a week without scrolling the whole dump.
 
-**Repos:** Spring = [SpringBoot-bookingApp](https://github.com/antondahdal/SpringBoot-bookingApp). LC = `leetcode-practice`. Notes = this private repo.
+**Repos:** Spring = [SpringBoot-bookingApp](https://github.com/antondahdal/SpringBoot-bookingApp). LC = [LC-Practice](https://github.com/antondahdal/LC-Practice). Notes = this private repo. How git works: [git.md](git.md).
 
 **From Fri 2026-09-04:** start with LC — [part1-map.md](part1-map.md). Then Spring — [part2-map.md](part2-map.md).
 
@@ -28,12 +28,13 @@ Cheat sheets for the 8-week Event Booking Platform plan. **One file per week** s
 | [week-01.md](week-01.md) | Monolith: entities, REST, JPA, pagination, slice tests |
 | [week-02.md](week-02.md) | Auth: register, BCrypt, JWT (from Day 2) |
 | [week-03.md](week-03.md) | Concurrency — lock, `@Version`, HTTP to Event, Fri HLD 1/10/100 |
-| [week-04.md](week-04.md) | Microservices split; Fri three-box HLD + OCP **done** |
-| [week-05.md](week-05.md) | Gateway + resilience *(not started)* |
+| [week-04.md](week-04.md) | Microservices split; Fri **#290** + three-box HLD + OCP **done** |
+| [week-05.md](week-05.md) | Gateway + resilience; **Part 1 Day 1 done**; Spring Cache notes (lab later) |
 | [week-06.md](week-06.md) | Async + observability; **LLD class-design drills start** *(not started)* |
 | [week-07.md](week-07.md) | Polish + performance; more LLD *(not started)* |
 | [week-08.md](week-08.md) | Interview ready; mock includes one LLD *(not started)* |
 | [lc-patterns.md](lc-patterns.md) | Pattern gate + table (all weeks) |
+| [git.md](git.md) | Three repos, commit vs push, when Anton says push |
 | [cheats.md](cheats.md) | DI, annotations, HTTP statuses, day template |
 
 `INTERVIEW-NOTES.md` at the repo root is only a pointer to this folder.

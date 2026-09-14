@@ -2,7 +2,7 @@
 
 **Day order (from Fri 2026-09-04):** start here. Then Spring ([part2-map.md](part2-map.md)). Then Part 3. Sat/Sun **off**.
 
-Pattern gate before code: [lc-patterns.md](lc-patterns.md). Pick **only** LeetCode **Top Interview 150** and **Blind 75**. Skip anything already in `leetcode-practice`. No NeetCode-only / Grind-only.
+Pattern gate before code: [lc-patterns.md](lc-patterns.md). Pick **only** LeetCode **Top Interview 150** and **Blind 75**. Skip anything already in [LC-Practice](https://github.com/antondahdal/LC-Practice). No NeetCode-only / Grind-only. Git: [git.md](git.md).
 
 From Week 3 Day 1: **two** coding LCs each weekday. Weeks 6–8: **three**.
 
@@ -27,14 +27,16 @@ From Week 3 Day 1: **two** coding LCs each weekday. Weeks 6–8: **three**.
 Mon 2026-09-07: #128 Longest Consecutive, #424 Long Repeating Char (off-list; last NeetCode-only) + Ch 11 rate limit. **Done.**  
 Tue 2026-09-08: #209 Min Size Subarray Sum, #219 Contains Duplicate II + **Ch 8** timeout / retry / idempotency (still **Part 1**, not Part 3). **Done.**  
 Wed 2026-09-09: #36 Valid Sudoku (go-over), #205 Isomorphic Strings, #380 Insert Delete GetRandom + **Ch 3 + 5** sync vs queue. Skipped **#76** Hard. **Done.**  
-Thu 2026-09-10: #383 Ransom Note, #73 Set Matrix Zeroes + **Ch 12** circuit breaker. Deleted **#290** (second Easy). **#76** still skipped. Remaining hash easy: **#202**. **Done.**  
-Fri 2026-09-11: **#202** Happy Number (coding only, no LC-SD). **#76** still skipped. **Done.**
+Thu 2026-09-10: #383 Ransom Note, #73 Set Matrix Zeroes + **Ch 12** circuit breaker. Deleted **#290** that day (second Easy). **#76** still skipped. **Done.**  
+Fri 2026-09-11: skipped **#202** Happy Number. Same-week hash Easy: **#290 Word Pattern**. Coding only, no LC-SD. **#76** still skipped. **Done.**
 
 ---
 
 ## Week 5 — linked list
 
 #206 Reverse, #141 Cycle, #21 Merge Two Lists, #19 Remove Nth, #143 Reorder.
+
+Mon 2026-09-14: **#19** Remove Nth + **#206** Reverse + **Ch 4** cache/TTL. **Done** (coding + LC-SD). Gateway Spring still open.
 
 ---
 

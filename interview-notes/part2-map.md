@@ -44,6 +44,8 @@ W4 Mon topics were built on **W3 Thu**. Start Week 4 on **Tue** (third service +
 | Thu | Docker Compose for the set | One health check |
 | Fri | HLD traffic through gateway | — |
 
+**Spring Cache** (Event GET + evict on book, Redis, TTL): not a third Monday lab. Interview + code shape is in [week-05.md](week-05.md). Lab on a **thin day** or **W7 Wed** (perf). Do **not** skip Gateway for it.
+
 ---
 
 ## Week 6 — async + observability
@@ -66,7 +68,7 @@ Part 3 from this week: LLD class-design drills start.
 |---|---|---|
 | Mon | N+1 fix | Index on hot FK |
 | Tue | Security pass (secrets/CORS) | README |
-| Wed | One perf check | Leftover polish |
+| Wed | One perf check **(+ Spring Cache lab if not done)** | Leftover polish |
 | Thu | Remaining polish | Test |
 | Fri | HLD/recap | — |
 
