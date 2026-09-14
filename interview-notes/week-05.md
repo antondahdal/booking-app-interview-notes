@@ -1,6 +1,6 @@
 # Interview notes — Week 5
 
-Gateway + resilience: Gateway, Resilience4j, Docker Compose. **Spring Cache** is interview + code shape here (lab on a thin day or W7 Wed). Git: [git.md](git.md).
+Gateway + resilience: Gateway, Resilience4j, Docker Compose. Git: [git.md](git.md).
 
 **Packed:** **two** Spring topics each Mon–Thu. Friday = one HLD. Full calendar: [part2-map.md](part2-map.md).
 
@@ -27,7 +27,7 @@ Gateway + resilience: Gateway, Resilience4j, Docker Compose. **Spring Cache** is
 | **Part 2** | Spring | Gateway routes + first service behind it. **Done.** |
 | **Part 3** | OOP + this-app design | equals / hashCode + Collections (longer) + JWT at gateway vs service. **Done.** |
 
-Do **not** call Chapter 4 “Part 3.” W7 Wed is cache on this app as a **design** prompt. Spring `@Cacheable` lab = thin day or W7 Wed perf (below).
+Do **not** call Chapter 4 “Part 3.” Spring `@Cacheable` lab is **W7 Wed**, not this week.
 
 ---
 
@@ -153,32 +153,3 @@ Anton wrote a **second process** under `gateway/` (own `src/` + `pom.xml`). Not 
 **Weak:** `equals` on the DTO. ArrayList cannot insert except at the end. Check JWT only on the gateway because “once is enough.”
 
 **Calendar:** Day 1 **closed**. **Next weekday:** Week 5 Day 2 — LC first, then Resilience4j timeout + retry. OOP: immutability + `Optional`.
-
----
-
-## Spring Cache (this app) — was missing from Part 2; add here
-
-**Not Monday’s Gateway lab.** Know it for interviews. Code on a **thin day** or **W7 Wed** (perf check). Same idea as Ch 4, with Spring names.
-
-### What Spring would do
-
-| Piece | Here |
-|---|---|
-| `@Cacheable("events")` on Event **GET by id** | Miss → DB, then store. Hit → skip DB. |
-| TTL on that cache | e.g. 30s. Copy dies; next GET is a miss. |
-| `@CacheEvict` on **reserve / take seat** | After a real write, drop `event:{id}`. |
-| Store | **Redis** (one box for all Event pods). Not `ConcurrentHashMap` in the JVM. |
-
-`BookingService.book()` does **not** `@Cacheable`. It calls Event HTTP. Event’s **take** method does not read the GET cache.
-
-Title-only GET may be cached. Remaining seats on the **browse** page may be slightly stale. Remaining seats for **Book** = row lock.
-
-### Trap
-
-`@Cacheable` on `reserveSeats` / “return the last Book DTO.” That is gospel. Also: cache on Booking’s `EventClient` **and** then `book()` uses that number.
-
-### Interview sentence
-
-> `@Cacheable` on Event GET, `@CacheEvict` on take, Redis + TTL. Book still hits the row.
-
-**Lab status:** notes only. **Not coded.**

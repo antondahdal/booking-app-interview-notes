@@ -44,7 +44,7 @@ W4 Mon topics were built on **W3 Thu**. Start Week 4 on **Tue** (third service +
 | Thu | Docker Compose for the set | One health check |
 | Fri | HLD traffic through gateway | — |
 
-**Spring Cache** (Event GET + evict on book, Redis, TTL): not a third Monday lab. Interview + code shape is in [week-05.md](week-05.md). Lab on a **thin day** or **W7 Wed** (perf). Do **not** skip Gateway for it.
+**Spring Cache** (Event GET + evict on book, Redis, TTL): **W7 Wed**, not Week 5. Notes: [week-07.md](week-07.md). Do **not** skip Gateway for it in Week 5.
 
 ---
 
