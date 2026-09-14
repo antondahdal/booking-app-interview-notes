@@ -44,7 +44,7 @@ W4 Mon topics were built on **W3 Thu**. Start Week 4 on **Tue** (third service +
 | Thu | Docker Compose for the set | One health check |
 | Fri | HLD traffic through gateway | — |
 
-**Spring Cache** (Event GET + evict on book, Redis, TTL): **W7 Wed**, not Week 5. Notes: [week-07.md](week-07.md). Do **not** skip Gateway for it in Week 5.
+**Spring Cache:** **understand on this app = W5 Tue extra** (Anton 2026-09-14; Ch 4 was thin). `@Cacheable` **code** = **W7 Wed**. Notes: [week-07.md](week-07.md). Do **not** skip Tuesday Resilience4j for it.
 
 ---
 

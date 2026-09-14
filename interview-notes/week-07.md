@@ -12,7 +12,7 @@ Polish + performance: security, N+1, indexes, README.
 | Thu | Remaining polish | Test |
 | Fri | HLD/recap | — |
 
-**Part 3:** continue LLD class-design (started Week 6). **W7 Wed longer:** cache talk on this app ([oop-design-map.md](oop-design-map.md)) **and** the Spring `@Cacheable` lab below.
+**Part 3:** continue LLD class-design (started Week 6). **W7 Wed longer:** this-app cache **if still weak** + Spring `@Cacheable` **code** lab below. Understanding pass is **W5 Tue extra**.
 
 **Not started yet.** Say `Start Week 7 Day 1` when you get here.
 

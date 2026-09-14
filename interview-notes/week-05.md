@@ -152,4 +152,4 @@ Anton wrote a **second process** under `gateway/` (own `src/` + `pom.xml`). Not 
 
 **Weak:** `equals` on the DTO. ArrayList cannot insert except at the end. Check JWT only on the gateway because “once is enough.”
 
-**Calendar:** Day 1 **closed**. **Next weekday:** Week 5 Day 2 — LC first, then Resilience4j timeout + retry. OOP: immutability + `Optional`.
+**Calendar:** Day 1 **closed**. **Next weekday:** Week 5 Day 2 — LC first, then Resilience4j timeout + retry. OOP: immutability + `Optional`. **Plus cache on this app** (key, TTL, 10× browse, Book skips it) — Anton asked to understand it fully; today’s Ch 4 was thin. `@Cacheable` **code** still W7 Wed.

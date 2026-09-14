@@ -36,7 +36,7 @@ Fri 2026-09-11: skipped **#202** Happy Number. Same-week hash Easy: **#290 Word 
 
 #206 Reverse, #141 Cycle, #21 Merge Two Lists, #19 Remove Nth, #143 Reorder.
 
-Mon 2026-09-14: **#19** Remove Nth + **#206** Reverse + **Ch 4** cache/TTL. **Done** (coding + LC-SD). Gateway Spring still open.
+Mon 2026-09-14: **#19** Remove Nth + **#206** Reverse + **Ch 4** cache/TTL. **Done** (coding + LC-SD). Cache **on this app** pulled to **Tue extra** (he asked to understand it fully). Gateway Spring **done**.
 
 ---
 

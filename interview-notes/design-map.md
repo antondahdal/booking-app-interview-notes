@@ -124,4 +124,4 @@ Bank and rules: [oop-design-map.md](oop-design-map.md) (bottom). Do **not** star
 
 Week 5 Day 1 **closed**. Do **not** rerun three-box HLD, OCP, or JWT-only-at-gateway.
 
-**Tue:** LC first. Then Resilience4j timeout + retry. OOP: immutability + `Optional`.
+**Tue:** LC first. Then Resilience4j timeout + retry. OOP: immutability + `Optional`. **Plus** cache on this app (key, 10× browse, Book skips cache). Not `@Cacheable` code.

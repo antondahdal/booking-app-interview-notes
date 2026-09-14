@@ -131,4 +131,6 @@ Week 5 Day 1 **closed**. Do **not** rerun gateway Book route, GET-on-8081=404, e
 
 **Tue:** LC first. Then Resilience4j timeout + retry (which calls, which not). OOP: immutability + `Optional`. Design: GET may retry; Book only with click id.
 
+**Plus (Anton 2026-09-14):** **Cache on this app** until he can say: key (`event:{id}`), miss/hit/TTL, 10× = more **browse**, `book()` skips the cache, never Redis “1 left” → **201**. Do **not** skip Resilience4j for it. Do **not** code `@Cacheable` (that stays **W7 Wed**).
+
 Classic product HLD lite lives in **Part 1** ([lc-sd-map.md](lc-sd-map.md)). Part 3 stays this app until W6 LLD. URL shortener stays **W7 Fri Part 3**.
