@@ -13,7 +13,7 @@ Cheat sheets for the 8-week Event Booking Platform plan. **One file per week** s
 1. Before an interview: open that week’s file. Each day’s **Quick recall** is general → this app → trap (no chat needed). Then [cheats.md](cheats.md) for annotation tables.
 2. Before the next day: read **Weak spots** in the current week file.
 3. Before any LC: [lc-patterns.md](lc-patterns.md) — name pattern before code. From Week 4 Mon–Thu, after code: [lc-sd-map.md](lc-sd-map.md).
-4. Before Part 3: [oop-design-map.md](oop-design-map.md) (today’s slot) + [design-map.md](design-map.md) (design done vs still need).
+4. Before Part 3: [oop-design-map.md](oop-design-map.md) (today’s slot) + [design-map.md](design-map.md) (design done vs still need). Before Part 2: [ai-spring.md](ai-spring.md).
 5. New days: paste the mentor block into **that week’s file** (template at the bottom of [cheats.md](cheats.md)).
 
 ## Files
@@ -29,12 +29,13 @@ Cheat sheets for the 8-week Event Booking Platform plan. **One file per week** s
 | [week-02.md](week-02.md) | Auth: register, BCrypt, JWT (from Day 2) |
 | [week-03.md](week-03.md) | Concurrency — lock, `@Version`, HTTP to Event, Fri HLD 1/10/100 |
 | [week-04.md](week-04.md) | Microservices split; Fri **#290** + three-box HLD + OCP **done** |
-| [week-05.md](week-05.md) | Gateway + resilience; **Part 1 Day 1 done**; Spring Cache notes (lab later) |
+| [week-05.md](week-05.md) | Gateway + resilience; Day 1 LC + gateway + equals/JWT **done** |
 | [week-06.md](week-06.md) | Async + observability; **LLD class-design drills start** *(not started)* |
 | [week-07.md](week-07.md) | Polish + performance; more LLD *(not started)* |
 | [week-08.md](week-08.md) | Interview ready; mock includes one LLD *(not started)* |
 | [lc-patterns.md](lc-patterns.md) | Pattern gate + table (all weeks) |
 | [git.md](git.md) | Three repos, commit vs push, when Anton says push |
+| [ai-spring.md](ai-spring.md) | **Part 2/3 coach protocol** (notes first → set topics → he types; interview Qs on that code) |
 | [cheats.md](cheats.md) | DI, annotations, HTTP statuses, day template |
 
 `INTERVIEW-NOTES.md` at the repo root is only a pointer to this folder.

@@ -6,7 +6,7 @@ Three GitHub repos. Each is its **own** project. Do not mix commits.
 |---|---|---|
 | [LC-Practice](https://github.com/antondahdal/LC-Practice) | Java LC solutions, JUnit, coach rules (`AI-TEACHING.md`) | `Downloads/LeetCode` |
 | [booking-app-interview-notes](https://github.com/antondahdal/booking-app-interview-notes) (this repo) | Calendar + mentor notes | `Downloads/booking-app-interview-notes` |
-| [SpringBoot-bookingApp](https://github.com/antondahdal/SpringBoot-bookingApp) | The app (Part 2 / Part 3 code) | the Spring workspace |
+| [SpringBoot-bookingApp](https://github.com/antondahdal/SpringBoot-bookingApp) | The app (Part 2 / Part 3 code) + `AI-TEACHING.md` | the Spring workspace |
 
 ## What the words mean
 
@@ -60,4 +60,6 @@ If GitHub is ahead and you have local commits, pull **before** push. If it refus
 
 ## Coach rule
 
-End of **Part 1**: update LC-Practice files locally. End of **Part 3**: Anton says push → LC-Practice **and** this notes repo together.
+End of **Part 1**: update LC-Practice files locally. End of **Part 3**: Anton says push → LC-Practice **and** this notes repo together. Spring too if app code changed.
+
+**Part 2/3 how to coach:** [ai-spring.md](ai-spring.md) (same as Spring `AI-TEACHING.md`). Notes first → set today’s two Spring topics → he types → interview questions on **that** code. Do not dump classes unless he asks.

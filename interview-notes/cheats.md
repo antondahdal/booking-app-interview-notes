@@ -159,6 +159,12 @@ JPA spec: entity must have a no-arg constructor. If you only add `@AllArgsConstr
 | `PasswordEncoder` / BCrypt | Hash passwords. `@Bean`, not an annotation. `encode` register, `matches` login. Salt inside the hash. |
 | `SecurityFilterChain` | Filters **before** the controller. URL matchers: `permitAll` / `hasRole` / `authenticated`. First match wins. |
 | `JwtAuthenticationFilter` | Read Bearer → verify → fill `SecurityContextHolder`. Does not pick 403. |
+
+**Bearer vs headers (W5 Mon):** `Authorization: Bearer <jwt>` — Bearer **is** the token inside that header. JWT claims here: `sub` (user id), `email`, `role`, `iat`/`exp`, signature. **Not** in the token: `X-Correlation-Id` (other header), click id, seats.
+
+**Gateway vs Booking JWT:** Check at the gateway so junk never forwards. Check **again** in Booking — `:8080` is still a door. Copy the header; do not drop it.
+
+**`equals` / lists (W5 Mon):** `equals`+`hashCode` on the **entity** id, not the DTO. `ArrayList.get(i)` = jump. `LinkedList` = insert between two items. `ArrayList.add(i, x)` shifts; `add(x)` = end.
 | `SecurityContextHolder` | Per-request identity box. Not a field on the singleton. |
 | `@WithMockUser` | Test-only. Fills that box. `roles =` is allowed; unnamed string is username. |
 | `.with(csrf())` | MockMvc POST often needs this even if the app turned CSRF off. |

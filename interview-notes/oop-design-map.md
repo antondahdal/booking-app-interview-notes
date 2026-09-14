@@ -47,8 +47,9 @@ Days marked **longer** in the calendar: do both items. Anton asked to be safe, n
 | Adapter | W4 Day 3 leftover (Tue slot) | `EventClient` **uses** `WebClient`. `book()` says reserve seats, not `post`/`.block()` | HTTP in `book()` = two services merged |
 | LSP (timeout ≠ ticket) | W4 Day 4 | Stand-in must not return success if Event did not take a seat. Catch must throw. | Fake DTO → **201** |
 | OCP | W4 Fri leftover (Wed slot) | New Event status → mapping in `EventClient` catch (+ handler). `book()` stays closed | Giant `if` in `book()`. Map on shared `WebClient` bean |
+| equals / hashCode + Collections | W5 Mon | Entity `id` after persist. `HashSet` needs **both**. `ArrayList` = `get(i)`. `LinkedList` = insert between | `equals` on the DTO. ArrayList can only `add` at the end |
 
-**SOLID so far:** S, O, L, I, D. Encapsulation.
+**SOLID so far:** S, O, L, I, D. Encapsulation. Java: equals/hashCode, ArrayList vs LinkedList.
 
 ---
 
@@ -59,7 +60,6 @@ Must-have. Includes **Java core** (collections, threads) — mid interviews ask 
 | # | Topic | Why they ask | Slot |
 |---|---|---|---|
 | 6 | **LSP** | Timeout / fallback must not look like **201 booked**. | W4 Thu **done** + W5 Wed (circuit) |
-| 7 | **equals / hashCode + Collections** | Entity id after persist. `HashMap` uses both. `ArrayList` vs `LinkedList` (random access vs middle insert). | **W5 Mon (longer OOP)** |
 | 8 | **Immutability + `Optional`** | Request DTO / `String` don’t mutate. `Event` is mutable (the row). `Optional` = empty box, not empty entity. | W5 Tue |
 | 9 | **Observer / events** | `book()` commits, then outbox — not email inside the lock. | W6 Mon |
 
@@ -94,7 +94,7 @@ Do not repeat prompts in **design-map.md → Done**. The five families are: **wh
 
 | Day | Design prompt | OOP |
 |---|---|---|
-| Mon | JWT at gateway vs again in the service | equals/hashCode **+ Collections (longer OOP)** |
+| Mon | JWT at gateway vs again in the service | equals/hashCode **+ Collections (longer OOP)** | **Done W5 Day 1** |
 | Tue | Which calls may **retry** (GET vs book). Need a click id to retry book. | Immutability + `Optional` |
 | Wed | Circuit open: fallback status. Must not look like a successful ticket | LSP |
 | Thu | Live vs ready. Kill a pod that still has `FOR UPDATE` | ISP (health ≠ book) |
@@ -125,10 +125,10 @@ Name the product → actors → 4–8 classes → fields + 2–4 methods each �
 
 ---
 
-## Next session — Week 5 Day 1
+## Next session — Week 5 Day 2
 
-Week 4 **closed**. Do **not** rerun three-box HLD, OCP mapping, hang=502, filter vs Auth box, `@Transactional` vs lock, LSP, Adapter, Ch 12, Strategy.
+Week 5 Day 1 **closed**. Do **not** rerun gateway Book route, GET-on-8081=404, equals on `Booking` vs DTO, ArrayList vs LinkedList, JWT only-at-gateway.
 
-**Mon:** LC first (linked list bank). Then gateway routes + first service behind it. OOP: equals/hashCode + Collections (**longer**). Sat/Sun **off** before that.
+**Tue:** LC first. Then Resilience4j timeout + retry (which calls, which not). OOP: immutability + `Optional`. Design: GET may retry; Book only with click id.
 
 Classic product HLD lite lives in **Part 1** ([lc-sd-map.md](lc-sd-map.md)). Part 3 stays this app until W6 LLD. URL shortener stays **W7 Fri Part 3**.

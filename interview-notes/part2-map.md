@@ -38,7 +38,7 @@ W4 Mon topics were built on **W3 Thu**. Start Week 4 on **Tue** (third service +
 
 | Day | Topic 1 | Topic 2 |
 |---|---|---|
-| Mon | Gateway routes | First service behind it |
+| Mon | Gateway routes | First service behind it | **Done W5 Day 1 (2026-09-14)** |
 | Tue | Resilience4j timeout | Retry (which calls, which not) |
 | Wed | Circuit breaker on the hot call | Fallback status |
 | Thu | Docker Compose for the set | One health check |

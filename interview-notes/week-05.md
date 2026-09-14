@@ -24,8 +24,8 @@ Gateway + resilience: Gateway, Resilience4j, Docker Compose. **Spring Cache** is
 |---|---|---|
 | **Part 1 coding** | [LC-Practice](https://github.com/antondahdal/LC-Practice) | **#19** he coded. **#206** he coded. **Done.** |
 | **Part 1 Design (LC-SD)** | Course card talk. **Still Part 1.** | **Chapter 4** — Cache / TTL. **Done.** |
-| **Part 2** | Spring | Gateway routes + first service behind it. **Not this chat.** |
-| **Part 3** | OOP + this-app design | equals / hashCode + Collections (longer). **Not this chat.** |
+| **Part 2** | Spring | Gateway routes + first service behind it. **Done.** |
+| **Part 3** | OOP + this-app design | equals / hashCode + Collections (longer) + JWT at gateway vs service. **Done.** |
 
 Do **not** call Chapter 4 “Part 3.” W7 Wed is cache on this app as a **design** prompt. Spring `@Cacheable` lab = thin day or W7 Wed perf (below).
 
@@ -99,7 +99,60 @@ Redis “1 seat left” → **201**. Never. Sold out is Event **409**. Stale **b
 
 **Weak:** sliding window on a list. Neighbor swap as reverse. Cache on Booking as the ticket. 10× mixed with more Book. Event cache = Event DB.
 
-**Calendar:** Part 1 **closed**. Part 2 Gateway **open**. Part 3 equals/hashCode **open**.
+**Calendar:** Part 1 **closed**. Part 2 **done** (see below). Part 3 **done** (see below).
+
+---
+
+### Part 2 — Gateway routes + first service behind it
+
+**Date:** 2026-09-14 (Mon, after Part 1)
+
+**Goal:** Fourth box. Phone’s one door. One Book route to this app. No Resilience4j, no JWT-on-gateway code, no cache lab.
+
+Anton wrote a **second process** under `gateway/` (own `src/` + `pom.xml`). Not a class inside Booking’s `src/`.
+
+| Piece | What |
+|---|---|
+| `GatewayApplication` | Boot class. Same job as `EventBookingPlatformApplication`, other JVM |
+| `server.port=8081` | Gateway door. Booking stays **8080** |
+| `booking.service.uri=http://localhost:8080` | Where to forward |
+| `BookingRouteConfig` | `POST /api/events/{eventId}/bookings` → `http(bookingUri)` |
+
+`route("booking")` = id. `path` + `POST` = match Book. `http(uri)` = copy method/path/body/**headers** to Booking. `.build()` = freeze the rule.
+
+**First service:** Booking only. Gateway does **not** call `EventClient`. GET `/api/events/7` on 8081 → gateway **404** (no route). Browse still hits **8080** directly. `www.example.com` in prod = the gateway.
+
+**Headers:** `http()` **copies** `Authorization`. Gateway does **not** parse JWT today. Drop the Bearer → Booking **401**. `reserveSeats` stays in `book()`.
+
+**Trap:** Gateway starter on Booking’s pom (same JVM = not a box). Path ≠ controller → 404. `EventClient` is a box.
+
+### 60-sec (Part 2)
+
+> Phone → gateway (8081). One route: POST Book → Booking (8080). Same path as `BookingController`. GET Event is not behind it yet. Headers copied, not checked. Seats still Event via Booking.
+
+**Weak:** Gateway = Booking class. GET magically uses the Book route. Gateway checks JWT today.
+
+**Calendar:** Part 2 **closed**. Part 3 **done** (see below).
+
+---
+
+### Part 3 — equals/hashCode + Collections + JWT at gateway vs service
+
+**Date:** 2026-09-14 (Mon, after Part 2)
+
+**`equals` / `hashCode`:** On the **entity** `Booking` (`HashSet<Booking>`), not the DTO. Both on `id`, stay in sync. Today’s class has neither → two instances, same id → set size **2**. With both → **1**.
+
+**Collections:** 50th item → `ArrayList` (`get(50)`). Slide a new item **between** two existing → `LinkedList` (change links). `ArrayList.add(index, x)` **can** insert in the middle; it **shifts** later items. `add(x)` with no index = end. This app: `ArrayList` / DB `Page`, not a splice chain.
+
+**JWT at gateway vs Booking:** Gateway **may** check first (junk never forwards). Booking **still** checks. `:8080` is still open; skip the door → still need Bearer. Token is **who**; role is **may**. Bearer is not a second envelope — it **is** the JWT inside `Authorization: Bearer …`. Correlation id is a **header**, not a claim.
+
+### 60-sec (Part 3)
+
+> Entity `equals`+`hashCode` on id. HashSet needs both. ArrayList = jump to index. LinkedList = insert between. Gateway check ≠ skip Booking’s filter.
+
+**Weak:** `equals` on the DTO. ArrayList cannot insert except at the end. Check JWT only on the gateway because “once is enough.”
+
+**Calendar:** Day 1 **closed**. **Next weekday:** Week 5 Day 2 — LC first, then Resilience4j timeout + retry. OOP: immutability + `Optional`.
 
 ---
 
