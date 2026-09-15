@@ -48,8 +48,9 @@ Days marked **longer** in the calendar: do both items. Anton asked to be safe, n
 | LSP (timeout ≠ ticket) | W4 Day 4 | Stand-in must not return success if Event did not take a seat. Catch must throw. | Fake DTO → **201** |
 | OCP | W4 Fri leftover (Wed slot) | New Event status → mapping in `EventClient` catch (+ handler). `book()` stays closed | Giant `if` in `book()`. Map on shared `WebClient` bean |
 | equals / hashCode + Collections | W5 Mon | Entity `id` after persist. `HashSet` needs **both**. `ArrayList` = `get(i)`. `LinkedList` = insert between | `equals` on the DTO. ArrayList can only `add` at the end |
+| Immutability + `Optional` | W5 Tue | Request DTO seats stay frozen. `Event` seats may change. Empty Optional = no row → `orElseThrow` 404 | Empty Optional = Event with 0 seats. Change `dto.seats` mid-`book()` |
 
-**SOLID so far:** S, O, L, I, D. Encapsulation. Java: equals/hashCode, ArrayList vs LinkedList.
+**SOLID so far:** S, O, L, I, D. Encapsulation. Java: equals/hashCode, ArrayList vs LinkedList, immutability, Optional.
 
 ---
 
@@ -60,7 +61,6 @@ Must-have. Includes **Java core** (collections, threads) — mid interviews ask 
 | # | Topic | Why they ask | Slot |
 |---|---|---|---|
 | 6 | **LSP** | Timeout / fallback must not look like **201 booked**. | W4 Thu **done** + W5 Wed (circuit) |
-| 8 | **Immutability + `Optional`** | Request DTO / `String` don’t mutate. `Event` is mutable (the row). `Optional` = empty box, not empty entity. | W5 Tue |
 | 9 | **Observer / events** | `book()` commits, then outbox — not email inside the lock. | W6 Mon |
 
 **Nice if leftover:** records vs class, Factory as `@Bean`, Facade = Gateway, checked vs unchecked (domain = unchecked).
@@ -95,7 +95,7 @@ Do not repeat prompts in **design-map.md → Done**. The five families are: **wh
 | Day | Design prompt | OOP |
 |---|---|---|
 | Mon | JWT at gateway vs again in the service | equals/hashCode **+ Collections (longer OOP)** | **Done W5 Day 1** |
-| Tue | Which calls may **retry** (GET vs book). Need a click id to retry book. | Immutability + `Optional` |
+| Tue | Which calls may **retry** (GET vs book). Need a click id to retry book. | Immutability + `Optional` | **Done W5 Day 2** |
 | Wed | Circuit open: fallback status. Must not look like a successful ticket | LSP |
 | Thu | Live vs ready. Kill a pod that still has `FOR UPDATE` | ISP (health ≠ book) |
 | Fri | **HLD** traffic through the gateway | — |
@@ -125,12 +125,11 @@ Name the product → actors → 4–8 classes → fields + 2–4 methods each �
 
 ---
 
-## Next session — Week 5 Day 2
+## Next session — Week 5 Day 3
 
-Week 5 Day 1 **closed**. Do **not** rerun gateway Book route, GET-on-8081=404, equals on `Booking` vs DTO, ArrayList vs LinkedList, JWT only-at-gateway.
+Week 5 Day 2 **closed**. Do **not** rerun timeout vs lock timeout, GET vs Book retry, Redis GET/SET/DEL, frozen DTO seats, Optional = no row, click id vs JWT vs correlation id.
 
-**Tue:** LC first. Then Resilience4j timeout + retry (which calls, which not). OOP: immutability + `Optional`. Design: GET may retry; Book only with click id.
+**Wed:** LC first. Then circuit breaker + fallback status. OOP: LSP (fallback must not look like **201**).
 
-**Plus (Anton 2026-09-14):** **Cache on this app** until he can say: key (`event:{id}`), miss/hit/TTL, 10× = more **browse**, `book()` skips the cache, never Redis “1 left” → **201**. Do **not** skip Resilience4j for it. Do **not** code `@Cacheable` (that stays **W7 Wed**).
 
 Classic product HLD lite lives in **Part 1** ([lc-sd-map.md](lc-sd-map.md)). Part 3 stays this app until W6 LLD. URL shortener stays **W7 Fri Part 3**.

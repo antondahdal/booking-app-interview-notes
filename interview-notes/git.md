@@ -62,4 +62,4 @@ If GitHub is ahead and you have local commits, pull **before** push. If it refus
 
 End of **Part 1**: update LC-Practice files locally. End of **Part 3**: Anton says push → LC-Practice **and** this notes repo together. Spring too if app code changed.
 
-**Part 2/3 how to coach:** [ai-spring.md](ai-spring.md) (same as Spring `AI-TEACHING.md`). Notes first → set today’s two Spring topics → he types → interview questions on **that** code. Do not dump classes unless he asks.
+**Part 2/3 how to coach:** [ai-spring.md](ai-spring.md) (same as Spring `AI-TEACHING.md`). Notes first. He types. Finish one topic before the next. Part 3 start: list today’s topics, skip Done. Human notes, one closed block per topic.

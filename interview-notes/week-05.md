@@ -152,4 +152,146 @@ Anton wrote a **second process** under `gateway/` (own `src/` + `pom.xml`). Not 
 
 **Weak:** `equals` on the DTO. ArrayList cannot insert except at the end. Check JWT only on the gateway because “once is enough.”
 
-**Calendar:** Day 1 **closed**. **Next weekday:** Week 5 Day 2 — LC first, then Resilience4j timeout + retry. OOP: immutability + `Optional`. **Plus cache on this app** (key, TTL, 10× browse, Book skips it) — Anton asked to understand it fully; today’s Ch 4 was thin. `@Cacheable` **code** still W7 Wed.
+**Calendar:** Day 1 **closed**. Next was Week 5 Day 2 (below). `@Cacheable` **code** was pulled to Day 2 (Anton asked to code it).
+
+---
+
+## Week 5 Day 2 — timeout + retry + cache
+
+**Date:** 2026-09-15 (Tue)
+
+**Where each “part” is (read this first)**
+
+| Name | What it is | Today |
+|---|---|---|
+| **Part 1 coding** | [LC-Practice](https://github.com/antondahdal/LC-Practice) | Linked list bank. **Not this chat.** |
+| **Part 2** | Spring | Resilience4j timeout + retry + **cache lab** (Anton asked to code it). **Done.** |
+| **Part 3** | OOP + this-app design | Immutability + `Optional` + click id to retry Book. **Done.** |
+
+---
+
+### Part 2 — Resilience4j timeout + retry + cache
+
+**Date:** 2026-09-15 (Tue)
+
+**Goal:** Named timeout on the Event call. Retry GET, not Book. Cache browse GET; evict on take. Redis talk (how two servers stay in sync).
+
+#### Timeout
+
+Booking **stops waiting**. Event is another process — timeout does **not** roll back Event’s row. Hang-up ≠ “no seat taken.” Phone gets **502** (`DownstreamServiceException`), not **201**.
+
+Repo `lock.timeout` = wait to **get the row lock** on that query. Resilience4j / WebClient 3s = Booking waits for the **HTTP answer**.
+
+WebClient 3s is one shared client → `AuthClient` and `EventClient` can both time out. Resilience4j instance name `event` is the Event call (`@TimeLimiter(name = "event")` on `reserveSeats`). Properties line alone does nothing until the method uses the same name.
+
+Jars on **Booking’s** pom (not gateway). Gateway never calls Event. EventController must **not** time out its own take.
+
+#### Retry
+
+`@Retry(name = "eventGet")` on `AuthClient.checkIfExist` (GET). `maxAttempts=3`.
+
+GET = read. Asking twice does not create a user. Book / `reserveSeats` = write. No click id today → retry can take a **second** seat. GET yes because it does not duplicate. Book no because we have no duplicate guard.
+
+#### Cache (this app + Redis)
+
+**What we coded**
+
+| Piece | Where |
+|---|---|
+| `spring-boot-starter-cache` | Booking pom |
+| `@EnableCaching` | `EventBookingPlatformApplication` |
+| `@Cacheable("events")` | `EventServiceImpl.getEvent` |
+| `@CacheEvict(value = "events", key = "#id")` | `EventServiceImpl.reserveSeats` |
+
+Spring sees `@Cacheable("events")` on `getEvent` — not “getById” by magic. Call `getEvent(7)` → look in box `events`, key `7`. Miss → DB, store DTO. Hit → skip DB.
+
+`@CacheEvict` same name `events`, `#id` = that method’s `id`. It **deletes** the copy. It does not reload GET immediately. Next `getEvent(7)` is a miss, then DB. Wrong name → browse stays stale.
+
+**Not on** `BookingServiceImpl.book()`. Take still hits the row. Cache “1 left” is not a ticket.
+
+**Today’s store:** a map **inside this JVM**. Two servers = two maps. They do **not** stay in sync.
+
+#### How we keep cache in sync — Redis
+
+Yes. **Redis is how you keep the cache in sync** when you have two servers.
+
+Each server does **not** keep its own copy of event 7. Both servers use **Redis as the cache**. Redis is one box on the network. Server A and server B both talk to that same box.
+
+**How Redis is used in general:** it is a key–value store. You put a key, you get a value, you delete a key.
+
+For us:
+
+1. Someone browses event 7. The server asks Redis: do you have `events` / `7`?  
+   - No → load from the Event database, then **SET** that DTO in Redis under that key.  
+   - Yes → **GET** it from Redis. Do not hit the database.
+
+2. Someone books. `reserveSeats` runs, then **DEL** that same key in Redis (`@CacheEvict`). Redis no longer has event 7. The next browse on **either** server misses and loads from the database again.
+
+3. You can also set a **TTL** (e.g. 30 seconds). Redis deletes the key by itself when time is up.
+
+Nothing is “synced between A and B.” A and B simply **share one Redis**. If A deletes the key, B cannot see a stale copy, because B was never storing it locally.
+
+Java stays `@Cacheable` / `@CacheEvict`. You swap the store to Redis. Book still ignores Redis and hits the row. Two `reserveSeats` still lock the **database**, not Redis.
+
+**10×** = more **browse** (GET hits). Not 10× Book.
+
+**Trap:** Redis “1 seat left” → **201**. Never. Sold out is Event **409**. Stale browse is OK. Stale take is a fake ticket.
+
+### 60-sec (Part 2)
+
+> Timeout: Booking hung up; Event may still have taken a seat; 502 not 201. Retry GET (read). Do not retry Book without a click id. Cache `getEvent`; evict on take; same name `events`. Two servers: Redis is the shared store (GET/SET/DEL + TTL), not a HashMap per JVM. Book still hits the row.
+
+**Weak:** Timeout = Event rolled back. Retry Book because GET has no guard. Cache on `book()`. Two servers sync their HashMaps. Redis “1 left” = ticket.
+
+**Calendar:** Part 2 **closed**. Part 3 **closed** (see below).
+
+---
+
+### Part 3 — immutability + Optional + click id
+
+**Date:** 2026-09-15 (Tue, after Part 2)
+
+Each topic closed on its own. Do not mix them.
+
+#### Immutability — closed
+
+The question in human words: after `book()` has started, should we still treat `dto.seats` as a number we can edit?
+
+**No.** That number is the user’s order (“I want 2 seats”). `book()` sends it to Event and saves it on the ticket. If it changes mid-method, Event can take 3 and the ticket can say 2.
+
+`Event.availableSeats` **may** change. That is the warehouse, not the order.
+
+DTO has a setter today so Java **can** change it. “Is it OK?” means **should you**. You should not.
+
+**Trap:** thinking the question is “does `@Setter` compile?”
+
+#### Optional — closed
+
+`findByIdForUpdate` returns `Optional<Event>`. Empty **box** = no row with that id. Not an Event with 0 seats.
+
+This app: `orElseThrow(() -> new ResourceNotFoundException(...))` → handler **404**. Not a fake Event.
+
+#### Click id — closed (interview words; **not in the app**)
+
+If Book times out, we do not know if Event already took a seat. Retry without a guard can take a **second** seat.
+
+**Click id** = one UUID for **this one tap**. Event **stores** it. Same id again → same take, do not subtract again.
+
+- **Who mints:** the **phone**, once per tap. Retry of that tap sends the **same** UUID. If Booking mints a **new** UUID on every HTTP hit, two hits = two seats.
+- **Where:** Event (the take), not Booking. Timeout means Booking may never have saved.
+- **Not** the JWT (who you are for the whole login — one token, many taps).
+- **Not** the correlation id (log sticker; we mint if missing; new request can get a new sticker).
+
+GET retry was already closed in Part 2. Do not re-ask it.
+
+**Trap:** click id = token. Click id = correlation id. Mint a new UUID per HTTP retry.
+
+### 60-sec (Part 3)
+
+> DTO seats stay frozen; Event seats may change. Empty Optional = no row → 404. Click id = phone UUID for this tap, stored on Event; retry sends the same one. Not JWT, not correlation id. Not built.
+
+**Weak:** JWT as click id. Correlation id as click id. Server mints a new UUID on every retry.
+
+**Calendar:** Day 2 **closed**. **Next weekday:** Week 5 Day 3 — LC first, then circuit breaker + fallback status. OOP: LSP (fallback ≠ 201).
+
+

@@ -39,12 +39,12 @@ W4 Mon topics were built on **W3 Thu**. Start Week 4 on **Tue** (third service +
 | Day | Topic 1 | Topic 2 |
 |---|---|---|
 | Mon | Gateway routes | First service behind it | **Done W5 Day 1 (2026-09-14)** |
-| Tue | Resilience4j timeout | Retry (which calls, which not) |
+| Tue | Resilience4j timeout | Retry (which calls, which not) | **Done W5 Day 2 (2026-09-15)** + cache lab |
 | Wed | Circuit breaker on the hot call | Fallback status |
 | Thu | Docker Compose for the set | One health check |
 | Fri | HLD traffic through gateway | — |
 
-**Spring Cache:** **understand on this app = W5 Tue extra** (Anton 2026-09-14; Ch 4 was thin). `@Cacheable` **code** = **W7 Wed**. Notes: [week-07.md](week-07.md). Do **not** skip Tuesday Resilience4j for it.
+**Spring Cache:** talk + `@Cacheable` / `@CacheEvict` **coded W5 Day 2**. Redis not wired (in-memory today). Interview store is still Redis. Notes: [week-05.md](week-05.md).
 
 ---
 

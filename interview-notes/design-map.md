@@ -61,6 +61,7 @@ Every weekday prompt and every Friday board is one of these. If a prompt is not 
 | Three-box HLD | HLD | W4 Fri | Phone → Booking → Event (seats) / Auth (who). Filter ≠ Auth box. Hang → 502, unknown if Event wrote. `@Transactional` holds a connection, not `FOR UPDATE` | EventClient is a box. Timeout = Event wrote nothing. Correlation id = click id. Filter = Auth service |
 | OCP new Event error | Status | W4 Fri leftover | New status → `EventClient` catch + handler. `book()` unchanged | `if` in `book()`. Shared WebClient maps Auth 401 |
 | JWT at gateway vs service | Who | W5 Mon | Check at the edge so junk never forwards. Check **again** in Booking (`:8080` still open). Bearer = JWT inside `Authorization` | Once on gateway is enough. Bearer is a second envelope |
+| Retry GET vs Book + click id | Slow hop | W5 Tue | GET may retry (read). Book only with a **click id** on Event. Phone mints UUID per tap; retry sends the same one. Not JWT. Not correlation id. Not in the app | JWT = click id. New UUID on every HTTP retry |
 
 **Asked, not built (keep as interview words only until code exists):** click id / idempotency key. Do not pretend it is in the app.
 
@@ -73,7 +74,6 @@ Same shape as the OOP “still need” table. Must-have on a mid-level board. Ea
 | # | Topic | Family | Why they ask | Slot |
 |---|---|---|---|---|
 | 6 | **Truth across HTTP** | Truth / Slow hop | Seats in Event **service**. What if Event is slow / 503? No 2PC. | W4 Mon |
-| 12 | **Retry which calls** | Slow hop | GET may retry. Book only with a **click id**. | W5 Tue |
 | 13 | **Circuit + fallback status** | Status | Open circuit ≠ **201 ticket**. | W5 Wed |
 | 14 | **Live vs ready + kill a holder** | 10× | Pod dies holding `FOR UPDATE`. | W5 Thu |
 | 15 | **Gateway HLD** | HLD | Traffic + time budget. | W5 Fri |

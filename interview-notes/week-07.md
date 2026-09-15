@@ -12,15 +12,17 @@ Polish + performance: security, N+1, indexes, README.
 | Thu | Remaining polish | Test |
 | Fri | HLD/recap | — |
 
-**Part 3:** continue LLD class-design (started Week 6). **W7 Wed longer:** this-app cache **if still weak** + Spring `@Cacheable` **code** lab below. Understanding pass is **W5 Tue extra**.
+**Part 3:** continue LLD class-design (started Week 6). **W7 Wed longer:** this-app cache **if still weak**. `@Cacheable` **code** already **W5 Day 2**.
 
 **Not started yet.** Say `Start Week 7 Day 1` when you get here.
 
 ---
 
-## Spring Cache lab (W7 Wed)
+## Spring Cache lab (coded W5 Day 2)
 
-Same idea as Week 5 Chapter 4 talk, with Spring names. **Not** a Week 5 lab.
+Same idea as Chapter 4 talk, with Spring names. **Coded** on Week 5 Tuesday (`@Cacheable` / `@CacheEvict`). Store today is in-memory. Redis is still the interview store (not wired).
+
+**Lab status:** Java **done W5 Day 2**. Redis / TTL in Redis **not coded**. W7 Wed = talk if still weak, not a second copy of the same lab unless Redis is the leftover.
 
 ### What Spring would do
 
@@ -43,4 +45,3 @@ Title-only GET may be cached. Remaining seats on the **browse** page may be slig
 
 > `@Cacheable` on Event GET, `@CacheEvict` on take, Redis + TTL. Book still hits the row.
 
-**Lab status:** notes only. **Not coded.** Do this on **W7 Wed**, not in Week 5.
