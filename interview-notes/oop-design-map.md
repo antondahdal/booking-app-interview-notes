@@ -12,6 +12,8 @@
 
 **How a weekday Part 3 runs**
 
+**Stick to this table.** Do not skip Part 3 because Part 2 already coded the idea. Skip a **repeat question**, not the **slot**. If today’s named OOP is Done, still ~10 min from **still need** / **nice if leftover**.
+
 **Opener (every Part, and when switching OOP → Design):** Cover today (bullets) + **one sentence** why a mid-level Java role gets this. Then the question.
 
 | Piece | Time | What |
