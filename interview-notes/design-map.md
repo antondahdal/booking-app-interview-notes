@@ -62,6 +62,7 @@ Every weekday prompt and every Friday board is one of these. If a prompt is not 
 | OCP new Event error | Status | W4 Fri leftover | New status → `EventClient` catch + handler. `book()` unchanged | `if` in `book()`. Shared WebClient maps Auth 401 |
 | JWT at gateway vs service | Who | W5 Mon | Check at the edge so junk never forwards. Check **again** in Booking (`:8080` still open). Bearer = JWT inside `Authorization` | Once on gateway is enough. Bearer is a second envelope |
 | Retry GET vs Book + click id | Slow hop | W5 Tue | GET may retry (read). Book only with a **click id** on Event. Phone mints UUID per tap; retry sends the same one. Not JWT. Not correlation id. Not in the app | JWT = click id. New UUID on every HTTP retry |
+| Circuit + fallback status | Status | W5 Wed | Open = do not call Event. Phone **503**, not **201**. Sold out still **409**. Fallback **throws**; a returned DTO is a fake ticket. 409/404 do not open the circuit | Fallback `return` DTO → **201**. Open → **409**. 502 mixed with 503. Sold out trips the circuit |
 
 **Asked, not built (keep as interview words only until code exists):** click id / idempotency key. Do not pretend it is in the app.
 
@@ -74,7 +75,7 @@ Same shape as the OOP “still need” table. Must-have on a mid-level board. Ea
 | # | Topic | Family | Why they ask | Slot |
 |---|---|---|---|---|
 | 6 | **Truth across HTTP** | Truth / Slow hop | Seats in Event **service**. What if Event is slow / 503? No 2PC. | W4 Mon |
-| 13 | **Circuit + fallback status** | Status | Open circuit ≠ **201 ticket**. | W5 Wed |
+| 13 | **Circuit + fallback status** | Status | Open circuit ≠ **201 ticket**. | W5 Wed **done** |
 | 14 | **Live vs ready + kill a holder** | 10× | Pod dies holding `FOR UPDATE`. | W5 Thu |
 | 15 | **Gateway HLD** | HLD | Traffic + time budget. | W5 Fri |
 | 16 | **Outbox / at-least-once mail** | Slow hop | Email after commit. Duplicate mail possible. | W6 Mon–Thu |
@@ -120,8 +121,8 @@ Bank and rules: [oop-design-map.md](oop-design-map.md) (bottom). Do **not** star
 
 **LC-SD (from W4, Part 1 only):** talk from [System Design for Interviews and Beyond](https://leetcode.com/explore/interview/card/system-design-for-interviews-and-beyond), ~15 min, Mon–Thu. Always **Chapter N + topic**. From W4 Tue: explain a bit, then the question. Calendar: [lc-sd-map.md](lc-sd-map.md). Do not run the same product again in Part 3 that day. **URL shortener** stays **W7 Fri Part 3**, not Part 1.
 
-## Next session — Week 5 Day 2
+## Next session — Week 5 Day 4
 
-Week 5 Day 1 **closed**. Do **not** rerun three-box HLD, OCP, or JWT-only-at-gateway.
+Week 5 Day 3 **closed**. Do **not** rerun circuit open vs **201** / **409** / **502**, or fallback-returns-DTO.
 
-**Tue:** LC first. Then Resilience4j timeout + retry. OOP: immutability + `Optional`. **Plus** cache on this app (key, 10× browse, Book skips cache). Not `@Cacheable` code.
+**Thu:** LC first. Then Docker Compose + one health check. OOP: ISP (health ≠ book). Design: live vs ready; kill a pod holding `FOR UPDATE`.

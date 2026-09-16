@@ -46,9 +46,11 @@ Days marked **longer** in the calendar: do both items. Anton asked to be safe, n
 | Strategy (job picks wait vs stamp) | W3 Thu, W3 Fri HLD | Book waits. Title PATCH stamps. Pool pain ≠ switch Book to stamp | Re-ask “which method / the job” |
 | Adapter | W4 Day 3 leftover (Tue slot) | `EventClient` **uses** `WebClient`. `book()` says reserve seats, not `post`/`.block()` | HTTP in `book()` = two services merged |
 | LSP (timeout ≠ ticket) | W4 Day 4 | Stand-in must not return success if Event did not take a seat. Catch must throw. | Fake DTO → **201** |
+| LSP (circuit fallback) | W5 Wed | Fallback throw ≠ return DTO. Open → **503**. Sold out still **409**. | Return `EventResponseDto` → **201** |
 | OCP | W4 Fri leftover (Wed slot) | New Event status → mapping in `EventClient` catch (+ handler). `book()` stays closed | Giant `if` in `book()`. Map on shared `WebClient` bean |
 | equals / hashCode + Collections | W5 Mon | Entity `id` after persist. `HashSet` needs **both**. `ArrayList` = `get(i)`. `LinkedList` = insert between | `equals` on the DTO. ArrayList can only `add` at the end |
 | Immutability + `Optional` | W5 Tue | Request DTO seats stay frozen. `Event` seats may change. Empty Optional = no row → `orElseThrow` 404 | Empty Optional = Event with 0 seats. Change `dto.seats` mid-`book()` |
+| Checked vs unchecked | W5 Wed leftover | Domain = `RuntimeException`. No `throws`. Empty catch → **201** | Checked on `book()` / swallow to compile |
 
 **SOLID so far:** S, O, L, I, D. Encapsulation. Java: equals/hashCode, ArrayList vs LinkedList, immutability, Optional.
 
@@ -60,10 +62,10 @@ Must-have. Includes **Java core** (collections, threads) — mid interviews ask 
 
 | # | Topic | Why they ask | Slot |
 |---|---|---|---|
-| 6 | **LSP** | Timeout / fallback must not look like **201 booked**. | W4 Thu **done** + W5 Wed (circuit) |
+| 6 | **LSP** | Timeout / fallback must not look like **201 booked**. | W4 Thu **done** + W5 Wed **done** |
 | 9 | **Observer / events** | `book()` commits, then outbox — not email inside the lock. | W6 Mon |
 
-**Nice if leftover:** records vs class, Factory as `@Bean`, Facade = Gateway, checked vs unchecked (domain = unchecked).
+**Nice if leftover:** records vs class, Factory as `@Bean`, Facade = Gateway. Checked vs unchecked **done W5 Wed**.
 
 **Skip:** Visitor, Prototype, Flyweight, Mediator, square-rectangle, JVM GC tuning.
 
@@ -96,7 +98,7 @@ Do not repeat prompts in **design-map.md → Done**. The five families are: **wh
 |---|---|---|
 | Mon | JWT at gateway vs again in the service | equals/hashCode **+ Collections (longer OOP)** | **Done W5 Day 1** |
 | Tue | Which calls may **retry** (GET vs book). Need a click id to retry book. | Immutability + `Optional` | **Done W5 Day 2** |
-| Wed | Circuit open: fallback status. Must not look like a successful ticket | LSP |
+| Wed | Circuit open: fallback status. Must not look like a successful ticket | LSP | **Done W5 Day 3** |
 | Thu | Live vs ready. Kill a pod that still has `FOR UPDATE` | ISP (health ≠ book) |
 | Fri | **HLD** traffic through the gateway | — |
 
@@ -125,11 +127,11 @@ Name the product → actors → 4–8 classes → fields + 2–4 methods each �
 
 ---
 
-## Next session — Week 5 Day 3
+## Next session — Week 5 Day 4
 
-Week 5 Day 2 **closed**. Do **not** rerun timeout vs lock timeout, GET vs Book retry, Redis GET/SET/DEL, frozen DTO seats, Optional = no row, click id vs JWT vs correlation id.
+Week 5 Day 3 **closed**. Do **not** rerun timeout vs lock timeout, GET vs Book retry, Redis GET/SET/DEL, frozen DTO seats, Optional = no row, click id vs JWT vs correlation id, circuit open vs **201** / **409** / **502**, fallback that returns a DTO.
 
-**Wed:** LC first. Then circuit breaker + fallback status. OOP: LSP (fallback must not look like **201**).
+**Thu:** LC first. Then Docker Compose + one health check. OOP: ISP (health ≠ book). Design: live vs ready; kill a pod that still has `FOR UPDATE`.
 
 
 Classic product HLD lite lives in **Part 1** ([lc-sd-map.md](lc-sd-map.md)). Part 3 stays this app until W6 LLD. URL shortener stays **W7 Fri Part 3**.

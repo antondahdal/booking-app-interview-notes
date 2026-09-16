@@ -306,8 +306,8 @@ GET retry was already closed in Part 2. Do not re-ask it.
 |---|---|---|
 | **Part 1 coding** | [LC-Practice](https://github.com/antondahdal/LC-Practice) | **#2** coach wrote. **#21** he coded. **Done.** |
 | **Part 1 Design (LC-SD)** | Course card talk. **Still Part 1.** | **Chapter 10** — Hot key / partition lite. **Done.** |
-| **Part 2** | Spring | Circuit breaker on the hot call + fallback status. **Not this chat.** |
-| **Part 3** | OOP + this-app design | LSP (fallback ≠ 201). **Not this chat.** |
+| **Part 2** | Spring | Circuit breaker on the hot call + fallback status. **Done.** |
+| **Part 3** | OOP + this-app design | LSP **skip** (repeat). Leftover: checked vs unchecked. Design: circuit open board. **Done.** |
 
 Cover from today: always paste the LeetCode URL.
 
@@ -379,6 +379,76 @@ This app: `event:7` — that Event **row**, cache key, lock. Not the whole catal
 
 **Weak:** Integer/string add. Stack on LSD-first lists. Merge took the larger node. Coach misheard 409 vs 502.
 
-**Calendar:** Part 1 **closed**. Part 2 / Part 3 **not this chat.** Next weekday: Week 5 Day 4 — LC first, then Docker Compose + one health check.
+**Calendar:** Part 1 **closed**. Part 2 **done** (see below). Part 3 **done** (see below).
+
+---
+
+### Part 2 — circuit breaker + fallback status
+
+**Date:** 2026-09-16 (Wed, after Part 1)
+
+**Goal:** Named circuit on the Event take. Open = do not call Event. Fallback is not a ticket.
+
+#### Circuit breaker on the hot call
+
+Jars already on Booking’s pom (Day 2). Gateway never calls Event. Annotation on `EventClient.reserveSeats`, same name `event` as `@TimeLimiter`.
+
+| Piece | Where |
+|---|---|
+| `@CircuitBreaker(name = "event", fallbackMethod = "reserveSeatsFallback")` | `reserveSeats` |
+| `slidingWindowSize=10` | last 10 takes |
+| `failureRateThreshold=50` | half fail → open |
+| `waitDurationInOpenState=10s` | then one trial (half-open) |
+| `ignoreExceptions` | `InsufficientSeatsException`, `ResourceNotFoundException` (full class names, **one** property line, no `.java`) |
+
+Closed = keep calling Event. Open = Booking does **not** enter `reserveSeats`. Resilience4j throws `CallNotPermittedException`. Timeout still waits 3s then hangs up; open is fail fast.
+
+**409** is Event working (sold out). Those exceptions must not count toward the 50%, or later callers get **503** while Event is fine.
+
+Two `ignoreExceptions=` lines: the second **replaces** the first. Simple name / `.java` suffix: `Class.forName` cannot load them.
+
+#### Fallback status
+
+`reserveSeatsFallback` lives on **`EventClient`** (same class as the annotation). Same return type, same args, last `Throwable`. **Throw.** Do not return a DTO. Do not return `null`. A return means seats were taken → `book()` saves → phone **201** with no take.
+
+The fallback also runs when `reserveSeats` **throws**, not only when the circuit is open. Sold out is already `InsufficientSeatsException`. If the fallback always throws `DownstreamServiceException`, Maria gets **502** instead of **409**. Rethrow `InsufficientSeatsException`, `ResourceNotFoundException`, and `CallNotPermittedException`. The rest stay `DownstreamServiceException` (**502** = we called Event and the hop died).
+
+`CallNotPermittedException` → handler **503** (`SERVICE_UNAVAILABLE`). Not **500** (unhandled). Not **502**. Title “Event unavailable,” not “Server Error.”
+
+Anton first said open already throws `DownstreamServiceException` (internal error). Unhandled open is **500**. After the handler: **503**. Status check named **409** and **502**; missed **201** until asked. Then: fallback runs on error / open, so a returned DTO is fake.
+
+### 60-sec (Part 2)
+
+> Circuit on `reserveSeats`, name `event`. Open = do not call Event. Phone **503**, not **201**. Sold out still **409** (rethrow; ignore on the circuit). Fallback throws; a returned DTO is a fake ticket. **502** = we tried the hop. **503** = we did not.
+
+**Weak:** Open = `DownstreamServiceException` / **500**. Fallback `if` on `WebClientResponseException` (already mapped). Two `ignoreExceptions` keys. Simple names / `.java`. Status list skipped **201**.
+
+**Calendar:** Part 2 **closed**. Part 3 **done** (see below).
+
+---
+
+### Part 3 — checked vs unchecked + circuit open board
+
+**Date:** 2026-09-16 (Wed, after Part 2)
+
+LSP **skip** (W4 Thu + Part 2 today). Anton: do not re-ask; still run the OOP **slot** with leftover.
+
+#### Checked vs unchecked — closed
+
+`InsufficientSeatsException` is a `RuntimeException`. Unchecked: no `throws` on `reserveSeats`. Checked (`extends Exception`) would force `throws` or `try/catch` on client, `book()`, controller. Empty catch so it compiles → `book()` continues → phone **201**. Domain failures stay unchecked so they reach `GlobalExceptionHandler` (**409** / **502** / **503**).
+
+#### Circuit open board — closed
+
+Phone → Booking controller → `book()` → Java call `eventClient.reserveSeats(...)`. Annotation is on `reserveSeats`, not `book()`. Open: that Java call throws `CallNotPermittedException` (fallback rethrows). `book()` has no catch → handler **503**. **Zero** HTTP to Event. Coach misread “call EventClient” as “Event was POSTed”; Anton’s sequence was right.
+
+After `waitDurationInOpenState`: **not open** (half-open). One trial **does** run `reserveSeats` and HTTP. Event still down → `DownstreamServiceException` → **502**, then open again. Trial works → real DTO, **201**, circuit closes. Not a fake ticket.
+
+### 60-sec (Part 3)
+
+> Domain = unchecked; empty catch → **201**. Open: `book()` → `reserveSeats` Java call throws `CallNotPermittedException` → **503**; no Event HTTP. Half-open trial is not open: hop runs; still down → **502**.
+
+**Weak:** Open mixed with “HTTP to EventClient.” Coach over-corrected Java vs HTTP.
+
+**Calendar:** Day 3 **closed**. **Next weekday:** Week 5 Day 4 — LC first, then Docker Compose + one health check. OOP: ISP (health ≠ book). Design: live vs ready; kill a pod holding `FOR UPDATE`.
 
 
