@@ -294,4 +294,91 @@ GET retry was already closed in Part 2. Do not re-ask it.
 
 **Calendar:** Day 2 **closed**. **Next weekday:** Week 5 Day 3 — LC first, then circuit breaker + fallback status. OOP: LSP (fallback ≠ 201).
 
+---
+
+## Week 5 Day 3 — Add Two Numbers + Merge Two Lists + hot key
+
+**Date:** 2026-09-16 (Wed)
+
+**Where each “part” is (read this first)**
+
+| Name | What it is | Today |
+|---|---|---|
+| **Part 1 coding** | [LC-Practice](https://github.com/antondahdal/LC-Practice) | **#2** coach wrote. **#21** he coded. **Done.** |
+| **Part 1 Design (LC-SD)** | Course card talk. **Still Part 1.** | **Chapter 10** — Hot key / partition lite. **Done.** |
+| **Part 2** | Spring | Circuit breaker on the hot call + fallback status. **Not this chat.** |
+| **Part 3** | OOP + this-app design | LSP (fallback ≠ 201). **Not this chat.** |
+
+Cover from today: always paste the LeetCode URL.
+
+Week 5 printed bank leftover was **#21**. Mon/Tue already used the Mediums on that line, so first LC was Top Interview 150 **#2** (not on the printed Week 5 line), then Easy **#21**.
+
+---
+
+### Part 1 — two LCs — passed + Design talk
+
+#### LC 2 Add Two Numbers (Medium) — passed, coach wrote it
+
+Lists store digits least-significant first. `2 → 4 → 3` plus `5 → 6 → 4` is `342 + 465` → `7 → 0 → 8`.
+
+**Gate:** “regular loop”; then strings + `Integer` (overflow on long lists). Stack is **#445** (ones at the tail), not this problem. Name: two walkers. Keep **carry**. O(max(m,n)) / O(1) extra besides the new list.
+
+**Memorize this:** Dummy + tail. Loop while either list **or carry**. Digit = (l1 or 0) + (l2 or 0) + carry. Write `% 10`, carry = `/ 10`. Missing node is 0, not stop.
+
+**Weak:** splice leftover list when one walker falls off. Carry can still change those digits. `9 → 9` plus `1` is `0 → 0 → 1`, not `1 → 9`.
+
+**Cousin:** dummy; #445 stack because MSD is at the head.
+
+#### LC 21 Merge Two Sorted Lists (Easy) — passed
+
+`1 → 2 → 4` and `1 → 3 → 4` → `1 → 1 → 2 → 3 → 4 → 4`.
+
+**Gate:** two walkers, O(n+m). First said extra space = new list. Extra is **O(1)** if you rewire existing nodes.
+
+**Memorize this:** Dummy in front. `tail` is last kept. While both alive, hook the **smaller** head (one node per step; equal 1s are two steps). After the while, leftover is one assignment: `tail.next = list1 or list2`. Return `dummy.next`.
+
+**Weak:** took the **larger** head. Copied `new ListNode` instead of hooking the live node. Leftover ifs inside `while (both)` never run. Returned dummy, then fixed to `dummy.next`.
+
+**Cousin:** same dummy as #2; hook leftover in one shot.
+
+---
+
+### Part 1 Design — Chapter 10 How to deliver data at scale — Hot key / partition lite
+
+Talk. No Java. Still Part 1. Do not redesign Kafka.
+
+Anton: hot key is **7**. Client hits GET and Book. Nothing “breaks.” **409** = lots of Book on 7, seats run out. **502** = traffic, lock wait on that row. He had both. Coach mashed 409 with traffic, then restated 502 as if it was new.
+
+#### What it is
+
+A hot key is **one** popular id. Most traffic hits that slot. Other ids stay quiet.
+
+This app: `event:7` — that Event **row**, cache key, lock. Not the whole catalog.
+
+- **Browse:** GET event 7. Can be cache hits (Mon/Tue).
+- **Book:** POST take on 7. Still hits Event’s **one row**. Extra pods do not split id 7. All Book-7 still serialize on that lock.
+
+10× means 10× **that event**, not 10× the catalog. Other events stay fine.
+
+#### Status
+
+- **409** = Event sold out. Traffic emptied 7. The row worked. Not “the box died.”
+- **502** = Booking hung up waiting on Event (lock wait / timeout on that take). Not a ticket.
+
+#### Trap
+
+10× servers fixes a hot event. Treating 409 as overload. Stale cache “1 left” → **201** (Ch 4; do not re-teach).
+
+#### Interview sentence
+
+> Hot key is event 7. Extra browse can hit cache. Extra Book still fights one Event row. More pods do not split that id.
+
+### 60-sec (Part 1)
+
+> #2: dummy, carry, missing digit is 0, loop while list or carry. #21: smaller head each step, leftover in one hook, dummy.next. Ch 10: hot key = event 7; GET can cache; Book still one row; 409 = sold out; 502 = lock wait; pods do not split that id.
+
+**Weak:** Integer/string add. Stack on LSD-first lists. Merge took the larger node. Coach misheard 409 vs 502.
+
+**Calendar:** Part 1 **closed**. Part 2 / Part 3 **not this chat.** Next weekday: Week 5 Day 4 — LC first, then Docker Compose + one health check.
+
 
