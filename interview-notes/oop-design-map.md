@@ -12,7 +12,9 @@
 
 **How a weekday Part 3 runs**
 
-**Stick to this table.** Do not skip Part 3 because Part 2 already coded the idea. Skip a **repeat question**, not the **slot**. If today’s named OOP is Done, still ~10 min from **still need** / **nice if leftover**.
+**Stick to this table.** The **times are the coach’s job.** Do not ask Anton to protect 45 min. If Part 2 ran long, cut Part 2 talk, not Design. Do not shrink the board to a few quizzes.
+
+Do not skip Part 3 because Part 2 already coded the idea. Skip a **repeat question**, not the **slot**. If today’s named OOP is Done, still ~10 min from **still need** / **nice if leftover**.
 
 **Opener (every Part, and when switching OOP → Design):** Cover today (bullets) + **one sentence** why a mid-level Java role gets this. Then the question.
 
@@ -53,8 +55,10 @@ Days marked **longer** in the calendar: do both items. Anton asked to be safe, n
 | equals / hashCode + Collections | W5 Mon | Entity `id` after persist. `HashSet` needs **both**. `ArrayList` = `get(i)`. `LinkedList` = insert between | `equals` on the DTO. ArrayList can only `add` at the end |
 | Immutability + `Optional` | W5 Tue | Request DTO seats stay frozen. `Event` seats may change. Empty Optional = no row → `orElseThrow` 404 | Empty Optional = Event with 0 seats. Change `dto.seats` mid-`book()` |
 | Checked vs unchecked | W5 Wed leftover | Domain = `RuntimeException`. No `throws`. Empty catch → **201** | Checked on `book()` / swallow to compile |
+| ISP (health ≠ book) | W5 Thu | Health **200** is not a seat. Probe ≠ `book()` | Health **200** → **201** |
+| Records vs class | W5 Thu leftover | Request DTO may be a record. `Event` stays a class | `Event` as record |
 
-**SOLID so far:** S, O, L, I, D. Encapsulation. Java: equals/hashCode, ArrayList vs LinkedList, immutability, Optional.
+**SOLID so far:** S, O, L, I, D. Encapsulation. Java: equals/hashCode, ArrayList vs LinkedList, immutability, Optional, records vs class.
 
 ---
 
@@ -67,7 +71,7 @@ Must-have. Includes **Java core** (collections, threads) — mid interviews ask 
 | 6 | **LSP** | Timeout / fallback must not look like **201 booked**. | W4 Thu **done** + W5 Wed **done** |
 | 9 | **Observer / events** | `book()` commits, then outbox — not email inside the lock. | W6 Mon |
 
-**Nice if leftover:** records vs class, Factory as `@Bean`, Facade = Gateway. Checked vs unchecked **done W5 Wed**.
+**Nice if leftover:** Factory as `@Bean`, Facade = Gateway. Checked vs unchecked **done W5 Wed**. Records vs class **done W5 Thu**.
 
 **Skip:** Visitor, Prototype, Flyweight, Mediator, square-rectangle, JVM GC tuning.
 
@@ -101,7 +105,7 @@ Do not repeat prompts in **design-map.md → Done**. The five families are: **wh
 | Mon | JWT at gateway vs again in the service | equals/hashCode **+ Collections (longer OOP)** | **Done W5 Day 1** |
 | Tue | Which calls may **retry** (GET vs book). Need a click id to retry book. | Immutability + `Optional` | **Done W5 Day 2** |
 | Wed | Circuit open: fallback status. Must not look like a successful ticket | LSP | **Done W5 Day 3** |
-| Thu | Live vs ready. Kill a pod that still has `FOR UPDATE` | ISP (health ≠ book) |
+| Thu | Live vs ready. Kill a pod that still has `FOR UPDATE` | ISP (health ≠ book) | **Done W5 Day 4** |
 | Fri | **HLD** traffic through the gateway | — |
 
 ### Weeks 6–8
@@ -129,11 +133,11 @@ Name the product → actors → 4–8 classes → fields + 2–4 methods each �
 
 ---
 
-## Next session — Week 5 Day 4
+## Next session — Week 5 Day 5 (Fri)
 
-Week 5 Day 3 **closed**. Do **not** rerun timeout vs lock timeout, GET vs Book retry, Redis GET/SET/DEL, frozen DTO seats, Optional = no row, click id vs JWT vs correlation id, circuit open vs **201** / **409** / **502**, fallback that returns a DTO.
+Week 5 Day 4 **closed**. Do **not** rerun Compose `localhost` vs `booking`, health **200** = seat, record vs `Event` class, live vs ready, kill-while-`FOR UPDATE` as circuit fallback, `book()` `@Transactional` as Event’s lock.
 
-**Thu:** LC first. Then Docker Compose + one health check. OOP: ISP (health ≠ book). Design: live vs ready; kill a pod that still has `FOR UPDATE`.
+**Fri:** LC first (coding only, no LC-SD). Then **HLD** traffic through the gateway. OOP ~2 min. Sat/Sun off.
 
 
 Classic product HLD lite lives in **Part 1** ([lc-sd-map.md](lc-sd-map.md)). Part 3 stays this app until W6 LLD. URL shortener stays **W7 Fri Part 3**.

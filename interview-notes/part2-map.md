@@ -41,7 +41,7 @@ W4 Mon topics were built on **W3 Thu**. Start Week 4 on **Tue** (third service +
 | Mon | Gateway routes | First service behind it | **Done W5 Day 1 (2026-09-14)** |
 | Tue | Resilience4j timeout | Retry (which calls, which not) | **Done W5 Day 2 (2026-09-15)** + cache lab |
 | Wed | Circuit breaker on the hot call | Fallback status | **Done W5 Day 3 (2026-09-16)** |
-| Thu | Docker Compose for the set | One health check |
+| Thu | Docker Compose for the set | One health check | **Done W5 Day 4 (2026-09-17)** |
 | Fri | HLD traffic through gateway | — |
 
 **Spring Cache:** talk + `@Cacheable` / `@CacheEvict` **coded W5 Day 2**. Redis not wired (in-memory today). Interview store is still Redis. Notes: [week-05.md](week-05.md).

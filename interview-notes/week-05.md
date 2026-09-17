@@ -449,6 +449,44 @@ After `waitDurationInOpenState`: **not open** (half-open). One trial **does** ru
 
 **Weak:** Open mixed with “HTTP to EventClient.” Coach over-corrected Java vs HTTP.
 
-**Calendar:** Day 3 **closed**. **Next weekday:** Week 5 Day 4 — LC first, then Docker Compose + one health check. OOP: ISP (health ≠ book). Design: live vs ready; kill a pod holding `FOR UPDATE`.
+**Calendar:** Day 3 **closed**. **Next weekday:** Week 5 Day 4 — done (see below).
+
+---
+
+## Week 5 Day 4 — Reverse II + Intersection + Docker
+
+**Date:** 2026-09-17 (Thu)
+
+| Name | Today |
+|---|---|
+| **Part 1** | **#92** (coach, overtime) + **#160** (he coded) + **Ch 7**. **Done.** Extra: `LC-Practice/notes/week-05-day-04.md` |
+| **Part 2** | Docker Compose + one health check. **Done.** Coach wrote config. |
+| **Part 3** | ISP skip (health ≠ seat). Leftover: records vs class. Design: live vs ready; kill `FOR UPDATE`. **Done.** |
+
+### Part 2 — Docker Compose + one health check
+
+Two boxes: Booking + Gateway. Event still this JVM. Gateway uses `http://booking:8080`, not `localhost`. Health **200** ≠ ticket. `localhost` on Gateway → connection refused.
+
+### 60-sec (Part 2)
+
+> Two boxes. Name `booking`. Health = up, not Book.
+
+**Weak:** Stacked Docker ideas. Coach ate Design time.
+
+### Part 3 — records + live/ready + kill holder
+
+**Records:** request DTO may be a record. `Event` no (take mutates). `book()` uses DTO.
+
+**Live vs ready:** alive = JVM running, do not restart. Ready = send Book (DB up). New pod with DB down = not ready, do not send, do not restart.
+
+**Kill holder:** lock is in the DB. Same pod → both 5xx. Other pod, 1 seat, 100 waiters → one **201**, rest **409**. Open = no lock **503**. Timeout = lock maybe, **502**. Kill Event, Booking up → `DownstreamServiceException` **502**, no `save`. `book()` `@Transactional` does not own Event’s lock.
+
+**Weak:** Kill = fallback. 502/503 swapped. “Ready pod” meaning the new pod. Design started short; continued after he called the clock.
+
+### 60-sec (Part 3)
+
+> Record = request. Event = class. Kill holder → DB rollback. One **201**, rest **409**. Booking tx ≠ Event lock. Alive ≠ ready.
+
+**Calendar:** Day 4 **closed**. **Next:** Friday LC coding only, then HLD through the gateway. Sat/Sun off.
 
 

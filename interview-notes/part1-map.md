@@ -39,6 +39,7 @@ Fri 2026-09-11: skipped **#202** Happy Number. Same-week hash Easy: **#290 Word 
 Mon 2026-09-14: **#19** Remove Nth + **#206** Reverse + **Ch 4** cache/TTL. **Done** (coding + LC-SD). Cache **on this app** pulled to **Tue extra** (he asked to understand it fully). Gateway Spring **done**.
 Tue 2026-09-15: **#143** Reorder + **#141** Cycle. **Done** (coding). Ch 13 Auth skipped (Mon Part 3). Cache extra done.
 Wed 2026-09-16: **#2** Add Two Numbers (off the printed Week 5 line; Top Interview 150; coach wrote) + **#21** Merge Two Lists + **Ch 10** hot key. **Done** (coding + LC-SD).
+Thu 2026-09-17: **#92** Reverse Linked List II (coach wrote, overtime) + **#160** Intersection (he coded) + **Ch 7** service-to-service (Ch 1 scrapped). **Done**.
 
 ---
 

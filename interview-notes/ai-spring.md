@@ -22,7 +22,7 @@ Pom / class: only if he says to write them.
 
 ## Start of Part 3 (every time)
 
-State today’s OOP + design from [oop-design-map.md](oop-design-map.md). Check [design-map.md](design-map.md) **Done** and this day’s Part 2. **Stick to the map.** Clock: OOP ~10 min, design ~45 min (Friday = HLD).
+State today’s OOP + design from [oop-design-map.md](oop-design-map.md). Check [design-map.md](design-map.md) **Done** and this day’s Part 2. **Stick to the map.** Clock: OOP ~10 min, design **~45 min** (Friday = HLD). **You keep the clock.** Do not ask him to protect it. If Part 2 ran long, cut Part 2, not Design.
 
 Skip a **repeat question**, not the **slot**. If today’s OOP is Done, still ~10 min from leftover. Do not skip Part 3 because Part 2 coded it. Then the leftover question in plain words.
 
