@@ -164,6 +164,8 @@ JPA spec: entity must have a no-arg constructor. If you only add `@AllArgsConstr
 
 **Gateway vs Booking JWT:** Check at the gateway so junk never forwards. Check **again** in Booking — `:8080` is still a door. Copy the header; do not drop it.
 
+**Gateway HLD:** Phone → Gateway → Booking → Auth → Event. `EventClient` is Booking (same jar still). Door wait longer than Booking 3s. Last seat on Event’s row; **409** stays **409**. Booking dead → Gateway **502**. Circuit **503** / timeout **502** = Booking fallback. Do not retry Book at the door. Dropped **201** is still a ticket.
+
 **`equals` / lists (W5 Mon):** `equals`+`hashCode` on the **entity** id, not the DTO. `ArrayList.get(i)` = jump. `LinkedList` = insert between two items. `ArrayList.add(i, x)` shifts; `add(x)` = end.
 | `SecurityContextHolder` | Per-request identity box. Not a field on the singleton. |
 | `@WithMockUser` | Test-only. Fills that box. `roles =` is allowed; unnamed string is username. |

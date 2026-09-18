@@ -488,8 +488,7 @@ Two boxes: Booking + Gateway. Event still this JVM. Gateway uses `http://booking
 > Record = request. Event = class. Kill holder → DB rollback. One **201**, rest **409**. Booking tx ≠ Event lock. Alive ≠ ready.
 
 **Calendar:** Day 4 **closed**.
-Friday Part 1 is below.
-HLD still today.
+Friday Part 1 + HLD **done** (below).
 
 ---
 
@@ -501,8 +500,8 @@ HLD still today.
 |---|---|
 | **Part 1** | **#82** (overtime, then he rewrote) + **#234** (on-time). **Done.** Extra: `LC-Practice/notes/week-05-day-05.md` |
 | **Part 1 Design (LC-SD)** | **Off** (Friday). |
-| **Part 2** | HLD traffic through the gateway. **Not yet.** |
-| **Part 3** | Same HLD. OOP ~2 min. **Not yet.** |
+| **Part 2** | HLD traffic through the gateway. **Done.** No new code. |
+| **Part 3** | Same HLD. OOP Facade = Gateway (~2 min). **Done.** |
 
 ### Part 1 — two LCs
 
@@ -597,9 +596,61 @@ Inner loop is still O(n).
 Not Reorder.
 Friday = no Chapter talk.
 
-**Calendar:** Part 1 **closed**.
-**Leftover today:** HLD traffic through the gateway.
-Sat/Sun **off**.
-**Next weekday:** Week 6 Day 1 — trees, three LCs.
+**Calendar:** Part 1 **closed**. HLD below.
+
+---
+
+### Part 2 / Part 3 — HLD traffic through the gateway
+
+**Date:** 2026-09-18 (Fri, after Part 1)
+
+**Goal:** One board. Phone → Gateway → Booking → Auth → Event. Time budget. 10× at the door. Statuses. No new code. Say **services**, not “boxes,” unless you define it.
+
+#### OOP — Facade (~2 min)
+
+Gateway is one door. It **forwards**. It does not replace `book()`. Taking seats still happens in Booking → `EventClient`.
+
+Forwarding **is** the job. Auth **may** be checked at the door (not built). Booking’s filter still runs.
+
+#### Services (not classes)
+
+Phone → **Gateway** (`8081`) → **Booking** (`8080`) → **Auth** → **Event**.
+
+`BookingController`, `book()`, `AuthClient`, `EventClient` live **inside Booking**. JWT filter ≠ Auth the service. `AuthClient` = Booking’s HTTP caller to Auth.
+
+`EventClient` = Booking, even though this repo is one jar. Annotations and `reserveSeatsFallback` run in Booking’s JVM. Event’s take has no circuit / TimeLimiter.
+
+#### Time budget
+
+This app: no Gateway timeout. Booking’s 3s fires. Phone sees HTTP **502**, not the Java type `DownstreamServiceException`. Gateway copies it.
+
+If Gateway is **2s** and Booking waits **3s**: the **door** hangs up first. Booking is still in `.block()`. Event may still write. Door wait must be **longer** than Booking’s 3s.
+
+#### 10× / last seat
+
+Gateway does not hold a seat and does not line people up. Wait is Event’s `FOR UPDATE`. One **201**, rest **409**. Gateway copies. Event decided. Booking **throws** `InsufficientSeatsException` (maps Event’s HTTP 409). Do not mix decide vs throw.
+
+#### Statuses
+
+| What happened | Phone | Who created it | Event row |
+|---|---|---|---|
+| Last seat taken / sold out | **201** / **409** | Event (Booking maps 409) | Yes |
+| Booking pod dead | **502** | Gateway | No |
+| Circuit open | **503** | Booking fallback | No (`AuthClient` already ran; `save` did not) |
+| TimeLimiter 3s | **502** | Booking fallback | Maybe still running |
+
+Do not remap **409** → **502**/**503**. Sold out is Event working.
+
+#### Retry at the door
+
+Gateway must **not** retry POST Book. No click id. Retry is a second POST: extra **201**, or **409** while try 1 already **saved** and the phone only saw **502**. Ticket in DB; user does not know. GET bookings / click id, not retry at the door.
+
+### 60-sec (HLD)
+
+> Phone → Gateway → Booking → Auth → Event. `EventClient` is Booking. Door wait longer than 3s. Last seat on Event’s row; **409** stays **409**. Booking dead → Gateway **502**. Circuit **503** / timeout **502** = Booking, not Event. Do not retry Book at the door. Dropped **201** is still a ticket.
+
+**Weak:** “Boxes” undefined. Auth named without `AuthClient` vs filter. `EventClient` = Event (same project). All **502**/**503** = Event. Gateway queues the winner. Phone “gets `DownstreamServiceException`.” “No ticket” because the user saw **502**. Coach: said boxes; underspecified “do they have a ticket?”; talked over “Gateway hangs first.”
+
+**Calendar:** Day 5 **closed**. Sat/Sun **off**. **Next weekday:** Week 6 Day 1 — trees, then async/outbox. Part 3: Observer + first LLD.
 
 

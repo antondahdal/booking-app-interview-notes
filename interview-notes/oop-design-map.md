@@ -57,6 +57,7 @@ Days marked **longer** in the calendar: do both items. Anton asked to be safe, n
 | Checked vs unchecked | W5 Wed leftover | Domain = `RuntimeException`. No `throws`. Empty catch → **201** | Checked on `book()` / swallow to compile |
 | ISP (health ≠ book) | W5 Thu | Health **200** is not a seat. Probe ≠ `book()` | Health **200** → **201** |
 | Records vs class | W5 Thu leftover | Request DTO may be a record. `Event` stays a class | `Event` as record |
+| Facade = Gateway | W5 Fri | One door. Forwards. Does not replace `book()` | Gateway swallows take-seats |
 
 **SOLID so far:** S, O, L, I, D. Encapsulation. Java: equals/hashCode, ArrayList vs LinkedList, immutability, Optional, records vs class.
 
@@ -71,7 +72,7 @@ Must-have. Includes **Java core** (collections, threads) — mid interviews ask 
 | 6 | **LSP** | Timeout / fallback must not look like **201 booked**. | W4 Thu **done** + W5 Wed **done** |
 | 9 | **Observer / events** | `book()` commits, then outbox — not email inside the lock. | W6 Mon |
 
-**Nice if leftover:** Factory as `@Bean`, Facade = Gateway. Checked vs unchecked **done W5 Wed**. Records vs class **done W5 Thu**.
+**Nice if leftover:** Factory as `@Bean`. Checked vs unchecked **done W5 Wed**. Records vs class **done W5 Thu**. Facade = Gateway **done W5 Fri**.
 
 **Skip:** Visitor, Prototype, Flyweight, Mediator, square-rectangle, JVM GC tuning.
 
@@ -106,7 +107,7 @@ Do not repeat prompts in **design-map.md → Done**. The five families are: **wh
 | Tue | Which calls may **retry** (GET vs book). Need a click id to retry book. | Immutability + `Optional` | **Done W5 Day 2** |
 | Wed | Circuit open: fallback status. Must not look like a successful ticket | LSP | **Done W5 Day 3** |
 | Thu | Live vs ready. Kill a pod that still has `FOR UPDATE` | ISP (health ≠ book) | **Done W5 Day 4** |
-| Fri | **HLD** traffic through the gateway | — |
+| Fri | **HLD** traffic through the gateway | Facade = Gateway | **Done W5 Day 5** |
 
 ### Weeks 6–8
 
@@ -133,14 +134,12 @@ Name the product → actors → 4–8 classes → fields + 2–4 methods each �
 
 ---
 
-## Next session — Week 5 Day 5 (Fri) HLD leftover
+## Next session — Week 6 Day 1 (Mon)
 
-Part 1 coding **closed** (#82 + #234).
-Do **not** rerun Compose `localhost` vs `booking`, health **200** = seat, record vs `Event` class, live vs ready, kill-while-`FOR UPDATE` as circuit fallback, `book()` `@Transactional` as Event’s lock.
+Week 5 Day 5 **closed**. Sat/Sun **off**.
+Do **not** rerun Gateway HLD: `EventClient` ≠ Event, stacked timeouts, retry Book at the door, 409 remapped, circuit **503** as Event.
 
-**Leftover today:** **HLD** traffic through the gateway.
-OOP ~2 min.
-Sat/Sun off.
+**Monday:** Part 1 trees. Part 2 async event + outbox idea. Part 3 Observer + **LLD** (first product from the bank).
 
 
 Classic product HLD lite lives in **Part 1** ([lc-sd-map.md](lc-sd-map.md)). Part 3 stays this app until W6 LLD. URL shortener stays **W7 Fri Part 3**.
