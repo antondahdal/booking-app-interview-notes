@@ -133,11 +133,14 @@ Name the product → actors → 4–8 classes → fields + 2–4 methods each �
 
 ---
 
-## Next session — Week 5 Day 5 (Fri)
+## Next session — Week 5 Day 5 (Fri) HLD leftover
 
-Week 5 Day 4 **closed**. Do **not** rerun Compose `localhost` vs `booking`, health **200** = seat, record vs `Event` class, live vs ready, kill-while-`FOR UPDATE` as circuit fallback, `book()` `@Transactional` as Event’s lock.
+Part 1 coding **closed** (#82 + #234).
+Do **not** rerun Compose `localhost` vs `booking`, health **200** = seat, record vs `Event` class, live vs ready, kill-while-`FOR UPDATE` as circuit fallback, `book()` `@Transactional` as Event’s lock.
 
-**Fri:** LC first (coding only, no LC-SD). Then **HLD** traffic through the gateway. OOP ~2 min. Sat/Sun off.
+**Leftover today:** **HLD** traffic through the gateway.
+OOP ~2 min.
+Sat/Sun off.
 
 
 Classic product HLD lite lives in **Part 1** ([lc-sd-map.md](lc-sd-map.md)). Part 3 stays this app until W6 LLD. URL shortener stays **W7 Fri Part 3**.

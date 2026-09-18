@@ -122,8 +122,9 @@ Bank and rules: [oop-design-map.md](oop-design-map.md) (bottom). Do **not** star
 
 **LC-SD (from W4, Part 1 only):** talk from [System Design for Interviews and Beyond](https://leetcode.com/explore/interview/card/system-design-for-interviews-and-beyond), ~15 min, Mon–Thu. Always **Chapter N + topic**. From W4 Tue: explain a bit, then the question. Calendar: [lc-sd-map.md](lc-sd-map.md). Do not run the same product again in Part 3 that day. **URL shortener** stays **W7 Fri Part 3**, not Part 1.
 
-## Next session — Week 5 Day 5 (Fri)
+## Next session — Week 5 Day 5 (Fri) HLD leftover
 
-Week 5 Day 4 **closed**. Do **not** rerun live vs ready or kill-while-holding `FOR UPDATE`.
+Part 1 coding **closed** (#82 + #234).
+Do **not** rerun live vs ready or kill-while-holding `FOR UPDATE`.
 
-**Fri:** LC first (no LC-SD). Then **HLD** traffic through the gateway.
+**Leftover today:** **HLD** traffic through the gateway.

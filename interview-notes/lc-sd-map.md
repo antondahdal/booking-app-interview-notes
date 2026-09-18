@@ -54,8 +54,8 @@ Skip if that product is **already** that day’s Part 3 or Friday HLD.
 | **W5 Mon** | Ch 4 — Cache (aside, TTL) | Speed browse; book is still truth | Cache “1 seat left” as gospel. **Skip** if Part 3 is already cache | **Done 2026-09-14** |
 | **W5 Tue** | Ch 13 — Auth practical. **Plus** cache on this app (extra, not a new chapter) | Login, token, who may call. Then cache until key / 10× / Book skips it | Full OAuth vendor sketch. `@Cacheable` code (W7 Wed) | **Auth skip** (Mon Part 3). Cache extra **Done 2026-09-15** |
 | **W5 Wed** | Ch 10 — Hot key / partition lite | One event is hot, others are not | Redesign Kafka | **Done 2026-09-16** |
-| **W5 Thu** | Ch 1 — Requirements on **this app** | Functional vs 10× / latency first | Jump to boxes |
-| **W5 Fri** | — | — | — |
+| **W5 Thu** | Ch 1 — Requirements on **this app**. **Scrapped.** Replaced with **Ch 7** service-to-service | Booking waits on Event HTTP | 201 before Event answers | **Done 2026-09-17** |
+| **W5 Fri** | — | — | — | **Off** (coding only) |
 | **W6 Mon** | Ch 5 — Queue + at-least-once | Outbox after commit | Exactly-once mail |
 | **W6 Tue** | Ch 8 recap if weak, else Ch 7 service-to-service | Booking → Event | 2PC |
 | **W6 Wed** | Ch 9 — CDN / edge **skip** unless they ask; use batching/timeout instead | — | YouTube |
@@ -80,3 +80,5 @@ Skip if that product is **already** that day’s Part 3 or Friday HLD.
 | **W5 Mon** | Ch 4 — Cache / TTL (browse GET; Book is Event’s row; never “1 left” → 201) |
 | **W5 Tue** | Ch 13 Auth skip (Mon Part 3). Cache extra (key / 10× browse / Book skips cache) |
 | **W5 Wed** | Ch 10 — Hot key / partition lite (event 7; GET can cache; Book still one row; 409 sold out ≠ 502 lock wait) |
+| **W5 Thu** | Ch 1 scrapped. **Ch 7** service-to-service (Booking HTTP wait; 201 only after Event answers) |
+| **W5 Fri** | — (coding only) |
