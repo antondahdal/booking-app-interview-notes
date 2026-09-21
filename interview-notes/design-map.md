@@ -65,6 +65,7 @@ Every weekday prompt and every Friday board is one of these. If a prompt is not 
 | Circuit + fallback status | Status | W5 Wed | Open = do not call Event. Phone **503**, not **201**. Sold out still **409**. Fallback **throws**; a returned DTO is a fake ticket. 409/404 do not open the circuit | Fallback `return` DTO → **201**. Open → **409**. 502 mixed with 503. Sold out trips the circuit |
 | Live vs ready + kill a holder | 10× | W5 Thu | Alive = JVM running (do not restart). Ready = send Book (DB up). Kill holder → DB rollback, lock free. Other pod: one waiter **201**, rest **409**. Dead Event + live Booking → `DownstreamServiceException` **502**, no ticket. `book()` `@Transactional` does not own Event’s lock | Kill = circuit. Health **200** = ticket. Booking rollback undoes Event. All waiters **201** |
 | Gateway HLD | HLD | W5 Fri | Phone → Gateway → Booking → Auth (`AuthClient`) → Event (`EventClient`). Filter ≠ Auth. `EventClient` = Booking, even in the same jar. Door wait **longer** than Booking 3s. 100 wait on Event’s row, not the door. **409** stays **409**. Booking down → Gateway **502**, no take. No retry Book at the door. Dropped **201** is still a ticket. Circuit **503** / TimeLimiter **502** = Booking fallback, Event may not have run | `EventClient` = Event. All **502**/**503** = Event. Gateway queues the last seat. Retry **502** at the door |
+| Outbox / at-least-once | Slow hop | W6 Mon | Ticket + `PENDING` in one `book()` commit. **201** ≠ print (`@Async` listener). Event **409** never reaches outbox. Same `PENDING` row can print twice (at-least-once). Unique on `bookingId` does not block that. Listener does not wake on restart by itself (poller = Thu) | Unique = no second print. `populateMessageAndSave` is `@Async`. Event writes the ticket |
 
 **Asked, not built (keep as interview words only until code exists):** click id / idempotency key. Do not pretend it is in the app.
 
@@ -80,7 +81,7 @@ Same shape as the OOP “still need” table. Must-have on a mid-level board. Ea
 | 13 | **Circuit + fallback status** | Status | Open circuit ≠ **201 ticket**. | W5 Wed **done** |
 | 14 | **Live vs ready + kill a holder** | 10× | Pod dies holding `FOR UPDATE`. | W5 Thu **done** |
 | 15 | **Gateway HLD** | HLD | Traffic + time budget. | W5 Fri **done** |
-| 16 | **Outbox / at-least-once mail** | Slow hop | Email after commit. Duplicate mail possible. | W6 Mon–Thu |
+| 16 | **Outbox / at-least-once mail** | Slow hop | Email after commit. Duplicate mail possible. | W6 Mon **done** (poller leftover Thu) |
 | 17 | **Async HLD** | HLD | Book path vs notify path. | W6 Fri |
 | 18 | **N+1 and index as bottleneck** | 10× | What the user feels, what you measure. | W7 Mon–Tue |
 | 19 | **Cache** | Truth / 10× | Cache-aside, TTL. Do not cache “1 seat left” as gospel. Book is truth. | **W7 Wed (longer)** |
@@ -123,9 +124,9 @@ Bank and rules: [oop-design-map.md](oop-design-map.md) (bottom). Do **not** star
 
 **LC-SD (from W4, Part 1 only):** talk from [System Design for Interviews and Beyond](https://leetcode.com/explore/interview/card/system-design-for-interviews-and-beyond), ~15 min, Mon–Thu. Always **Chapter N + topic**. From W4 Tue: explain a bit, then the question. Calendar: [lc-sd-map.md](lc-sd-map.md). Do not run the same product again in Part 3 that day. **URL shortener** stays **W7 Fri Part 3**, not Part 1.
 
-## Next session — Week 6 Day 1 (Mon)
+## Next session — Week 6 Day 2 (Tue)
 
-Week 5 Friday **closed**. Sat/Sun **off**.
-Do **not** rerun Gateway traffic HLD.
+Week 6 Monday **closed**.
+Do **not** rerun outbox **201** ≠ print or Event **409** / no `PENDING`.
 
-**Monday:** outbox / at-least-once mail + first LLD.
+**Tuesday:** notification send + Actuator. LLD: **library** (parking lot first pass done).

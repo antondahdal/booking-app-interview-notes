@@ -48,6 +48,8 @@ Fri 2026-09-18: **#82** Remove Duplicates from Sorted List II (overtime, then he
 
 #104 Max Depth, #226 Invert, #102 Level Order, #98 Validate BST, #230 Kth Smallest.
 
+Mon 2026-09-21: **#104** Max Depth (on-time) + **#226** Invert (on-time) + **#102** Level Order (overtime, coach filled) + **Ch 5** queue / at-least-once. **Done** (coding + LC-SD). Spring async/outbox + Observer + parking-lot LLD **done**.
+
 ---
 
 ## Week 7 — heap / intervals / binary search

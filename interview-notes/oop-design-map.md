@@ -58,6 +58,7 @@ Days marked **longer** in the calendar: do both items. Anton asked to be safe, n
 | ISP (health ≠ book) | W5 Thu | Health **200** is not a seat. Probe ≠ `book()` | Health **200** → **201** |
 | Records vs class | W5 Thu leftover | Request DTO may be a record. `Event` stays a class | `Event` as record |
 | Facade = Gateway | W5 Fri | One door. Forwards. Does not replace `book()` | Gateway swallows take-seats |
+| Observer / events | W6 Mon | `publishEvent` matches `@TransactionalEventListener` + argument type. `book()` does not name the listener | `book()` calls the listener class |
 
 **SOLID so far:** S, O, L, I, D. Encapsulation. Java: equals/hashCode, ArrayList vs LinkedList, immutability, Optional, records vs class.
 
@@ -70,9 +71,9 @@ Must-have. Includes **Java core** (collections, threads) — mid interviews ask 
 | # | Topic | Why they ask | Slot |
 |---|---|---|---|
 | 6 | **LSP** | Timeout / fallback must not look like **201 booked**. | W4 Thu **done** + W5 Wed **done** |
-| 9 | **Observer / events** | `book()` commits, then outbox — not email inside the lock. | W6 Mon |
+| 9 | **Observer / events** | `book()` commits, then outbox — not email inside the lock. | W6 Mon **done** |
 
-**Nice if leftover:** Factory as `@Bean`. Checked vs unchecked **done W5 Wed**. Records vs class **done W5 Thu**. Facade = Gateway **done W5 Fri**.
+**Nice if leftover:** Factory as `@Bean`. Checked vs unchecked **done W5 Wed**. Records vs class **done W5 Thu**. Facade = Gateway **done W5 Fri**. Observer **done W6 Mon**.
 
 **Skip:** Visitor, Prototype, Flyweight, Mediator, square-rectangle, JVM GC tuning.
 
@@ -113,7 +114,7 @@ Do not repeat prompts in **design-map.md → Done**. The five families are: **wh
 
 | When | Design | OOP / LLD |
 |---|---|---|
-| W6 Mon–Thu | Outbox, at-least-once mail, metrics on `book()` | Observer + **LLD** (see bank) |
+| W6 Mon–Thu | Outbox, at-least-once mail, metrics on `book()` | Observer + **LLD** (see bank) | **Observer + outbox board + parking-lot LLD first pass: Done W6 Day 1** |
 | W6 Fri | HLD async | — |
 | W7 Mon–Tue | Index, N+1, secrets — as **bottleneck** talk | More LLD |
 | **W7 Wed (longer)** | **Cache** (aside, TTL, don’t cache “1 seat left” as truth) | LLD |
@@ -128,18 +129,18 @@ Whiteboard only. No Java files. Rotate. Do not repeat the same product.
 
 Name the product → actors → 4–8 classes → fields + 2–4 methods each → say has-a vs is-a once.
 
-**Bank:** parking lot, library, hotel rooms, food-delivery order, split-bill, URL shortener (classes, not AWS), chat (User / Message / Room), notification outbox.
+**Bank:** parking lot **(first pass W6 Day 1)**, library, hotel rooms, food-delivery order, split-bill, URL shortener (classes, not AWS), chat (User / Message / Room), notification outbox.
 
 **Critique:** missing entity, god-class, wrong is-a.
 
 ---
 
-## Next session — Week 6 Day 1 (Mon)
+## Next session — Week 6 Day 2 (Tue)
 
-Week 5 Day 5 **closed**. Sat/Sun **off**.
-Do **not** rerun Gateway HLD: `EventClient` ≠ Event, stacked timeouts, retry Book at the door, 409 remapped, circuit **503** as Event.
+Week 6 Day 1 **closed**.
+Do **not** rerun: `201` ≠ print, Event **409** never writes `PENDING`, unique on `bookingId` ≠ second print of the same row, `book()` names the listener, parking-lot actors/`Ticket` fields.
 
-**Monday:** Part 1 trees. Part 2 async event + outbox idea. Part 3 Observer + **LLD** (first product from the bank).
+**Tuesday:** Part 1 leftover trees #98 / #230. Part 2 notification send + Actuator health. Part 3 leftover OOP (Factory `@Bean` if needed) + **LLD** next product (**library**). PENDING poller stays Thu glue.
 
 
 Classic product HLD lite lives in **Part 1** ([lc-sd-map.md](lc-sd-map.md)). Part 3 stays this app until W6 LLD. URL shortener stays **W7 Fri Part 3**.

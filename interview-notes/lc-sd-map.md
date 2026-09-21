@@ -56,7 +56,7 @@ Skip if that product is **already** that day’s Part 3 or Friday HLD.
 | **W5 Wed** | Ch 10 — Hot key / partition lite | One event is hot, others are not | Redesign Kafka | **Done 2026-09-16** |
 | **W5 Thu** | Ch 1 — Requirements on **this app**. **Scrapped.** Replaced with **Ch 7** service-to-service | Booking waits on Event HTTP | 201 before Event answers | **Done 2026-09-17** |
 | **W5 Fri** | — | — | — | **Off** (coding only) |
-| **W6 Mon** | Ch 5 — Queue + at-least-once | Outbox after commit | Exactly-once mail |
+| **W6 Mon** | Ch 5 — Queue + at-least-once | Outbox after commit | Exactly-once mail | **Done 2026-09-21** |
 | **W6 Tue** | Ch 8 recap if weak, else Ch 7 service-to-service | Booking → Event | 2PC |
 | **W6 Wed** | Ch 9 — CDN / edge **skip** unless they ask; use batching/timeout instead | — | YouTube |
 | **W6 Thu** | Weak recap (rate limit **or** retry) | — | A new Hard product |
@@ -82,3 +82,4 @@ Skip if that product is **already** that day’s Part 3 or Friday HLD.
 | **W5 Wed** | Ch 10 — Hot key / partition lite (event 7; GET can cache; Book still one row; 409 sold out ≠ 502 lock wait) |
 | **W5 Thu** | Ch 1 scrapped. **Ch 7** service-to-service (Booking HTTP wait; 201 only after Event answers) |
 | **W5 Fri** | — (coding only) |
+| **W6 Mon** | Ch 5 — Queue + at-least-once (outbox with the book; worker may run the same row twice) |

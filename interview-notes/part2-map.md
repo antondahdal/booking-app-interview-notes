@@ -52,7 +52,7 @@ W4 Mon topics were built on **W3 Thu**. Start Week 4 on **Tue** (third service +
 
 | Day | Topic 1 | Topic 2 |
 |---|---|---|
-| Mon | Async event | Outbox idea in code |
+| Mon | Async event | Outbox idea in code | **Done W6 Day 1 (2026-09-21)** |
 | Tue | Notification send | Actuator health |
 | Wed | Metrics on `book()` | One dashboard query |
 | Thu | Remaining async glue | Test |

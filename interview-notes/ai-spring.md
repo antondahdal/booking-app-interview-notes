@@ -12,6 +12,8 @@ Normal sentences. No telegram. If he does not get the **phrasing** of a question
 
 Answer what he asked. Finish **one topic** before the next. Wrong → correct, stay. Do not jump.
 
+**Walk the story** (Anton 2026-09-21): first time a type appears, 3–5 sentences, then the lines. Do not repeat “Not HTTP. Not a table.” After done/ok: **only the check**, wait for his answer. No Maven/import quizzes. If phrasing failed, restate, do not write a long correction. Coach stays short.
+
 ## Start of Part 2
 
 1. Notes first. Lock today’s slots (including extras already written there).
