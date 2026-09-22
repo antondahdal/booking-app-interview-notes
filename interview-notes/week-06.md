@@ -96,3 +96,52 @@ LLD = Low-Level Design (classes / fields / methods). Whiteboard. Not this app.
 Next LLD product: **library**. Do not rerun this parking-lot sketch.
 
 **Calendar:** Day 1 **closed**. **Next weekday:** Week 6 Day 2 — #98 / #230, notification send, Actuator, library LLD.
+
+---
+
+## Week 6 Day 2 — trees + notification send + Actuator
+
+**Date:** 2026-09-22 (Tue)
+
+| Name | What it is | Today |
+|---|---|---|
+| **Part 1 coding** | LC-Practice | **#98**, **#230** overtime (he coded). Third Easy skipped. **Done.** |
+| **Part 1 Design (LC-SD)** | Course card talk | **Chapter 8** timeout / retry / click id recap. **Done.** |
+| **Part 2** | Spring | Notification send + Actuator probes. **Done.** |
+| **Part 3** | OOP + LLD | **Skipped** (Anton). Carry: Factory `@Bean` + library LLD. |
+
+---
+
+### Part 2 — Notification send
+
+**Goal:** Listener does not own the “tell the user” print. A `BookingNotifier` does. Mark outbox `SENT` only after `send` returns.
+
+`BookingNotifier` is `@Service`. Constructor DI into `BookingCreatedListener`. `EventIdPublisher` calls `send`, then updates the row.
+
+If `send` throws: ticket already committed (listener is after commit). Outbox row stays `PENDING`.
+
+**60-sec:** After commit, notifier tells; then `SENT`. Fail tell → ticket stays, row stays `PENDING`.
+
+**Weak:** `send` inside `book()`. Mark `SENT` before `send`. Print still on the listener.
+
+---
+
+### Part 2 — Actuator health
+
+**Goal:** Live ≠ ready. Ops probe is not `book()`.
+
+`management.endpoint.health.probes.enabled=true`. Security: `/actuator/health/**` public (exact `/actuator/health` is not enough for liveness/readiness paths).
+
+DB down, JVM up → **alive**, **not ready**. Health **200** is not a ticket.
+
+**60-sec:** Liveness = process up. Readiness = may send Book (DB). Probes on; health path open under `/**`.
+
+**Weak:** Health **200** → ticket. Kill / restart on failed readiness only as if it were liveness. Exact matcher blocks probe URLs.
+
+---
+
+### Part 3 — skipped
+
+Factory `@Bean` + library LLD **not run**. Do not skip the slot next weekday — run these first, then Wed map items.
+
+**Calendar:** Part 1 + Part 2 **closed**. Part 3 **open** (carry). **Next weekday:** Week 6 Day 3 — carried Factory + library LLD, then metrics on `book()` + dashboard query.

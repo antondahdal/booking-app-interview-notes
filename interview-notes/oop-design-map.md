@@ -135,12 +135,12 @@ Name the product → actors → 4–8 classes → fields + 2–4 methods each �
 
 ---
 
-## Next session — Week 6 Day 2 (Tue)
+## Next session — Week 6 Day 3 (Wed)
 
-Week 6 Day 1 **closed**.
-Do **not** rerun: `201` ≠ print, Event **409** never writes `PENDING`, unique on `bookingId` ≠ second print of the same row, `book()` names the listener, parking-lot actors/`Ticket` fields.
+Week 6 Day 2 Part 1 + Part 2 **closed**. Part 3 **skipped** (carry).
+Do **not** rerun: notification `send` fail → ticket + `PENDING`; liveness vs readiness (DB down); parking-lot sketch; outbox **201** ≠ print.
 
-**Tuesday:** Part 1 leftover trees #98 / #230. Part 2 notification send + Actuator health. Part 3 leftover OOP (Factory `@Bean` if needed) + **LLD** next product (**library**). PENDING poller stays Thu glue.
+**Wednesday:** **First** carried Part 3 — Factory `@Bean` (~10) + library LLD (~45). **Then** Part 2 metrics on `book()` + one dashboard query. PENDING poller stays Thu.
 
 
 Classic product HLD lite lives in **Part 1** ([lc-sd-map.md](lc-sd-map.md)). Part 3 stays this app until W6 LLD. URL shortener stays **W7 Fri Part 3**.
