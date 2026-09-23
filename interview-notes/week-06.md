@@ -145,3 +145,18 @@ DB down, JVM up → **alive**, **not ready**. Health **200** is not a ticket.
 Factory `@Bean` + library LLD **not run**. Do not skip the slot next weekday — run these first, then Wed map items.
 
 **Calendar:** Part 1 + Part 2 **closed**. Part 3 **open** (carry). **Next weekday:** Week 6 Day 3 — carried Factory + library LLD, then metrics on `book()` + dashboard query.
+
+---
+
+## Week 6 Day 3 — tree fill + metrics (open)
+
+**Date:** 2026-09-23 (Wed)
+
+| Name | What it is | Today |
+|---|---|---|
+| **Part 1 coding** | LC-Practice | **#199** overtime (coach filled). **#100** overtime (he coded). **#112** overtime (coach filled). **Coding done.** |
+| **Part 1 Design (LC-SD)** | Course card talk | **Chapter 9** batching / timeout (CDN skip). **Open** at coding push. |
+| **Part 2** | Spring | Metrics on `book()` + one dashboard query. **Open.** |
+| **Part 3** | OOP + LLD | First carried Factory `@Bean` + library LLD, then Wed map. **Open.** |
+
+Extra detail: [LC-Practice `notes/week-06-day-03.md`](https://github.com/antondahdal/LC-Practice/blob/master/notes/week-06-day-03.md).
