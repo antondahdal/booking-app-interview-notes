@@ -144,11 +144,11 @@ DB down, JVM up → **alive**, **not ready**. Health **200** is not a ticket.
 
 Factory `@Bean` + library LLD **not run**. Do not skip the slot next weekday — run these first, then Wed map items.
 
-**Calendar:** Part 1 + Part 2 **closed**. Part 3 **open** (carry). **Next weekday:** Week 6 Day 3 — carried Factory + library LLD, then metrics on `book()` + dashboard query.
+**Calendar:** Part 1 + Part 2 **closed**. Part 3 **open** (carry). **Next weekday:** Week 6 Day 3 — carried Factory + library LLD, then metrics on `book()` + dashboard query. *(Day 3 closed — see below.)*
 
 ---
 
-## Week 6 Day 3 — tree fill + metrics (open)
+## Week 6 Day 3 — tree fill + metrics
 
 **Date:** 2026-09-23 (Wed)
 
@@ -156,7 +156,67 @@ Factory `@Bean` + library LLD **not run**. Do not skip the slot next weekday —
 |---|---|---|
 | **Part 1 coding** | LC-Practice | **#199** overtime (coach filled). **#100** overtime (he coded). **#112** overtime (coach filled). **Coding done.** |
 | **Part 1 Design (LC-SD)** | Course card talk | **Chapter 9** batching / timeout (CDN skip). **Done.** |
-| **Part 2** | Spring | Metrics on `book()` + one dashboard query. **Open.** |
-| **Part 3** | OOP + LLD | First carried Factory `@Bean` + library LLD, then Wed map. **Open.** |
+| **Part 2** | Spring | Metrics on `book()` + one dashboard query. **Done.** |
+| **Part 3** | OOP + LLD | Carried Factory `@Bean` + library LLD. **Done.** (Anton asked Part 2 before Part 3.) |
 
 Extra detail: [LC-Practice `notes/week-06-day-03.md`](https://github.com/antondahdal/LC-Practice/blob/master/notes/week-06-day-03.md).
+
+---
+
+### Part 2 — Metrics on `book()`
+
+**Goal:** Count successful tickets. Ops can see load without reading logs. Health is not this number.
+
+`MeterRegistry` is a Spring bean (comes with Actuator). Constructor DI into `BookingServiceImpl`. After a successful `save`, `counter("bookings.created").increment()`.
+
+Event **409** throws in `reserveSeats` — never reaches the increment. Do not bump on a sold-out path.
+
+**60-sec:** Counter = how many times `book()` finished. Sold out → no bump. Not a health probe.
+
+**Weak:** Increment before `reserveSeats`. Health **200** means someone booked. Bump on every POST even when Event fails.
+
+---
+
+### Part 2 — One dashboard query
+
+**Goal:** Read that counter once via Actuator.
+
+`management.endpoints.web.exposure.include=health,metrics`. GET `/actuator/metrics/bookings.created` (JWT required — only `/actuator/health/**` is public). After one successful book, `COUNT` = `1.0`.
+
+Lab note: live book hit **500** while `@TimeLimiter` ran `EventClient.reserveSeats` on another thread — `RequestContextHolder` null. Commented TimeLimiter for the demo, then put it back. Proper fix (copy request context) is not today’s topic. PENDING poller stays Thu.
+
+**60-sec:** Expose metrics. Hit the named counter. Health **200** with count **0** means nobody booked yet.
+
+**Weak:** Metrics path is a ticket. Forget to expose `metrics`. Empty Bearer → **403** (same as missing `$ATT`).
+
+---
+
+### Part 3 — Factory as `@Bean`
+
+`@Bean` on a method in `@Configuration`: Spring calls the method at startup and registers the **return value** as a bean. The method is the factory; the object is what others inject.
+
+Spring Security finds your chain by **type** (`SecurityFilterChain`), not by the class name `SecurityConfig`. Scan finds `@Configuration`; Security asks the container for that type on each request. You do not call `filterChain` from a controller.
+
+`@Service` on `SecurityFilterChain` does not work — it is not your class to annotate. Factory vs Singleton: factory = who creates; singleton = how many (default one shared instance).
+
+---
+
+### Part 3 — LLD library
+
+Whiteboard. Not this app. Do not rerun parking lot.
+
+**Actors:** Member (Guest), Librarian.
+
+**Classes:** Book, Shelf, Library, Member, Librarian, Loan.
+
+**Loan fields:** Book, Member, from, till. (Optional later: returned.)
+
+**Loan methods:** `returnBook`, `extendTill`, `isOverdue`. Fields at create time are not methods.
+
+**Has-a:** Loan has-a Book (not is-a).
+
+**Checkout:** `checkout(member, book)` on **Librarian** (desk admin). Loan does not loan itself. Same idea as `initiateTicket` on `ParkingLot`.
+
+Next LLD product: **hotel rooms**. Do not rerun this library sketch.
+
+**Calendar:** Day 3 **closed**. **Next weekday:** Week 6 Day 4 — PENDING poller + test.

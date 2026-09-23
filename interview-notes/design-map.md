@@ -124,9 +124,9 @@ Bank and rules: [oop-design-map.md](oop-design-map.md) (bottom). Do **not** star
 
 **LC-SD (from W4, Part 1 only):** talk from [System Design for Interviews and Beyond](https://leetcode.com/explore/interview/card/system-design-for-interviews-and-beyond), ~15 min, Mon–Thu. Always **Chapter N + topic**. From W4 Tue: explain a bit, then the question. Calendar: [lc-sd-map.md](lc-sd-map.md). Do not run the same product again in Part 3 that day. **URL shortener** stays **W7 Fri Part 3**, not Part 1.
 
-## Next session — Week 6 Day 3 (Wed)
+## Next session — Week 6 Day 4 (Thu)
 
-Week 6 Tuesday Part 2 **closed**. Part 3 **skipped** (carry).
-Do **not** rerun outbox **201** ≠ print, notification fail → `PENDING`, or live-vs-ready (DB down).
+Week 6 Day 3 **closed** (metrics + Factory `@Bean` + library LLD).
+Do **not** rerun metrics vs health, library Loan board, or parking lot.
 
-**Wednesday:** library LLD first (parking lot done). Then Wed map (metrics) after that board.
+**Thursday:** PENDING poller leftover from outbox + test. Next LLD product if needed: hotel rooms.
