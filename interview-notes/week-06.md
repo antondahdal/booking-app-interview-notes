@@ -155,7 +155,7 @@ Factory `@Bean` + library LLD **not run**. Do not skip the slot next weekday —
 | Name | What it is | Today |
 |---|---|---|
 | **Part 1 coding** | LC-Practice | **#199** overtime (coach filled). **#100** overtime (he coded). **#112** overtime (coach filled). **Coding done.** |
-| **Part 1 Design (LC-SD)** | Course card talk | **Chapter 9** batching / timeout (CDN skip). **Open** at coding push. |
+| **Part 1 Design (LC-SD)** | Course card talk | **Chapter 9** batching / timeout (CDN skip). **Done.** |
 | **Part 2** | Spring | Metrics on `book()` + one dashboard query. **Open.** |
 | **Part 3** | OOP + LLD | First carried Factory `@Bean` + library LLD, then Wed map. **Open.** |
 
