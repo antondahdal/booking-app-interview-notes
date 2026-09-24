@@ -220,3 +220,50 @@ Whiteboard. Not this app. Do not rerun parking lot.
 Next LLD product: **hotel rooms**. Do not rerun this library sketch.
 
 **Calendar:** Day 3 **closed**. **Next weekday:** Week 6 Day 4 — PENDING poller + test.
+
+---
+
+## Week 6 Day 4 — tree fill + rate limit recap
+
+**Date:** 2026-09-24 (Thu)
+
+| Name | What it is | Today |
+|---|---|---|
+| **Part 1 coding** | LC-Practice | **#236** LCA coach filled (before 0). **#101** Symmetric overtime (coach filled). Third (#637) skipped. **Coding done.** |
+| **Part 1 Design (LC-SD)** | Course card talk | **Chapter 11** rate limit drill. **Done.** |
+| **Part 2** | Spring | PENDING poller + test. **Open.** |
+| **Part 3** | OOP + LLD | Hotel rooms LLD. **Open.** |
+
+Extra detail: [LC-Practice `notes/week-06-day-04.md`](https://github.com/antondahdal/LC-Practice/blob/master/notes/week-06-day-04.md). DFS orders look-up: [`notes/dfs-orders.md`](https://github.com/antondahdal/LC-Practice/blob/master/notes/dfs-orders.md).
+
+---
+
+### Part 1 coding — trees
+
+**#236 LCA:** post-order. Each call returns `p`/`q`/answer or null. Both sides non-null → this node. Else pass the non-null side up.
+
+**#101 Symmetric:** two queues in lockstep. Check the **polled pair** (both null → continue; one null / values differ → false). Offer outer (`a.left` / `b.right`) then inner (`a.right` / `b.left`).
+
+**Weak:** pre vs in vs post mixed (first said pre-order for LCA). "How do p and q connect" — it is two non-null returns at one node. Symmetric: pre-checking kids instead of the polled pair (same as Day 3 Same Tree); right side offered in Same Tree order, not mirror.
+
+---
+
+### Part 1 Design — Chapter 11 rate limit drill
+
+Retry already recapped Tue. W4 Day 1 Ch 11 was explained, not drilled.
+
+Prompt: bot on one account fires POST Book 50/s for event 7, seats left.
+
+Anton: count per save / commit; 4XX too many; separate error response.
+
+Right: 4XX family (**429**). Separate response so it is not sold out (**409**).
+
+Wrong: per commit is too late — flood already hit `book()`, Event, DB. Failed Books (409) never commit, so never counted. Where was vague.
+
+Fix: count per caller (JWT user, else IP) per window. Check before the handler (gateway / filter). Shared counter (Redis) so N instances ≠ N × cap.
+
+**Trap:** count inside `book()` or on commit. 429 must never look like 409 or a ticket.
+
+**60-sec:** Rate-limit per user per window with a shared counter at the edge, before `book()`. Over the cap is 429. Sold out stays 409.
+
+**Calendar:** Part 1 **closed**. Part 2 (PENDING poller + test) and Part 3 (hotel rooms LLD) **open**.

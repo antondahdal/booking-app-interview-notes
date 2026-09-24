@@ -59,7 +59,7 @@ Skip if that product is **already** that day’s Part 3 or Friday HLD.
 | **W6 Mon** | Ch 5 — Queue + at-least-once | Outbox after commit | Exactly-once mail | **Done 2026-09-21** |
 | **W6 Tue** | Ch 8 recap if weak, else Ch 7 service-to-service | Booking → Event | 2PC | **Done 2026-09-22** (Ch 8 recap) |
 | **W6 Wed** | Ch 9 — CDN / edge **skip** unless they ask; use batching/timeout instead | — | YouTube | **Done 2026-09-23** (batching/timeout; CDN skip) |
-| **W6 Thu** | Weak recap (rate limit **or** retry) | — | A new Hard product |
+| **W6 Thu** | Weak recap (rate limit **or** retry) | — | A new Hard product | **Done 2026-09-24** (Ch 11 rate limit drill; retry already Tue) |
 | **W6 Fri** | — | — | — |
 | **W7 Mon** | Ch 10 — Consistent hashing lite | Add a cache node, few keys move | URL shortener (that is **Fri Part 3**) |
 | **W7 Tue** | Ch 11 recap or leaderboard skip | — | — |
@@ -85,3 +85,4 @@ Skip if that product is **already** that day’s Part 3 or Friday HLD.
 | **W6 Mon** | Ch 5 — Queue + at-least-once (outbox with the book; worker may run the same row twice) |
 | **W6 Tue** | Ch 8 — Timeout / retry / click id recap |
 | **W6 Wed** | Ch 9 — batching / timeout (CDN skip; do not merge separate Books) |
+| **W6 Thu** | Ch 11 — rate limit drill (per user per window, before `book()`, shared counter; 429 not 409; not per commit) |

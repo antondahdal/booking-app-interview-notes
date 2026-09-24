@@ -51,6 +51,7 @@ Fri 2026-09-18: **#82** Remove Duplicates from Sorted List II (overtime, then he
 Mon 2026-09-21: **#104** Max Depth (on-time) + **#226** Invert (on-time) + **#102** Level Order (overtime, coach filled) + **Ch 5** queue / at-least-once. **Done** (coding + LC-SD). Spring async/outbox + Observer + parking-lot LLD **done**.
 Tue 2026-09-22: **#98** Validate BST (overtime) + **#230** Kth Smallest (overtime). Third Easy skipped. **Ch 8** timeout/retry recap. **Done** (coding + LC-SD). Part 3 skipped (carry Factory + library LLD).
 Wed 2026-09-23: tree fill **#199** Right Side View (overtime, coach filled) + **#100** Same Tree (overtime) + **#112** Path Sum (overtime, coach filled) + **Ch 9** batching/timeout (CDN skip). **Done** (coding + LC-SD).
+Thu 2026-09-24: tree fill **#236** LCA (coach filled) + **#101** Symmetric Tree (overtime, coach filled). Third (#637) skipped. **Ch 11** rate limit drill. **Done** (coding + LC-SD).
 
 ---
 
