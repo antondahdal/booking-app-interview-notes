@@ -33,6 +33,7 @@ Cheat sheets for the 8-week Event Booking Platform plan. **One file per week** s
 | [week-06.md](week-06.md) | Async + observability; **LLD class-design drills start** *(not started)* |
 | [week-07.md](week-07.md) | Polish + performance; more LLD *(not started)* |
 | [week-08.md](week-08.md) | Interview ready; mock includes one LLD *(not started)* |
+| [week-09.md](week-09.md) | Spring Boot questions + backtracking LCs; Hibernate / Docker / Kubernetes / Spring AI; HLD board + AI for developers *(not started)* |
 | [lc-patterns.md](lc-patterns.md) | Pattern gate + table (all weeks) |
 | [git.md](git.md) | Three repos, commit vs push, when Anton says push |
 | [ai-spring.md](ai-spring.md) | **Part 2/3 coach protocol** (notes first → set topics → he types; interview Qs on that code) |

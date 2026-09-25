@@ -83,3 +83,19 @@ Part 3 from this week: LLD class-design drills start.
 | Wed | Mock prep | Leftover |
 | Thu | Dry-run answers | Polish |
 | Fri | Long mock (HLD + LLD) | — |
+
+---
+
+## Week 9 — Hibernate + Docker + Kubernetes + Spring AI (Anton 2026-09-25)
+
+Details and traps: [week-09.md](week-09.md). Compose and health vs ready were W5 Thu — build on them, do not rerun.
+
+| Day | Topic 1 | Topic 2 |
+|---|---|---|
+| Mon | H1 Hibernate persistence context (lifecycle, first-level cache, dirty checking, flush, `merge`) | H2 Lazy loading + proxies (`getReferenceById`, `LazyInitializationException`, open-in-view off) |
+| Tue | H3 N+1 deep (fetch join / `@EntityGraph` / `@BatchSize`, two bags, fetch join + paging, prove query count) | H4 Transactions (propagation, `readOnly`, rollback, isolation) |
+| Wed | H5 Mapping / cascade / IDs / batch inserts / locking | Docker: multi-stage, layers, JVM memory in a container |
+
+Hibernate is **five topics** (Anton 2026-09-25: go deeper). SQL logging on for every Hibernate lab.
+| Thu | Kubernetes `Deployment` + `Service` + `ConfigMap` / `Secret` (kind or minikube) | Probes on Actuator, requests / limits, rolling update, HPA |
+| Fri | Spring AI `ChatClient` endpoint | One read-only tool (no booking tool) |

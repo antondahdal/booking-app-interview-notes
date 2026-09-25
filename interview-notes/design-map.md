@@ -87,6 +87,11 @@ Same shape as the OOP “still need” table. Must-have on a mid-level board. Ea
 | 19 | **Cache** | Truth / 10× | Cache-aside, TTL. Do not cache “1 seat left” as gospel. Book is truth. | **W7 Wed (longer)** |
 | 20 | **Classic HLD + 429** | HLD | URL shortener. Rate limit **429** ≠ sold-out **409**. | **W7 Fri (longer)** |
 | 21 | **Mock HLD + one LLD** | HLD / LLD | Week 8 Friday. | W8 Fri |
+| 22 | **Payment for Book** | Slow hop / Status | Webhook twice or never. Idempotency key. Never charge inside the lock. | W9 Mon |
+| 23 | **Flash sale waiting room** | 10× | 1M users, one hot row. Entry token with TTL. More pods ≠ more seats. | W9 Tue |
+| 24 | **Event search index** | Truth | Index is a stale copy. Book reads the row. | W9 Wed |
+| 25 | **Deploy on Kubernetes** | 10× / HLD | Probes, HPA, secrets, zero-downtime migration. | W9 Thu |
+| 26 | **AI assistant HLD** | HLD / Who | RAG + read-only tools + confirm. LLM off the Book hot path. | W9 Fri |
 
 **Should-know one-liners (already have a slot, or 2 min if they ask):**
 

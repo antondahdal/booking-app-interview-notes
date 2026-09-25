@@ -4,7 +4,7 @@
 
 Pattern gate before code: [lc-patterns.md](lc-patterns.md). Pick **only** LeetCode **Top Interview 150** and **Blind 75**. Skip anything already in [LC-Practice](https://github.com/antondahdal/LC-Practice). No NeetCode-only / Grind-only. Git: [git.md](git.md).
 
-From Week 3 Day 1: **two** coding LCs each weekday. Weeks 6–8: **three**.
+From Week 3 Day 1: **two** coding LCs each weekday. Weeks 6–8: **three**. Week 9: **two** + a Spring Boot question (Mon–Thu).
 
 **From Week 4 (Anton 2026-09-07):** Mon–Thu, after the coding LCs, **one ~15 min talk** from [System Design for Interviews and Beyond](https://leetcode.com/explore/interview/card/system-design-for-interviews-and-beyond). Bank: [lc-sd-map.md](lc-sd-map.md). Friday = coding LCs only. Not Design-tag code.
 
@@ -66,3 +66,19 @@ Thu 2026-09-24: tree fill **#236** LCA (coach filled) + **#101** Symmetric Tree 
 #200 Number of Islands, #207 Course Schedule, #70 Climbing Stairs, #198 House Robber, #322 Coin Change, #146 LRU.
 
 Short extras if a day needs them (only if not done): #344 Reverse String.
+
+---
+
+## Week 9 — backtracking / trie + Spring Boot questions (Anton 2026-09-25)
+
+**Two** coding LCs each weekday (Medium then Easy). Mon–Thu: **~20 min, two Spring Boot interview questions** replace LC-SD. Friday: **~15 min rapid-fire** of the rest of the Spring bank. Full bank (S1–S8, R1–R8) and traps: [week-09.md](week-09.md).
+
+| Day | Medium | Easy | Spring Boot questions |
+|---|---|---|---|
+| Mon | #17 Letter Combinations | #637 Average of Levels (W6 leftover) | S1 Auto-config + S2 Config / profiles |
+| Tue | #22 Generate Parentheses | #108 Sorted Array to BST | S3 Proxies / AOP + S4 Scopes / lifecycle |
+| Wed | #46 Permutations | #392 Is Subsequence | S5 Request path + S6 Errors / validation |
+| Thu | #39 Combination Sum | #14 Longest Common Prefix | S7 Boot 3 + S8 Testing slices |
+| Fri | #208 Implement Trie | #530 Min Abs Diff in BST | Rapid-fire R1–R8 |
+
+Same-week extras: #79 Word Search, #77 Combinations, #228 Summary Ranges.

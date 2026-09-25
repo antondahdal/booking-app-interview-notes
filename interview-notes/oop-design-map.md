@@ -123,6 +123,18 @@ Do not repeat prompts in **design-map.md → Done**. The five families are: **wh
 | **W7 Fri (longer)** | **Classic HLD:** URL shortener. **429** rate limit ≠ 409 sold out. | — |
 | W8 Fri | Long mock: **HLD + one LLD** | — |
 
+### Week 9 (Anton 2026-09-25) — HLD whiteboard + AI for developers
+
+OOP still-need is empty, so the OOP slot becomes **AI for developers (~20)**. HLD board ~40. Details and traps: [week-09.md](week-09.md).
+
+| Day | HLD whiteboard (~40) | AI for developers (~20) |
+|---|---|---|
+| Mon | Payment for Book (webhook, idempotency key, ledger, reconcile) | LLM basics (tokens, context, temperature, hallucination, structured output) |
+| Tue | Flash sale waiting room (1M users, 5k seats, entry token) | Spring AI map (`ChatClient`, advisors, structured output) |
+| Wed | Event search (index from outbox / CDC, stale browse vs Book truth) | Embeddings + RAG (pgvector, chunking, top-k, sources) |
+| Thu | Deploy board on Kubernetes (ingress, HPA, secrets, expand / contract migration) | Tools, MCP, agents, guardrails, AI coding tools |
+| Fri | **Long HLD:** AI assistant for the booking app (RAG + read-only tools + confirm + LLM gateway) | 2 min recap |
+
 ---
 
 ## LLD bank (Week 6+, not this booking app)

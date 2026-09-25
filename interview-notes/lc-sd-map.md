@@ -68,6 +68,7 @@ Skip if that product is **already** that day’s Part 3 or Friday HLD.
 | **W7 Fri** | — | URL shortener is **Part 3** (course practical #1) | Do not run it here |
 | **W8 Mon–Thu** | Recap whichever course piece was weak | — | Fraud pipeline, Uber, YouTube |
 | **W8 Fri** | — | Mock HLD is **Part 3** | — |
+| **W9 Mon–Thu** | **No LC-SD.** Slot = two Spring Boot interview questions; Fri rapid-fire ([week-09.md](week-09.md)) | Anton 2026-09-25 | Run an LC-SD chapter here |
 
 ## Done
 
