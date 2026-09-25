@@ -60,6 +60,7 @@ Days marked **longer** in the calendar: do both items. Anton asked to be safe, n
 | Facade = Gateway | W5 Fri | One door. Forwards. Does not replace `book()` | Gateway swallows take-seats |
 | Observer / events | W6 Mon | `publishEvent` matches `@TransactionalEventListener` + argument type. `book()` does not name the listener | `book()` calls the listener class |
 | Overloading vs overriding | W6 Day 4 (leftover — list was empty) | Overload = same name, different params, can be one class. Override = subclass replaces inherited method, needs parent, may call `super` | “Same signature” for overload |
+| Builder | W6 Fri (leftover — list was empty) | Long ctor: same-type params swap. Setters: half-built, `null`, no `final`. Builder: named steps, `build()` validates, immutable | Only “mixing variables”; setter cost missed |
 | Factory as `@Bean` | W6 Day 3 (carry from Tue) | `@Bean` method builds; return value is the bean. Security finds `SecurityFilterChain` by type | `@Service` on a library type. Class name = how Security finds it |
 
 **SOLID so far:** S, O, L, I, D. Encapsulation. Java: equals/hashCode, ArrayList vs LinkedList, immutability, Optional, records vs class.
@@ -149,11 +150,11 @@ Name the product → actors → 4–8 classes → fields + 2–4 methods each �
 
 ---
 
-## Next session — Week 6 Day 5 (Fri)
+## Next session — Week 7 Day 1 (Mon)
 
-Week 6 Day 4 Part 1 + Part 2 + Part 3 **closed**.
-Do **not** rerun: PENDING poller / at-least-once; overloading vs overriding; hotel rooms LLD; library; parking lot.
+Week 6 **closed** (Fri: async HLD + Builder).
+Do **not** rerun: async HLD board (saga release, idempotent key, claim / `SKIP LOCKED`); Builder; PENDING poller; overloading vs overriding; hotel / library / parking lot.
 
-**Friday:** HLD async (60–75 min) + 2 min OOP. From W7: LLD = **critique** + HLD board (services / DB / traffic) — see [week-07.md](week-07.md).
+**From W7:** LLD = **critique** + HLD board (services / DB / traffic) — see [week-07.md](week-07.md). Hold + confirm = W7 Thu Part 2.
 
 Classic product HLD lite lives in **Part 1** ([lc-sd-map.md](lc-sd-map.md)). Part 3 stays this app until W6 LLD. URL shortener stays **W7 Fri Part 3**.

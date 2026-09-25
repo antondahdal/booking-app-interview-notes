@@ -329,3 +329,43 @@ Leftover (OOP list empty). Overload = same **name**, different params, can live 
 Next LLD: **W7 critique format** (food-delivery order Mon). Do not rerun hotel.
 
 **Calendar:** Day 4 **closed**. **Next weekday:** Week 6 Day 5 (Fri) — HLD async.
+
+---
+
+## Week 6 Day 5 — HLD async
+
+**Date:** 2026-09-25 (Fri)
+
+| Name | What it is | Today |
+|---|---|---|
+| **Part 3** | HLD + 2 min OOP | Async HLD board + Builder. **Done.** |
+
+---
+
+### Part 3 — HLD async
+
+**Boxes.** Book path: Phone → Gateway → Booking (JWT filter, `AuthClient`, `EventClient` reserve, ticket `save`, metric, `populateMessageAndSave`, `publishEvent`) → **201**. Notify path: `@Async` listener (fast path) + `OutboxPoller` (backup) → `BookingNotifier.send` → `SENT`. Store: outbox table in Booking's DB.
+
+**Truth / commits.** Seats = Event's DB, committed when the HTTP call returns. Ticket + outbox row = Booking's DB, **one** commit. No transaction across both.
+
+**Event took seats, Booking `save` fails.** Booking rolls back (no ticket, no outbox). Phone **500**. Seats stuck in Event, nobody owns them. Fix = **compensating** release via Event's API (saga). Release can fail → durable `RELEASE_PENDING` row + poller. Retry is at-least-once → Event must be **idempotent**: key on the attempt id (reservation id, unique), not `eventId`. Only Event can dedupe — Booking never saw the lost reply.
+
+Alternative: **hold + confirm** — Event writes `HELD` + `expiresAt`, Booking confirms after commit, Event `@Scheduled` expires unconfirmed holds. Anton asked to build it → **W7 Thu Part 2**.
+
+**10× + mail down 1 h.** Book unaffected, **201** keeps coming, ~60k `PENDING` pile up. Fetch in batches, backoff/retry count.
+
+**3 Booking pods, same poller.** All read the same `PENDING` → mail ×3. Plain `FOR UPDATE` → others wait (no dupes, no speedup). `SKIP LOCKED` → each pod takes different rows. Do not hold the lock during `send()` (Week 3 pay-after-lock rule — holds a pool connection that `book()` needs). **Claim:** `PENDING → SENDING` + commit, send, `SENT` in a short tx. Crash while `SENDING` → `claimedAt` + timeout returns rows to the scan (slow pod may still send → at-least-once).
+
+**60-sec:** Gateway → Booking: Auth check, seats in Event (its own commit), ticket + `PENDING` outbox in one Booking commit, **201**. `@Async` listener sends after commit; poller retries `PENDING`. Mail down never blocks Book. At-least-once; claim rows across pods. Booking fails after Event took seats → idempotent release keyed by reservation id.
+
+**Weak:** `publishEvent` "populates the DB" (it is `populateMessageAndSave`). Booking-side status table to stop a double release (reply was lost — only Event knows). "Batch it" / "slower" for lock held during `send()` — needed the connection-pool cost and the claim step. "Same thread" for three pods.
+
+---
+
+### Part 3 — OOP: Builder (leftover, list empty)
+
+Long constructor: same-type params (`eventId`, `userId`) swap and still compile. Setters: half-built object, forgotten field = `null`, no `final`. Builder: named steps, `build()` checks required fields once, immutable result.
+
+**Weak:** setters half not known.
+
+**Calendar:** Week 6 **closed**. **Next weekday:** Week 7 Day 1 (Mon) — see [week-07.md](week-07.md).

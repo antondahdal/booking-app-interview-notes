@@ -9,7 +9,7 @@ Polish + performance: security, N+1, indexes, README.
 | Mon | N+1 fix | Index on hot FK |
 | Tue | Security pass (secrets/CORS) | README |
 | Wed | One perf check **(+ Spring Cache lab if not done)** | Leftover polish |
-| Thu | Remaining polish | Test |
+| Thu | Seat hold + confirm on Event (hold row `HELD` + `expiresAt`, Booking confirms after commit, Event `@Scheduled` expires → seats back). Anton asked W6 Fri. | Test (expiry job) |
 | Fri | HLD/recap | — |
 
 **Part 3:** continue LLD class-design (started Week 6). **W7 Wed longer:** this-app cache **if still weak**. `@Cacheable` **code** already **W5 Day 2**.

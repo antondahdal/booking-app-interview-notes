@@ -66,6 +66,7 @@ Every weekday prompt and every Friday board is one of these. If a prompt is not 
 | Live vs ready + kill a holder | 10× | W5 Thu | Alive = JVM running (do not restart). Ready = send Book (DB up). Kill holder → DB rollback, lock free. Other pod: one waiter **201**, rest **409**. Dead Event + live Booking → `DownstreamServiceException` **502**, no ticket. `book()` `@Transactional` does not own Event’s lock | Kill = circuit. Health **200** = ticket. Booking rollback undoes Event. All waiters **201** |
 | Gateway HLD | HLD | W5 Fri | Phone → Gateway → Booking → Auth (`AuthClient`) → Event (`EventClient`). Filter ≠ Auth. `EventClient` = Booking, even in the same jar. Door wait **longer** than Booking 3s. 100 wait on Event’s row, not the door. **409** stays **409**. Booking down → Gateway **502**, no take. No retry Book at the door. Dropped **201** is still a ticket. Circuit **503** / TimeLimiter **502** = Booking fallback, Event may not have run | `EventClient` = Event. All **502**/**503** = Event. Gateway queues the last seat. Retry **502** at the door |
 | Outbox / at-least-once | Slow hop | W6 Mon | Ticket + `PENDING` in one `book()` commit. **201** ≠ print (`@Async` listener). Event **409** never reaches outbox. Same `PENDING` row can print twice (at-least-once). Unique on `bookingId` does not block that. Listener does not wake on restart by itself (poller = Thu) | Unique = no second print. `populateMessageAndSave` is `@Async`. Event writes the ticket |
+| Async HLD | HLD / Slow hop | W6 Fri | Book path vs notify path. Seats commit in Event; ticket + outbox in one Booking commit. Event took seats + Booking fails → compensating release (saga), idempotent on reservation id in **Event**. Hold + confirm alternative (build W7 Thu). 3 pods: `SKIP LOCKED`, claim `PENDING → SENDING` + commit, send outside tx, `claimedAt` timeout | Booking dedupes the release. Lock held during `send()`. Key on `eventId`. Publish writes the row |
 
 **Asked, not built (keep as interview words only until code exists):** click id / idempotency key. Do not pretend it is in the app.
 
@@ -129,9 +130,9 @@ Bank and rules: [oop-design-map.md](oop-design-map.md) (bottom). Do **not** star
 
 **LC-SD (from W4, Part 1 only):** talk from [System Design for Interviews and Beyond](https://leetcode.com/explore/interview/card/system-design-for-interviews-and-beyond), ~15 min, Mon–Thu. Always **Chapter N + topic**. From W4 Tue: explain a bit, then the question. Calendar: [lc-sd-map.md](lc-sd-map.md). Do not run the same product again in Part 3 that day. **URL shortener** stays **W7 Fri Part 3**, not Part 1.
 
-## Next session — Week 6 Day 4 (Thu)
+## Next session — Week 7 Day 1 (Mon)
 
-Week 6 Day 3 **closed** (metrics + Factory `@Bean` + library LLD).
-Do **not** rerun metrics vs health, library Loan board, or parking lot.
+Week 6 **closed** (Fri async HLD done).
+Do **not** rerun the async board: saga release, idempotent release key, hold + confirm talk, claim / `SKIP LOCKED` across pods.
 
-**Thursday:** PENDING poller leftover from outbox + test. Next LLD product if needed: hotel rooms.
+**Monday:** N+1 and index as bottleneck (#18). Hold + confirm gets built W7 Thu Part 2.

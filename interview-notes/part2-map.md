@@ -56,7 +56,7 @@ W4 Mon topics were built on **W3 Thu**. Start Week 4 on **Tue** (third service +
 | Tue | Notification send | Actuator health | **Done W6 Day 2 (2026-09-22)** |
 | Wed | Metrics on `book()` | One dashboard query | **Done W6 Day 3 (2026-09-23)** |
 | Thu | Remaining async glue | Test | **Done W6 Day 4 (2026-09-24)** — PENDING poller + Mockito test |
-| Fri | HLD | — |
+| Fri | HLD | — | **Done W6 Day 5 (2026-09-25)** — async board |
 
 Part 3 from this week: LLD class-design drills start.
 
@@ -69,7 +69,7 @@ Part 3 from this week: LLD class-design drills start.
 | Mon | N+1 fix | Index on hot FK |
 | Tue | Security pass (secrets/CORS) | README |
 | Wed | One perf check **(+ Spring Cache lab if not done)** | Leftover polish |
-| Thu | Remaining polish | Test |
+| Thu | Seat hold + confirm on Event (TTL expiry). Anton asked W6 Fri 2026-09-25 | Test (expiry job) |
 | Fri | HLD/recap | — |
 
 ---
