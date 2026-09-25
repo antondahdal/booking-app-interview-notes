@@ -14,6 +14,16 @@ Polish + performance: security, N+1, indexes, README.
 
 **Part 3:** continue LLD class-design (started Week 6). **W7 Wed longer:** this-app cache **if still weak**. `@Cacheable` **code** already **W5 Day 2**.
 
+**Part 3 format change (Anton, 2026-09-24):** LLD = **critique**, not a fresh sketch. Coach shows a flawed class design (missing entity, god-class, wrong is-a, method on the wrong owner). He finds and fixes. ~15 min. Rest of Design = **HLD board**: more services, DB, traffic (~30 min). Do not run the same actors → classes → fields frame again in W7.
+
+| Day | LLD critique (~15) | HLD board (~30) |
+|---|---|---|
+| Mon | Food-delivery order | Services: split + who owns what data |
+| Tue | Split-bill | DB: read replica, index, when to shard |
+| Wed (longer) | Chat (User / Message / Room) | Traffic: LB + cache (plus cache talk above) |
+| Thu | Notification outbox | Traffic: rate limit (429), queue for spikes |
+| Fri | — | Classic HLD URL shortener (longer) |
+
 **Not started yet.** Say `Start Week 7 Day 1` when you get here.
 
 ---

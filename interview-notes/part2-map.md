@@ -55,7 +55,7 @@ W4 Mon topics were built on **W3 Thu**. Start Week 4 on **Tue** (third service +
 | Mon | Async event | Outbox idea in code | **Done W6 Day 1 (2026-09-21)** |
 | Tue | Notification send | Actuator health | **Done W6 Day 2 (2026-09-22)** |
 | Wed | Metrics on `book()` | One dashboard query | **Done W6 Day 3 (2026-09-23)** |
-| Thu | Remaining async glue | Test |
+| Thu | Remaining async glue | Test | **Done W6 Day 4 (2026-09-24)** — PENDING poller + Mockito test |
 | Fri | HLD | — |
 
 Part 3 from this week: LLD class-design drills start.

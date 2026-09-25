@@ -59,6 +59,7 @@ Days marked **longer** in the calendar: do both items. Anton asked to be safe, n
 | Records vs class | W5 Thu leftover | Request DTO may be a record. `Event` stays a class | `Event` as record |
 | Facade = Gateway | W5 Fri | One door. Forwards. Does not replace `book()` | Gateway swallows take-seats |
 | Observer / events | W6 Mon | `publishEvent` matches `@TransactionalEventListener` + argument type. `book()` does not name the listener | `book()` calls the listener class |
+| Overloading vs overriding | W6 Day 4 (leftover — list was empty) | Overload = same name, different params, can be one class. Override = subclass replaces inherited method, needs parent, may call `super` | “Same signature” for overload |
 | Factory as `@Bean` | W6 Day 3 (carry from Tue) | `@Bean` method builds; return value is the bean. Security finds `SecurityFilterChain` by type | `@Service` on a library type. Class name = how Security finds it |
 
 **SOLID so far:** S, O, L, I, D. Encapsulation. Java: equals/hashCode, ArrayList vs LinkedList, immutability, Optional, records vs class.
@@ -117,8 +118,8 @@ Do not repeat prompts in **design-map.md → Done**. The five families are: **wh
 |---|---|---|
 | W6 Mon–Thu | Outbox, at-least-once mail, metrics on `book()` | Observer + **LLD** (see bank) | **Observer + outbox + parking-lot: Done W6 Day 1.** **Factory `@Bean` + library LLD: Done W6 Day 3.** |
 | W6 Fri | HLD async | — |
-| W7 Mon–Tue | Index, N+1, secrets — as **bottleneck** talk | More LLD |
-| **W7 Wed (longer)** | **Cache** (aside, TTL, don’t cache “1 seat left” as truth) | LLD |
+| W7 Mon–Thu | **HLD board** (~30): more services, DB, traffic — calendar in [week-07.md](week-07.md). Index / N+1 / secrets fold in as bottleneck talk | **LLD critique** (~15), not a fresh sketch (Anton, 2026-09-24) |
+| **W7 Wed (longer)** | **Cache** (aside, TTL, don’t cache “1 seat left” as truth) + traffic board | LLD critique |
 | **W7 Fri (longer)** | **Classic HLD:** URL shortener. **429** rate limit ≠ 409 sold out. | — |
 | W8 Fri | Long mock: **HLD + one LLD** | — |
 
@@ -130,17 +131,17 @@ Whiteboard only. No Java files. Rotate. Do not repeat the same product.
 
 Name the product → actors → 4–8 classes → fields + 2–4 methods each → say has-a vs is-a once.
 
-**Bank:** parking lot **(first pass W6 Day 1)**, library **(W6 Day 3)**, hotel rooms, food-delivery order, split-bill, URL shortener (classes, not AWS), chat (User / Message / Room), notification outbox.
+**Bank:** parking lot **(first pass W6 Day 1)**, library **(W6 Day 3)**, hotel rooms **(W6 Day 4)**, food-delivery order, split-bill, URL shortener (classes, not AWS), chat (User / Message / Room), notification outbox.
 
 **Critique:** missing entity, god-class, wrong is-a.
 
 ---
 
-## Next session — Week 6 Day 4 (Thu)
+## Next session — Week 6 Day 5 (Fri)
 
-Week 6 Day 3 Part 1 + Part 2 + Part 3 **closed**.
-Do **not** rerun: metrics vs health; Factory `@Bean` / `SecurityFilterChain` by type; library Loan has-a Book; parking-lot sketch.
+Week 6 Day 4 Part 1 + Part 2 + Part 3 **closed**.
+Do **not** rerun: PENDING poller / at-least-once; overloading vs overriding; hotel rooms LLD; library; parking lot.
 
-**Thursday:** remaining async glue — PENDING poller + test. Next LLD if Part 3 runs: **hotel rooms**.
+**Friday:** HLD async (60–75 min) + 2 min OOP. From W7: LLD = **critique** + HLD board (services / DB / traffic) — see [week-07.md](week-07.md).
 
 Classic product HLD lite lives in **Part 1** ([lc-sd-map.md](lc-sd-map.md)). Part 3 stays this app until W6 LLD. URL shortener stays **W7 Fri Part 3**.

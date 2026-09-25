@@ -231,8 +231,8 @@ Next LLD product: **hotel rooms**. Do not rerun this library sketch.
 |---|---|---|
 | **Part 1 coding** | LC-Practice | **#236** LCA coach filled (before 0). **#101** Symmetric overtime (coach filled). Third (#637) skipped. **Coding done.** |
 | **Part 1 Design (LC-SD)** | Course card talk | **Chapter 11** rate limit drill. **Done.** |
-| **Part 2** | Spring | PENDING poller + test. **Open.** |
-| **Part 3** | OOP + LLD | Hotel rooms LLD. **Open.** |
+| **Part 2** | Spring | PENDING poller + test. **Done.** |
+| **Part 3** | OOP + LLD | Overloading vs overriding + hotel rooms LLD. **Done.** |
 
 Extra detail: [LC-Practice `notes/week-06-day-04.md`](https://github.com/antondahdal/LC-Practice/blob/master/notes/week-06-day-04.md). DFS orders look-up: [`notes/dfs-orders.md`](https://github.com/antondahdal/LC-Practice/blob/master/notes/dfs-orders.md).
 
@@ -267,3 +267,65 @@ Fix: count per caller (JWT user, else IP) per window. Check before the handler (
 **60-sec:** Rate-limit per user per window with a shared counter at the edge, before `book()`. Over the cap is 429. Sold out stays 409.
 
 **Calendar:** Part 1 **closed**. Part 2 (PENDING poller + test) and Part 3 (hotel rooms LLD) **open**.
+
+---
+
+### Part 2 — PENDING poller
+
+**Goal:** Listener shout dies on crash/restart. Row stays `PENDING`. Something must pick it up without an event.
+
+`findByStatus(String)` on the outbox repo (derived query, no `@Query`). `@EnableScheduling` on the app. `OutboxPoller` (`@Component`, `events`): `@Scheduled(fixedDelay = 10000)` → each `PENDING` row: `send(bookingId)`, then `SENT`, `save`.
+
+`fixedDelay` = 10 s after the previous run **finishes**. `fixedRate` = every 10 s from start. Method is `void`, no args (no caller).
+
+Crash after `send`, before `SENT` → still `PENDING` → next run sends again → user gets it **twice**. At-least-once: never lost, may duplicate.
+
+**Bugs he hit:** `@Scheduled` with no timing (startup fails). `"Pending"` ≠ `"PENDING"`. No `send` call. Outbox `getId()` passed where booking id is needed.
+
+**60-sec:** Poller scans `PENDING` on a timer, sends, then marks `SENT`. Crash between → sent twice, never lost.
+
+**Weak:** Answered “row gets reprocessed” but missed “user gets it twice” until told.
+
+---
+
+### Part 2 — Test
+
+`OutboxPollerTest` — plain Mockito (`@ExtendWith(MockitoExtension.class)`, `@Mock`, `@InjectMocks`), no Spring context. Coach wrote it (Anton asked). Row outbox id **7**, booking id **42**. Call `checkMail()`. Verify `send(42)`, status `SENT`, `save(message)`. Passes.
+
+Why two numbers: same value would hide `getId()` vs `getBookingId()`. Wrong id on `send` → the `verify(send(42))` line fails (lookup still uses booking id). Real cost: wrong/no user told, row marked `SENT`, never retried.
+
+**Weak:** Said the lookup would fail — it is the `send` verify.
+
+**Command:** `.\mvnw.cmd test -Dtest=OutboxPollerTest`
+
+---
+
+### Part 3 — OOP: overloading vs overriding
+
+Leftover (OOP list empty). Overload = same **name**, different params, can live in one class. Override = subclass replaces inherited method, needs a parent, may call `super`.
+
+**Weak:** said overload = “same signature.” Signature = name + params.
+
+---
+
+### Part 3 — LLD hotel rooms
+
+**Actors:** Guest, Manager/Admin (prices, rooms), Receptionist, Housekeeping. “Owner” / “Workers” too vague at first.
+
+**Classes:** Guest, Room (floor as field), Hotel, Worker → `Receptionist`, `Housekeeper` subclasses (no enum on top), **Reservation** (missed first — found with Ticket/Loan hint), Payment.
+
+**Reservation fields:** Guest, Room, from, till, price, Payment (amount, partial). **Methods:** `pay`, `changeRoom`, `changeDates`, `cancel` (blocked < 72 h). Guest changes on the reservation; Hotel/service decides availability.
+
+**Status:** one enum, not booleans. `BOOKED → CHECKED_IN | CANCELLED (>72 h)`. `CHECKED_IN → CHECKED_OUT`. `CANCELLED`, `CHECKED_OUT` terminal.
+
+**Owner:** `Receptionist.checkIn(reservation)`. Receptionist is-a Worker. Reservation has-a Guest / Room / Payment.
+
+**Change (room types):** price calc in `Room`. Only numbers differ → multiplier field via constructor. Behavior differs (Suite breakfast) → subclass + **override** `calculatePrice`. Not overloading.
+
+**Sequence:** browse → pick Deluxe + dates → price → Book → BookingService validates → `BOOKED` → id to guest. Availability checked on browse and again on book.
+
+**Weak:** booleans for arrived/left/cancelled. “Overloading” for per-type price. “Check twice = no race” — second check needs a lock (`FOR UPDATE` / unique room+date) or two guests both pass.
+
+Next LLD: **W7 critique format** (food-delivery order Mon). Do not rerun hotel.
+
+**Calendar:** Day 4 **closed**. **Next weekday:** Week 6 Day 5 (Fri) — HLD async.
