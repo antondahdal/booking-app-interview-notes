@@ -181,9 +181,20 @@ Code slips: `@Index` first put on the `id` field with no column list.
 
 ### Part 2 — Lab notes (not topics)
 
-**Book is broken on master.** Every `POST` Book returns **500**.
-`@TimeLimiter` on `EventClient.reserveSeats` needs a `CompletionStage` return type; the method returns `EventResponseDto` directly.
-This is the same problem from W6 Day 3 (TimeLimiter was commented for that demo, then put back). Not fixed today.
+**Book was broken, now fixed.** Every `POST` Book returned **500**.
+`@TimeLimiter` only works on methods that return a `CompletableFuture` (async). `reserveSeats` returns `EventResponseDto` directly, so Resilience4j threw before the method even ran.
+This is the same problem from W6 Day 3 (TimeLimiter was commented for that demo, then put back).
+
+**Fix:** `@TimeLimiter` and its `timeoutDuration` property are commented out.
+The timeout still exists: `WebClientConfig` sets `responseTimeout` to 3 seconds on the HTTP client.
+A slow Event throws `WebClientRequestException`, the existing catch turns it into `DownstreamServiceException`, and the phone gets **502**.
+The circuit breaker still counts those timeouts as failures.
+
+**Why not make `reserveSeats` async instead:** the call would run on another thread, where `RequestContextHolder` is null (lost `Authorization` + correlation id). `book()` needs the result before it can save, so it would block anyway. Errors come back wrapped in `CompletionException`, which breaks the 409 mapping.
+
+**Verified:** event with 2 seats. Book 2 → **201**. Book again → **409**. "My tickets" shows the one ticket.
+
+**Leftover:** the commented lines and the unused `TimeLimiter` import in `EventClient` should be deleted, not left commented, so nobody puts them back.
 
 For the N+1 demo, the venue, 3 events and 3 bookings were seeded from a throwaway SQL file in `target/` (not in the repo).
 
