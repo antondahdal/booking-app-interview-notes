@@ -66,7 +66,7 @@ Part 3 from this week: LLD class-design drills start.
 
 | Day | Topic 1 | Topic 2 |
 |---|---|---|
-| Mon | N+1 fix | Index on hot FK |
+| Mon | N+1 fix | Index on hot FK | **Done W7 Day 1 (2026-09-28)** — `@EntityGraph` on "My tickets" + `idx_booking_user` |
 | Tue | Security pass (secrets/CORS) | README |
 | Wed | One perf check **(+ Spring Cache lab if not done)** | Leftover polish |
 | Thu | Seat hold + confirm on Event (TTL expiry). Anton asked W6 Fri 2026-09-25 | Test (expiry job) |
