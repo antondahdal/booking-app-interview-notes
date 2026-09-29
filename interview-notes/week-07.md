@@ -210,3 +210,170 @@ The critique design was shown but not answered: `Courier extends Customer`, `Ord
 
 **Calendar:** Part 1 + Part 2 **closed**. Part 3 **open** (carry). **Next weekday:** Week 7 Day 2 — security pass (secrets / CORS) + README, then carried Part 3.
 
+---
+
+## Week 7 Day 2 — Security pass (secrets + CORS) + README
+
+**Date:** 2026-09-29 (Tue)
+
+| Name | What it is | Today |
+|---|---|---|
+| **Part 1** | LC-Practice | #56, #228, Ch 11 fixed window vs token bucket. Details: [LC-Practice `notes/week-07-day-02.md`](https://github.com/antondahdal/LC-Practice/blob/master/notes/week-07-day-02.md). **Done.** |
+| **Part 2** | Spring | JWT secret out of the repo, CORS, README. **Done.** Anton asked the coach to write the config, CORS bean and README. |
+| **Part 3** | Carried Mon + Tue | Food-delivery critique **done**. Services split board **done**. Split-bill critique **skipped** (Anton). DB board **done**. |
+
+---
+
+### Part 2 — JWT secret out of the repo
+
+**Why it exists now**
+
+`app.jwt.secret` was a literal string in `application-dev.properties`, pushed to a public GitHub repo.
+Anyone could read it and sign their own token for any user and any role.
+
+**What was built**
+
+The property is now a placeholder that reads the `JWT_SECRET` environment variable, with **no default** (a default would put the secret back in the file).
+The app does not start without it.
+`docker-compose.yml` passes `JWT_SECRET` from the shell into the booking container and stops with a clear message if it is not set.
+Anton runs from the terminal, not IntelliJ: set `$env:JWT_SECRET` in PowerShell before starting.
+
+**Why a new value, not the old one**
+
+The old secret is still in git history.
+With it, anyone can **sign** a fresh token for any user, not just replay one.
+A new secret makes every token signed with the old one fail the signature check (401).
+
+**60-sec:** The JWT secret comes from an environment variable, never the repo, with no default. Because the old value is in git history, I rotated it; tokens signed with the old secret now fail.
+
+**Weak:**
+First answer was why env vars beat hard-coding (true, but not the question).
+Second answer: "he can send requests with the token." Missed that he can **forge** new tokens, and that a new value is what kills them.
+
+---
+
+### Part 2 — CORS
+
+**What it is**
+
+The browser's rule, not the API's lock.
+Before a cross-origin call with an `Authorization` header, the browser sends an `OPTIONS` preflight asking "may this origin call you?". If the answer does not name the origin, the browser blocks the call.
+Curl and Postman never ask.
+
+**Where it goes**
+
+In this app's `SecurityFilterChain`, not the gateway: the browser calls `/api/auth` and `/api/events` straight on 8080, and the gateway only routes Book.
+If all traffic later goes through the gateway, CORS moves there, and only there (two places = duplicate headers, the browser rejects).
+
+**What was built**
+
+`.cors(Customizer.withDefaults())` in the chain + a `CorsConfigurationSource` bean.
+Origin only `http://localhost:3000` (not `*`). Methods GET, POST, PATCH, OPTIONS. Headers `Authorization`, `Content-Type`, `X-Correlation-Id`. `X-Correlation-Id` exposed so the front end can read it. Registered on `/api/**`.
+CORS has to be in the security chain because the preflight carries no JWT, so `anyRequest().authenticated()` would 401 it.
+
+**Verified:** preflight from `localhost:3000` → **200** with the allow-origin header. From `evil.com` → **403**.
+
+**The picture that landed (Dana)**
+
+Dana is logged in, in Chrome. A script on `evil.com` in another tab tries to read her tickets through her browser. Chrome asks the API, the API says no, Chrome blocks. CORS protects **Dana's browser**.
+An attacker's curl on his own server: no browser, no question. Only the JWT filter and the URL rules stop him.
+
+**60-sec:** CORS lets only my front-end origin call the API from a browser. It protects the user from other sites in her own browser; it is not auth. A server-side caller is stopped by the token and the role rules.
+
+**Weak:**
+Said curl from another server gets 403 "because it's not the defined server." It gets 200 if the token is valid; curl sends no `Origin` and Spring skips CORS.
+Needed the Dana picture; the preflight explanation alone did not land.
+
+---
+
+### Part 2 — README
+
+Rewritten (coach draft, Anton asked).
+Fixed: "Booking owns inventory" → **Event owns seats**, Booking reserves over HTTP. Diagram now shows gateway → Booking → Event / Auth over HTTP → outbox → poller.
+Added: Design decisions table (row lock, `@Version`, correlation id, circuit breaker 503 / 502 / 409, retry only on the Auth GET, outbox, probes, metrics, My tickets N+1 + index), Security section (env secret, roles, CORS, CSRF off), Run with `JWT_SECRET` + `docker compose up --build`.
+Compose itself not run today.
+
+---
+
+### Part 3 — Food-delivery LLD critique (carried from Mon)
+
+**Design shown:** `Courier extends Customer`; `Order` has `List<Dish>`; `Order` does `calculateTotal()`, `chargeCard()`, `assignNearestCourier()`, `sendSms()`; `Dish` has the price.
+
+**Found:**
+`Courier extends Customer` is a wrong is-a. Share a `Person` parent or a contact-details object; they never extend each other. (Right, first try.)
+`chargeCard`, `assignNearestCourier`, `sendSms` move out: payment, dispatch, notification services. (Right.)
+
+**Corrected:**
+`calculateTotal()` can **stay** on `Order`: the order holds the lines, adding them up is its own job. Moves only if pricing grows rules (promos, fees, tax).
+`List<Dish>` has no quantity → `OrderItem` (dish, quantity, **unitPrice**).
+Price copied at checkout into `unitPrice`. Otherwise a menu price change rewrites the total of yesterday's order.
+Anton's own version landed: store each order in the DB with the total and the price at that time. Plus: keep the price per line too (receipt, refund one item).
+
+**Interview sentence:** Order items copy the price at checkout; an order is a record of what was paid, not a live view of the menu.
+
+**Weak:**
+Did not see the quantity problem until restated ("how does the list say 3?").
+Asked why yesterday's total would change: did not see that recalculating from `Dish` reads today's price.
+First fix offered: `final`. That freezes the menu or only the reference, not the price the customer paid.
+
+---
+
+### Part 3 — HLD board: services split + who owns what data (carried from Mon)
+
+Food delivery, services from the critique: Order, Payment, Dispatch, Notification, Restaurant.
+
+**Data per service:** Order = orders, items with copied price, status. Payment = charges. Dispatch = couriers, availability, assignment. Notification = what was sent. Restaurant = menus, dishes, **current** prices. (Right.)
+
+**Rule:** no service reads another's tables. Order gets prices by **calling Restaurant over HTTP** (right). Never trust a price the phone sends.
+
+**Sequence:**
+Charge = **wait** (right: kitchen must not cook an unpaid order).
+SMS = **announce** (right).
+Find courier = he said wait. **Announce**: finding a courier can take minutes; the checkout request would hang. Order announces "paid", Dispatch keeps looking, announces "courier assigned".
+
+**Statuses:** his PAID → ASSIGNING_COURIER → COURIER_ASSIGNED → ON_THE_WAY (right). Added CREATED, PAYMENT_FAILED, DELIVERED, CANCELLED.
+
+**One change: no courier after 20 minutes, money already taken.**
+He said Payment rolls back the charge. Right idea, wrong word: **refund**, a compensating action (saga). Nothing to roll back; the charge committed long ago in another service.
+Dispatch announces "no courier" → Order CANCELLED → Payment refunds → Notification tells the customer.
+Refund message arrives twice: he said check status, skip if already REFUNDED (right, idempotent). Trap added: two copies at the same moment both read PAID. Make check-and-change one step (PAID → REFUNDING only if still PAID), and pass the order id as the provider's idempotency key.
+
+**Interview sentence:** Each service owns its data; Order gets prices from Restaurant over HTTP, waits only for the charge, and the rest is events; when no courier is found, a saga refunds, and the refund handler is idempotent.
+
+**Weak:**
+"Find courier" as a wait. "Rollback" across services.
+
+---
+
+### Part 3 — Split-bill critique — skipped
+
+Anton skipped it. Design shown, not answered: `double` for money, `balance` on `User` (balances are per group), `Settlement extends Expense`, `Group.addExpense()` saving + balances + currency + email.
+
+---
+
+### Part 3 — HLD board: read replica, index, when to shard
+
+Booking app, festival Saturday, 10× traffic, 95% reads, one Postgres at 90% CPU, Book timing out behind reads.
+
+**First answer:** cache for the hot GETs. Valid (W7 Wed topic), but "My tickets" is per user and changes on Book.
+**Read replica:** did not know it. Taught: primary takes every write, replica is a streamed copy slightly behind, read-only queries go there (`readOnly = true` can route).
+
+**Can Book's seat check read the replica?** No, outdated data (right). Plus: `FOR UPDATE` exists only on the primary. Book stays on the primary.
+
+**Dana books, "My tickets" on the replica misses the ticket:** he said block a second booking at Book time. A guard, but people may want two tickets and the screen is still wrong. Fix = **read-your-own-writes**: that user's reads go to the primary for a few seconds (or "My tickets" always on the primary). The 201 already carries the ticket.
+
+**Primary full on writes, 2 TB table:** he proposed old data on one replica, active on others. Replicas are **full copies**, so that is an archive DB, not a replica. Archiving / date partitioning fixes size, not write throughput. Writes need **sharding**.
+**Shard key:** did not know. Answer: `event_id`. Book locks the event row and inserts that event's bookings in one transaction; same shard keeps it one normal transaction. By `user_id`, the seat count would be across shards.
+Cost (coach gave it, no check): "My tickets" spans every shard → per-user copy fed by events.
+
+**Interview sentence:** Reads go to replicas, but Book and anything that must see its own write stay on the primary; when writes outgrow one primary I shard by the key the transaction locks, here `event_id`.
+
+**Weak:**
+Did not know read replica or shard key.
+Thought replicas can hold different data.
+Coach said "last question" and then asked one more; Anton was annoyed. When saying last, mean it.
+
+---
+
+**Calendar:** Day 2 **closed**. Spring changes (secret, CORS, README, Compose) **not pushed**. **Next weekday:** Week 7 Day 3 — one perf check + leftover polish; Part 3 chat critique + traffic board (LB + cache, longer). Leftover: delete the commented `@TimeLimiter` lines and import in `EventClient`.
+

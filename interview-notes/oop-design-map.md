@@ -150,11 +150,16 @@ Name the product → actors → 4–8 classes → fields + 2–4 methods each �
 
 ---
 
-## Next session — Week 7 Day 2 (Tue)
+## Next session — Week 7 Day 3 (Wed, longer)
 
-**Carry from W7 Day 1 (Part 3 skipped by Anton):** food-delivery LLD critique (~15) + HLD board "services split + who owns what data" (~30). Run these **first**, then Tue slots (split-bill critique + DB board). Details: [week-07.md](week-07.md).
+Chat critique (~15) + traffic board LB + cache (longer). Details: [week-07.md](week-07.md).
+Do **not** rerun: food-delivery critique, services-split board, read replica / shard board (all done W7 Day 2). Split-bill critique was **skipped** by Anton — do not force it back.
 
-## Previous — Week 7 Day 1 (Mon)
+## Previous — Week 7 Day 2 (Tue)
+
+Carried Mon Part 3 done (food-delivery critique + services-split board). DB board done. Split-bill skipped.
+
+## Older — Week 7 Day 1 (Mon)
 
 Week 6 **closed** (Fri: async HLD + Builder).
 Do **not** rerun: async HLD board (saga release, idempotent key, claim / `SKIP LOCKED`); Builder; PENDING poller; overloading vs overriding; hotel / library / parking lot.
