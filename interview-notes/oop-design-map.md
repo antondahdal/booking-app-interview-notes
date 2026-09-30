@@ -150,12 +150,16 @@ Name the product → actors → 4–8 classes → fields + 2–4 methods each �
 
 ---
 
-## Next session — Week 7 Day 3 (Wed, longer)
+## Next session — Week 7 Day 4 (Thu)
 
-Chat critique (~15) + traffic board LB + cache (longer). Details: [week-07.md](week-07.md).
-Do **not** rerun: food-delivery critique, services-split board, read replica / shard board (all done W7 Day 2). Split-bill critique was **skipped** by Anton — do not force it back.
+Notification-outbox critique (~15) + traffic board: rate limit (429), queue for spikes (~30). Details: [week-07.md](week-07.md).
+Do **not** rerun: chat critique, LB + cache board, cache stampede / Redis-down (all done W7 Day 3). Phrase board questions as "with high traffic, what happens to Book" (Anton).
 
-## Previous — Week 7 Day 2 (Tue)
+## Previous — Week 7 Day 3 (Wed, longer)
+
+Chat critique **done** (Membership, `lastReadMessageId`, admin = role). LB + cache board **done** (least connections, stateless, cache-aside, evict, stampede + Redis lock, Redis down → replica).
+
+## Older — Week 7 Day 2 (Tue)
 
 Carried Mon Part 3 done (food-delivery critique + services-split board). DB board done. Split-bill skipped.
 

@@ -85,7 +85,7 @@ Same shape as the OOP “still need” table. Must-have on a mid-level board. Ea
 | 16 | **Outbox / at-least-once mail** | Slow hop | Email after commit. Duplicate mail possible. | W6 Mon **done** (poller leftover Thu) |
 | 17 | **Async HLD** | HLD | Book path vs notify path. | W6 Fri |
 | 18 | **N+1 and index as bottleneck** | 10× | What the user feels, what you measure. | W7 Mon–Tue |
-| 19 | **Cache** | Truth / 10× | Cache-aside, TTL. Do not cache “1 seat left” as gospel. Book is truth. | **W7 Wed (longer)** |
+| 19 | **Cache** | Truth / 10× | Cache-aside, TTL. Do not cache “1 seat left” as gospel. Book is truth. | **W7 Wed done** (LB + cache board, stampede, Redis down) |
 | 20 | **Classic HLD + 429** | HLD | URL shortener. Rate limit **429** ≠ sold-out **409**. | **W7 Fri (longer)** |
 | 21 | **Mock HLD + one LLD** | HLD / LLD | Week 8 Friday. | W8 Fri |
 | 22 | **Payment for Book** | Slow hop / Status | Webhook twice or never. Idempotency key. Never charge inside the lock. | W9 Mon |

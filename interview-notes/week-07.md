@@ -377,3 +377,119 @@ Coach said "last question" and then asked one more; Anton was annoyed. When sayi
 
 **Calendar:** Day 2 **closed**. Spring changes (secret, CORS, README, Compose) **not pushed**. **Next weekday:** Week 7 Day 3 — one perf check + leftover polish; Part 3 chat critique + traffic board (LB + cache, longer). Leftover: delete the commented `@TimeLimiter` lines and import in `EventClient`.
 
+---
+
+## Week 7 Day 3 — Perf check (connection held during HTTP) + leftover polish
+
+**Date:** 2026-09-30 (Wed)
+
+---
+
+### Part 2 — Perf check: `book()` held a DB connection while waiting on HTTP
+
+**What a connection is**
+
+An open link between the Java app and the database. Every SQL query goes over one.
+Opening one is slow, so Spring Boot opens a fixed set at startup (10 by default) and reuses them. That set is the **pool**; **HikariCP** manages it.
+A transaction borrows one connection when it starts and gives it back on commit.
+
+**The problem**
+
+`@Transactional` was on the whole `book()`. So the connection was borrowed **the moment `book()` started**, not at `save`.
+Then `book()` called Auth over HTTP and Event over HTTP (up to 3 s). The connection sat idle the whole time.
+10 slow Books = all 10 connections idle, and request 11 (even "My tickets") waits and fails.
+
+**Proved it**
+
+Pool set to 1 (`spring.datasource.hikari.maximum-pool-size=1`, `connection-timeout=5000`). One Book → **500**.
+Log: `HikariPool-1 - Connection is not available, request timed out after 5004ms (total=1, active=1, idle=0, waiting=2)`.
+`active=1` = `book()` holds the only connection. `waiting=2` = the Auth call (same app, needs a connection to look up the user) and its retry, stuck in line. The app blocked itself.
+500, not 502: `AuthClient` does not map a timeout to `DownstreamServiceException` (gap, not fixed today).
+
+**The fix (not async)**
+
+HTTP hops stay in `book()`, which is no longer `@Transactional`. The DB part (find user, save ticket, save outbox row, publish) moves to a `@Transactional` method on a **separate bean** (`BookingWriter`).
+Same steps, same order, the user waits the same time. Only the connection is borrowed later: just for the save.
+Publish stays inside the transactional method, because the listener is `AFTER_COMMIT` and needs a commit.
+`myBookings()` had the same bug (`@Transactional` around the Auth call). `@Transactional` removed; the `@EntityGraph` finder already loads the events in one query.
+`BookingWriter` is one plain class, no interface + `Impl`: Spring Boot proxies classes directly, and only `BookingServiceImpl` uses it. The transactional method must not be `private` or `final` (the proxy cannot intercept those).
+
+**Verified after the fix:** same pool of 1, same single Book → **201**. No Hikari timeout.
+
+**Why a separate bean, not another method in the same class (self-invocation)**
+
+`@Transactional` works only when the call comes from **another** bean.
+Spring wraps each bean in a proxy, and the proxy is what starts the transaction.
+A call inside the same class (`this.method()`) skips the proxy, so `@Transactional` on it is silently ignored. No transaction, no error.
+
+**60-sec:** `@Transactional` on `book()` borrowed a DB connection before the Auth and Event HTTP calls, so a slow Event held connections doing nothing. With the pool at 1 one Book blocked itself. I kept the HTTP calls outside and put only the writes in a `@Transactional` method on a separate bean, because a call inside the same class skips Spring's proxy and gets no transaction.
+
+**Check (right, first try):** pool 10, Event slow, 10 Books at once. Can an 11th user open "My tickets"? Yes: the 10 wait on Event without holding a Booking connection; each borrows one only for the short save.
+
+**Weak:**
+Did not see at first what HTTP has to do with the connection: thought the connection was taken at `save`, and that moving HTTP out of the transaction makes it async.
+
+---
+
+### Part 2 — Leftover polish
+
+Hikari test lines removed (pool back to default 10). Commented `@TimeLimiter`, its property and the unused import removed from `EventClient` / `application.properties`.
+
+**Timeout today:** 3 s per HTTP call, from `responseTimeout` on the shared `WebClient` bean. Event: 3 s → `DownstreamServiceException` → **502**, no retry. Auth: 3 s per try × `@Retry` 3 attempts ≈ 10 s, then **500** (Auth timeout not mapped — gap).
+
+---
+
+### Part 3 — Chat LLD critique
+
+**Design shown:** `User` (rooms, `unreadCount`); `GroupAdmin extends User` (`banUser`, `renameRoom`); `Room` (members, list of **every** message, `sendMessage` = add + save to DB + push to every member); `Message` (text, sender, `sentAt`).
+
+**Found:**
+All messages in `Room` is bad: millions in memory. (Right.) Messages live in the DB, loaded a page at a time by room + time. No `HashMap` needed; the query does it.
+`GroupAdmin extends User` → after the hint (Dana admin in Family, member in Work) said admin belongs to the room. Right direction.
+`sendMessage` → async worker picks it up after commit (right: outbox, like W6).
+
+**Corrected:**
+Admin is a **role in one room**, not a kind of user (wrong is-a). The pair "Dana in Family" is the **missing entity**: `Membership` (user, room, role, joinedAt, `lastReadMessageId`).
+Read flag on `Message` fails in a group (Dana read, Anton did not). Unread list on `User` has no room and grows forever. Unread = messages in that room newer than `Membership.lastReadMessageId`; opening the room moves it.
+`Room` is data. `MessageService` = save + outbox row. `NotificationService` = pushes. (Same move as `chargeCard` / `sendSms` leaving `Order`.)
+
+**Interview sentence:** Admin is a role in a room, not a kind of user, so user and room meet in a `Membership` that holds the role and `lastReadMessageId`; messages are paged from the DB, and notifications go out after commit through an outbox.
+
+**Weak:**
+First answer listed new features (admin adds users, user creates room, read flag) instead of flaws.
+Did not see the wrong is-a until the Dana picture.
+"Unread comes from the DB" without the field to count against.
+
+---
+
+### Part 3 — HLD board: traffic, load balancer + cache (longer)
+
+Festival lineup at 10:00. 200,000 phones on `GET /api/events/5`. 3 Event pods. Book is small but must be correct.
+
+**Load balancer:** named it (right). How it picks: "who is less busy" = **least connections** (right). Also **round robin** (in turn; default, fine when requests cost the same). Only sends to pods whose **readiness** passes (W5).
+**Dana's next request on another pod:** "they share the same DB" (right) + **stateless**: identity is in the JWT, every pod has the same secret, no session in memory → no sticky sessions.
+
+**Cache:** separate shared pod (right; Redis, not per-pod memory, or pods disagree). Key `event:5`. **Cache-aside:** check → hit returns → miss reads DB, stores with **TTL**.
+**1 seat left in the cache, 3 tap Book:** Book reads the DB, first 201, others 409 (right). From the cache all three would get a ticket for one seat.
+**Stale "1 left" for 30 s after the last seat:** not a business problem, Book gets a clean 409 (right). His fix "update cache on insert" → **evict**, not update (two updates can land out of order; delete can't be wrong). Evict in **Event** (owns seats), not Booking's insert. `@CacheEvict` coded W5.
+
+**One change: key expires at 5,000 req/s.**
+He said "first reads, rest from cache." Wrong: nothing makes the others wait. Every request in the ~20 ms gap misses → ~100 same SELECTs → pool full → Book waits behind page views. Name: **cache stampede** / thundering herd.
+Fix: "lock" (right). Which lock: first said the row lock (`FOR UPDATE`). Wrong: the 100 are already in the DB holding connections, and Book locks the same row (W3: never lock on GET). Then: "the lock on the cache" (right). Name: **distributed lock** in Redis (`SET lock:event:5 NX` + short expiry so a crashed pod frees it). One DB read total. Per-pod `synchronized` = 3 reads, also acceptable.
+
+**Change: Redis down at 10:10.**
+Must not take the system down; cache is a speed-up, not data (right). Page views fall back to the DB (right). Book works the same, never used the cache (right, after the question was restated).
+With high traffic, Book gets slower: all reads now hit the DB Book uses (right, after restating as "with high traffic what happens to Book"). Slow enough → 502 / lock wait timeout.
+Protect Book: **read replica** for page views, primary for Book (right, from W7 Day 2). Correction: the DB streams to the replica itself; the app does not "update it frequently". Also: short timeout on Redis calls; tiny in-pod cache (seconds) as a second layer.
+
+**Interview sentence:** A load balancer spreads requests across stateless pods; event pages come from Redis with cache-aside and a TTL, the take-seat path evicts the key, and a Redis lock stops a stampede on a miss. Book never reads the cache; it locks the row on the primary. If Redis dies, reads fall back to a replica so they don't slow Book.
+
+**Weak:**
+Stampede: assumed the first miss makes the rest wait.
+Reached for the row lock to protect the cache.
+Needed the "what happens to Book" question in plain words (Anton: phrase it as "with high traffic, what happens to Book").
+
+---
+
+**Calendar:** Day 3 **closed**. Spring change (`BookingWriter`, `book()` / `myBookings()` without `@Transactional`, TimeLimiter leftovers removed) **not pushed**. Notes **not pushed**. **Next weekday:** Week 7 Day 4 — seat hold + confirm on Event (TTL expiry) + expiry job test; Part 3 notification-outbox critique + traffic board (rate limit 429, queue for spikes).
+
