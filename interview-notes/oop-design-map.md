@@ -150,7 +150,15 @@ Name the product → actors → 4–8 classes → fields + 2–4 methods each �
 
 ---
 
-## Next session — Week 7 Day 4 (Thu)
+## Next session — Week 8 Day 1 (Mon), carrying W7 Thu + Fri Part 3
+
+W7 Day 4 + Day 5 Part 3 **not run** (Thu skipped, Fri Part 2 ran late). Carry, in order:
+1. Notification-outbox critique (~15).
+2. Traffic board: rate limit (429), queue for spikes (~30). Fixed window vs token bucket already done in Part 1 W7 Tue - do not re-ask the algorithm names.
+3. Classic HLD: URL shortener (W7 Fri, longer). 429 gets one sentence there, no second check.
+Then the W8 slots. Details: [week-07.md](week-07.md).
+
+## Older — Week 7 Day 4 (Thu) plan
 
 Notification-outbox critique (~15) + traffic board: rate limit (429), queue for spikes (~30). Details: [week-07.md](week-07.md).
 Do **not** rerun: chat critique, LB + cache board, cache stampede / Redis-down (all done W7 Day 3). Phrase board questions as "with high traffic, what happens to Book" (Anton).

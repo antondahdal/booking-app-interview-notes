@@ -491,5 +491,162 @@ Needed the "what happens to Book" question in plain words (Anton: phrase it as "
 
 ---
 
-**Calendar:** Day 3 **closed**. Spring change (`BookingWriter`, `book()` / `myBookings()` without `@Transactional`, TimeLimiter leftovers removed) **not pushed**. Notes **not pushed**. **Next weekday:** Week 7 Day 4 — seat hold + confirm on Event (TTL expiry) + expiry job test; Part 3 notification-outbox critique + traffic board (rate limit 429, queue for spikes).
+**Calendar:** Day 3 **closed**. Spring change (`BookingWriter`, `book()` / `myBookings()` without `@Transactional`, TimeLimiter leftovers removed) **pushed W7 Day 5**. **Next weekday:** Week 7 Day 4 — seat hold + confirm on Event (TTL expiry) + expiry job test; Part 3 notification-outbox critique + traffic board (rate limit 429, queue for spikes).
+
+---
+
+## Week 7 Day 4 — not run
+
+**Date:** 2026-10-01 (Thu)
+
+Part 1 cut short for personal reasons (#74 green, #69 unfinished — see [LC-Practice `notes/week-07-day-05.md`](https://github.com/antondahdal/LC-Practice/blob/master/notes/week-07-day-05.md)). Part 2 and Part 3 **skipped**, carried to Friday.
+
+---
+
+## Week 7 Day 5 — Seat hold + confirm (carried Thu Part 2)
+
+**Date:** 2026-10-02 (Fri)
+
+| Name | What it is | Today |
+|---|---|---|
+| **Part 1** | LC-Practice | #452 Min Arrows (overtime, coach-fixed), #57 Insert Interval (untimed, coach-fixed), #162 dropped. Details: [LC-Practice `notes/week-07-day-05.md`](https://github.com/antondahdal/LC-Practice/blob/master/notes/week-07-day-05.md). **Done.** |
+| **Part 2** | Spring | Thu's seat hold + confirm. **Most of it built.** Expiry `@Scheduled` class, Booking cancel and the test **left**. Part 2 ran all afternoon. |
+| **Part 3** | Thu + Fri | **Not run** (late). Carried: notification-outbox critique, 429 + queue board, URL shortener HLD. |
+
+---
+
+### Part 2 — Why a hold
+
+**The hole before today**
+
+`reserveSeats` on Event took the seats **for good** in its own commit. Then Booking ran `writeBook`.
+If Booking crashed or its DB failed between the two, Event had subtracted the seats and no ticket existed. Nobody would ever give them back.
+
+**Anton's first idea: try/catch around `writeBook`, release seats in the catch**
+
+Valid as a fast path (compensating action, W6 Fri). Not enough alone, because three failures never reach the catch:
+1. The pod dies between the two lines — no JVM, no catch.
+2. The release HTTP call fails too (Event slow / circuit open).
+3. `reserveSeats` itself timed out after Event took the seats — Booking never reached the `try`.
+
+**The fix: a hold with a deadline in Event's own DB.** Event gives the seats back by itself, even if Booking never answers.
+
+**Why a separate `seat_holds` row, not `status` + `expiresAt` on `Event`** (Anton asked)
+
+One event row = the whole concert. Dana holds 2 at 10:00, Anton 3 at 10:01, each with its own deadline and fate. One column can hold one deadline. Each hold is its own row — the missing entity again (like `OrderItem`, `Membership`).
+
+**Why not its own service over HTTP** (Anton asked)
+
+The hold must commit **with** the seat decrement. Two services = two commits = the same gap. Event owns seats, so Event owns holds: same service, two tables, one transaction.
+
+---
+
+### Part 2 — The design (picture)
+
+```mermaid
+sequenceDiagram
+    participant Phone
+    participant Booking
+    participant Event
+    participant EventDB as Event DB (events + seat_holds)
+    participant Poller as Booking outbox poller
+    participant Job as Event expiry job
+
+    Phone->>Booking: POST book
+    Booking->>Event: reserveSeats
+    Event->>EventDB: lock event row, seats -= n, insert hold HELD (+10 min)
+    Event-->>Booking: seatHoldId
+    Booking->>Booking: writeBook (one commit): ticket + outbox NOTIFY + outbox CONFIRM_HOLD
+    Booking-->>Phone: 201
+
+    Poller->>Event: POST /api/events/holds/{holdId}/confirm
+    alt hold HELD
+        Event->>EventDB: HELD -> CONFIRMED
+        Event-->>Poller: 200
+    else already CONFIRMED (sent twice)
+        Event-->>Poller: 200, nothing changes
+    else hold EXPIRED (Booking was down > 10 min)
+        Event-->>Poller: 409
+        Poller->>Booking: ticket -> CANCELLED (next session)
+    end
+
+    Job->>EventDB: every 5 s: HELD and expiresAt < now
+    Job->>EventDB: lock hold, still HELD -> EXPIRED, lock event, seats += n
+```
+
+```mermaid
+stateDiagram-v2
+    [*] --> HELD: reserveSeats
+    HELD --> CONFIRMED: confirm from Booking
+    HELD --> EXPIRED: expiry job, 10 min passed
+    CONFIRMED --> [*]
+    EXPIRED --> [*]
+```
+
+Every hold ends in one of two places: **CONFIRMED** (ticket + seats taken) or **EXPIRED** (seats back; if a ticket was saved, Booking cancels it). Nothing stays open.
+
+---
+
+### Part 2 — The gap Anton found: fake ticket
+
+**His question:** Booking commits the ticket, the pod dies before confirm. The hold expires, the seats are resold. We gave a fake ticket.
+
+**Fix:** the confirm is an **outbox row** written in the **same commit** as the ticket (the W6 outbox, a second row type). The poller in Booking finds it after a crash and sends it until Event answers.
+
+**His follow-up:** Booking down longer than the hold. Hold already EXPIRED, seats resold.
+→ Late confirm gets **409**. **Booking cancels its own ticket** (`CANCELLED`, not deleted — keep the record, tell the user).
+Event does **not** touch Booking's ticket, and does not call Booking (Booking is the one that was down). Each service cleans only its own data.
+Keep it rare with numbers: hold 10 min vs poller 10 s.
+
+**The poller is not a service.** It is a `@Component` + `@Scheduled` inside the **Booking** app, same JVM and DB. That is why it can use `BookingRepository` to cancel. (`checkMail` name is now misleading — rename to `poller`, later.)
+
+---
+
+### Part 2 — What was built (Event side)
+
+- `SeatHold` entity, table `seat_holds`: lazy `event`, `seats`, `status` (`HoldStatus` HELD / CONFIRMED / EXPIRED, `@Enumerated(STRING)`), `expiresAt` (`LocalDateTime` — `Date` / `LocalDate` drop the time).
+- `SeatHoldRepository`: `findByIdForUpdate` (`@Lock` PESSIMISTIC_WRITE, JPQL uses the **entity** name `SeatHold`, not the table) + `findByStatusAndExpiresAtBefore(status, time)`.
+- `reserveSeats`: same row lock + check + decrement, then saves a HELD hold (+10 min) in the **same** transaction, returns `seatHoldId` in `EventResponseDto` (other methods pass `null` — an event has many holds, no single one to show).
+- `confirmHold(holdId)`, `@Transactional`, locks the hold: HELD → CONFIRMED; CONFIRMED → nothing; EXPIRED → `HoldDataExceedTimeException` → **409**. No time check — expiring is the job's work. `POST /api/events/holds/{holdId}/confirm`, `permitAll` (machine call, no user JWT; production = service token).
+- `expireHold(holdId)`, `@Transactional`: lock hold, still HELD → EXPIRED, lock event row, seats back. **The `@Scheduled` class that calls it is not written yet.**
+
+**Why `@Transactional` on `confirmHold`** (Anton asked): `FOR UPDATE` lives only until the commit. Without a transaction the lock drops right after the select, and the expiry job could expire the hold between the read and the CONFIRMED write.
+
+### Part 2 — What was built (Booking side)
+
+- `OutboxMessage`: `type` (`OutboxType` NOTIFY / CONFIRM_HOLD, string) + nullable `holdId`.
+- `book()` passes `seatHoldId` to `writeBook`; `writeBook` saves the ticket + NOTIFY row + CONFIRM_HOLD row in one commit.
+- Listener finds its row by booking id **and** type (two rows per booking now).
+- `EventClient.confirmHold(holdId)`: POST, `retrieve()` → `toBodilessEntity()` → `block()`. Does **not** read `RequestContextHolder` (the poller has no user request). 409 → `HoldDataExceedTimeException`, 5xx / no answer → `DownstreamServiceException`.
+- `OutboxPoller`: try **per row**. NOTIFY → mail, CONFIRM_HOLD → `confirmHold`, then row SENT. Downstream error → row stays PENDING, next run retries. 409 catch is **empty** for now.
+- `BookingStatus` enum (CONFIRMED / CANCELLED) created, not wired.
+
+---
+
+### Part 2 — Checks
+
+**Second confirm for the same hold (first reply lost): what does it return?**
+Anton: 200, nothing changes (right). Why it matters: a 409 would make the poller think the hold expired and **cancel a valid ticket**. Confirm must be safe to repeat.
+
+**The finder already returned only HELD holds. Why does `expireHold` lock and check HELD again?**
+Anton: so it cannot be updated during the check (right — the lock). Other half: the list is milliseconds old; a confirm may have committed between the finder and `expireHold`. Without the re-check you'd give Dana's paid seats away.
+
+**60-sec:** Event takes seats as a hold with a deadline, in the same commit as the decrement. Booking saves the ticket and a "confirm hold" outbox row in one commit, and a poller delivers it; confirming twice is safe. A scheduled job on Event expires unconfirmed holds and gives the seats back under the row lock. If Booking was down past the deadline, the late confirm gets 409 and Booking cancels its own ticket.
+
+**Weak:**
+Code slips: `java.sql.Date` / `LocalDate` for a time; missing `@Enumerated(STRING)`; JPQL with the table name; `long` vs `Long` in impl vs interface; `@PathVariable` name not matching `{holdId}`; WebClient chain without `retrieve()` / `block()` (nothing sent); outbox `type` flipped on one row instead of two rows; poller `try` around the whole loop; derived finder name without `By` / missing a parameter.
+Confused by step order: coach built the Booking cancel before the Event expiry job existed. Coach note: **keep steps in story order.** Short answers, no lectures (Anton).
+
+---
+
+### Part 2 — Left (next session, in story order)
+
+1. `HoldExpiryJob` (`@Component`, `@Scheduled` every 5 s): finder with HELD + now, then `eventService.expireHold(id)` per hold — through the bean, so `@Transactional` runs.
+2. Booking cancel: `status` on `Booking` (CONFIRMED in `writeBook`), poller's 409 catch → ticket CANCELLED + row SENT.
+3. Test for the expiry job.
+Small: rename `checkMail` → `poller`.
+
+---
+
+**Calendar:** Day 5 Part 1 **closed**. Part 2 **open** (3 items above). Part 3 **not run** (carry: notification-outbox critique, 429 + queue board, URL shortener HLD). Spring + notes + LC **pushed**. **Next weekday:** Week 8 Day 1 — finish W7 Part 2 leftovers first, then carried Part 3, then W8 slots.
 

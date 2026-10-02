@@ -69,7 +69,7 @@ Part 3 from this week: LLD class-design drills start.
 | Mon | N+1 fix | Index on hot FK | **Done W7 Day 1 (2026-09-28)** — `@EntityGraph` on "My tickets" + `idx_booking_user` |
 | Tue | Security pass (secrets/CORS) | README | **Done W7 Day 2 (2026-09-29)** — `JWT_SECRET` env var, CORS bean, README rewrite |
 | Wed | One perf check **(+ Spring Cache lab if not done)** | Leftover polish | **Done W7 Day 3 (2026-09-30)** — `book()` no longer holds a DB connection during HTTP (`BookingWriter`), TimeLimiter leftovers removed |
-| Thu | Seat hold + confirm on Event (TTL expiry). Anton asked W6 Fri 2026-09-25 | Test (expiry job) |
+| Thu | Seat hold + confirm on Event (TTL expiry). Anton asked W6 Fri 2026-09-25 | Test (expiry job) | Skipped Thu, **built W7 Day 5 (2026-10-02)** - hold + confirm + outbox confirm row + `expireHold`. **Left:** `@Scheduled` expiry class, Booking cancel on 409, test |
 | Fri | HLD/recap | — |
 
 ---
