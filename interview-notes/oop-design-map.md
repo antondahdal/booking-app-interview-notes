@@ -150,7 +150,11 @@ Name the product → actors → 4–8 classes → fields + 2–4 methods each �
 
 ---
 
-## Next session — Week 8 Day 1 (Mon), carrying W7 Thu + Fri Part 3
+## Next session — after Week 8 Day 3
+
+Part 3 still **not run** (W8 Day 1, 2, 3 all carried). OOP still-need and leftover lists are empty, so the OOP slot goes to the notification-outbox critique. The sketch was shown on W8 Day 3 (god `NotificationService`, `channel` / `status` as Strings, `EmailNotification` / `SmsNotification` is-a with their own `send()`, no delivery-attempt entity). Anton has not answered "first thing you'd change" yet — start there. Then the 429 + queue board, then the URL shortener.
+
+## Older — Week 8 Day 1 (Mon), carrying W7 Thu + Fri Part 3
 
 W7 Day 4 + Day 5 Part 3 **not run** (Thu skipped, Fri Part 2 ran late). Carry, in order:
 1. Notification-outbox critique (~15).

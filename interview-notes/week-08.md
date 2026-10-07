@@ -70,3 +70,64 @@ Full answers, examples and edits: [cv-prep.md](cv-prep.md).
 - Booking app: checked the code. It's one Spring Boot app plus a gateway (a modular monolith with service boundaries), not four deployed services. The CV line was reworded, and the list of what's missing to split it (Booking's `@ManyToOne` links to Event and User, one shared DB, one deployable, the gateway routing only Book) is in the notes.
 
 **Carry:** Week 8 Day 2 Part 2 (weak-topic drill and one fix). Part 3's carried Week 7 items (notification-outbox critique, the 429 and queue board, the URL shortener). CV: one high-availability example with DevOps, one root-cause story.
+
+---
+
+## Week 8 Day 3 (Wed 2026-10-07)
+
+Part 2 used the "one fix" + "leftover" slots for the first two items of the split list in [cv-prep.md](cv-prep.md) section 8. Part 3 **not run** (Anton closed after Part 2) — carry.
+
+### Part 2 — Booking keeps ids, not links to Event and User
+
+- `Booking`: `@ManyToOne Event` and `@ManyToOne User` replaced by plain `eventId` and `userId` columns (not null, same column names, so `idx_booking_user` still matches). New `eventTitle` column.
+- `BookingWriter.writeBook(resUser, seats, eventRes)`: no more `UserRepository` / `EventRepository`. User id comes from Auth's answer; event id, title and hold id come from Event's `reserveSeats` answer.
+- `myBookings()` reads the booking's own `eventTitle`. `@EntityGraph` on `findByUserId` removed (no `event` field left to join).
+
+**Why:** after the split Booking has its own database. It cannot join Event's or User's tables, so a foreign key into them is impossible.
+
+**Questions Anton asked (good ones):**
+- *How does it know the relation without the FK?* It doesn't, on purpose. The id is trusted because Event answered `reserveSeats` for it (no event → 404 → no booking row). The check moves from the DB into the flow.
+- *How does lazy fetch work now?* It doesn't apply. Lazy is only for a relationship field (a proxy loaded on first touch). A `Long` column loads with the row like `seats`.
+- *Inject the clients into `BookingWriter` instead of the repos?* No. `book()` already called them; `writeBook` gets their answers as parameters. HTTP inside `writeBook` would hold a DB connection during the call again (the W7 Day 3 fix).
+
+**Check:** title for "My tickets" — call Event over HTTP, or keep a copy? First answer: HTTP, "because the user might want something else" (missed the cost). After the cost was spelled out: the list shows the copied title, clicking a ticket calls Event for full details. Right.
+- HTTP per ticket: 10 tickets = 10 calls, and Event down = "My tickets" down.
+- Copy: no calls, works with Event down, but stale if the organizer renames the event.
+- Interview line: *"The ticket keeps a snapshot of what I bought. The detail page asks the owner."*
+
+**Code slips:** kept `@ManyToOne` + `@JoinColumn` on the new `Long` fields (startup would fail — those annotations mean "link to an entity"). Passed the same data twice to `writeBook` (`id` + `title` next to `eventRes`).
+
+### Part 2 — Gateway routes every public endpoint
+
+Coach wrote this one (Anton: "2 u do it").
+
+- `GatewayRouteConfig` replaces `BookingRouteConfig`. Three groups, each with its own URI property:
+  - Auth: `/api/auth/**`, `/api/users/**`
+  - Event: `/api/events`, `/api/events/{id}`, `/api/venues/**` — exact paths, no `/api/events/**` wildcard
+  - Booking: POST `/api/events/{eventId}/bookings`, `/api/bookings/**`
+- Left off on purpose: Event's `seat-reservations` and `holds/{holdId}/confirm` (only Booking calls them).
+- `auth.service.uri` / `event.service.uri` = `localhost:8080` today (one app). After the split only these values change. Compose passes `AUTH_SERVICE_URI` / `EVENT_SERVICE_URI` too (inside a container `localhost` is the gateway itself).
+- The gateway did not compile before today: this Spring Cloud Gateway version dropped `http(uri)`. Now `http()` + `before(uri(...))`.
+
+**Check (skipped by Anton — "I know why"):** why keep those two off the gateway? First answers were the label ("they're internal"). The real reason: a user could call `seat-reservations` 500 times with no ticket → holds make the concert look sold out, again every 10 minutes (denial of inventory). `confirm` is `permitAll` → anyone could make a ticketless hold permanent. Seats may only change through Book, which checks who you are and writes the ticket.
+
+**Side questions:**
+- *What happens when I open www.mysite.com?* DNS → IP of the load balancer / gateway → TLS → `GET /` returns the front-end (static host / CDN) → its JS calls `/api/...` through the gateway → the gateway routes by path → the service's JWT filter → controller.
+- *What do I see today?* No front-end in the repo. `localhost:8081/` → 404. `/api/events` → raw JSON. `/api/bookings/me` → 401 (the address bar can't send a JWT).
+- *So I need a default route?* Only when there's a front-end: everything not `/api/**` goes to the front-end server, checked **last**. Never point it at 8080 (would reopen the internal Event endpoints). Front-end to be built later (Anton asked).
+
+### Tests
+
+The same 7 of 11 fail on the W8 Day 1 commit too — not from today. Causes: tests don't set `JWT_SECRET`; `@WebMvcTest` / `@DataJpaTest` slices have no `CacheManager`; `ConcurrentBookingTest` now goes through the HTTP clients with no server running. With `JWT_SECRET` set the full context loads (new `Booking` mapping is fine). `OutboxPollerTest` and `HoldExpiryJobTest` pass.
+
+### Left for the split
+
+1. ~~Booking FK links~~ — done today.
+2. ~~Gateway routes~~ — done today.
+3. One database per service.
+4. Three deployables (Auth, Event, Booking), each a Compose container.
+5. JWT: Auth issues, Event and Booking only check.
+
+3–5 are Docker / deploy work and line up with Week 9. Leftovers: `holds/*/confirm` is `permitAll` in `SecurityConfig` (port 8080 is still open, so the gateway alone doesn't protect it); the 7 broken tests.
+
+**Carry:** Part 3 — notification-outbox critique (sketch shown, not answered yet: "first thing you'd change"), then the 429 + queue board, then the URL shortener. CV: add Docker at the end of the skills list, low-key, ATS friendly.

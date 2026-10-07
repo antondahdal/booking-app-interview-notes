@@ -79,8 +79,8 @@ Part 3 from this week: LLD class-design drills start.
 | Day | Topic 1 | Topic 2 |
 |---|---|---|
 | Mon | Demo path | Architecture recap notes | **Done W8 Day 1 (2026-10-05)** — + W7 leftovers closed (expiry job, Booking cancel on 409, tests) |
-| Tue | Weak-topic drill | One fix |
-| Wed | Mock prep | Leftover |
+| Tue | Weak-topic drill | One fix | **Not run W8 Day 2** (CV drill instead) |
+| Wed | Mock prep | Leftover | **Done W8 Day 3 (2026-10-07)** — split items 1–2: `Booking` keeps `eventId` / `userId` / `eventTitle` (no FK into Event / User), gateway routes every public endpoint. Split items 3–5 → Week 9 |
 | Thu | Dry-run answers | Polish |
 | Fri | Long mock (HLD + LLD) | — |
 

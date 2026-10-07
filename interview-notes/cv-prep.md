@@ -552,6 +552,8 @@ The usual name for this is a **modular monolith with service boundaries**, ready
 4. **The gateway only routes Book** (`POST /api/events/{eventId}/bookings`). It also needs routes for auth, events, venues and my-bookings.
 5. **JWT after the split.** Today the one app both issues and checks the token. After the split, Auth issues it, and Event and Booking only check it, using the same secret or Auth's public key with RS256.
 
+**Update W8 Day 3 (2026-10-07):** items 1 and 4 are done. `Booking` now stores `eventId`, `userId` and a copy of `eventTitle`, with no foreign keys into Event or User. The gateway routes Auth, Event, venues, Book and "My tickets", and keeps Event's internal `seat-reservations` and `holds/{holdId}/confirm` off. Items 2, 3 and 5 are left.
+
 **Already done, and it's the hard part:** HTTP clients between the modules, retry, a circuit breaker and timeouts, the outbox and poller, the seat hold with expiry, a correlation id, health probes, Docker Compose, and the gateway.
 
 > The service boundaries are done: Booking reaches Event and Auth only over HTTP, with resilience and an outbox. What's left is replacing the JPA links between Booking and Event/User with plain ids, one database per service, and deploying three apps behind the gateway.
