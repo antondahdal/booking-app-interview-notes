@@ -82,3 +82,16 @@ Short extras if a day needs them (only if not done): #344 Reverse String.
 | Fri | #208 Implement Trie | #530 Min Abs Diff in BST | Rapid-fire R1–R8 |
 
 Same-week extras: #79 Word Search, #77 Combinations, #228 Summary Ranges.
+
+---
+
+## Weeks 10–11 — redo + fresh, family hidden (Anton 2026-10-07)
+
+Each weekday: **one redo** (a problem already done, from the redo pool) + **one fresh** Top Interview 150 problem + **two Spring Boot questions** (~20 min).
+Mon and Wed only: a ~10 min design recap of one weak LC-SD piece.
+Same gate and timer (Medium 25, Easy 15).
+Mock interviews happen outside this platform.
+
+The coach picks both LCs **on the day** and never says the family or the week in the Cover.
+Do not list the day's problems here ahead of time.
+Rules, redo pool and Done table: [week-10.md](week-10.md).

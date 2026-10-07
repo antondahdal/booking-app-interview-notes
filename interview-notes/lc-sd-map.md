@@ -69,6 +69,7 @@ Skip if that product is **already** that day’s Part 3 or Friday HLD.
 | **W8 Mon–Thu** | Recap whichever course piece was weak | — | Fraud pipeline, Uber, YouTube |
 | **W8 Fri** | — | Mock HLD is **Part 3** | — |
 | **W9 Mon–Thu** | **No LC-SD.** Slot = two Spring Boot interview questions; Fri rapid-fire ([week-09.md](week-09.md)) | Anton 2026-09-25 | Run an LC-SD chapter here |
+| **W10–W11** | **Mon and Wed only:** ~10 min recap of a weak piece (token bucket, consistent hashing). Other days: two Spring Boot questions only ([week-10.md](week-10.md)) | Anton 2026-10-07 | A new chapter or a new product |
 
 ## Done
 
