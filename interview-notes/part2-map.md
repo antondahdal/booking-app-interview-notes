@@ -81,7 +81,7 @@ Part 3 from this week: LLD class-design drills start.
 | Mon | Demo path | Architecture recap notes | **Done W8 Day 1 (2026-10-05)** — + W7 leftovers closed (expiry job, Booking cancel on 409, tests) |
 | Tue | Weak-topic drill | One fix | **Not run W8 Day 2** (CV drill instead) |
 | Wed | Mock prep | Leftover | **Done W8 Day 3 (2026-10-07)** — split items 1–2: `Booking` keeps `eventId` / `userId` / `eventTitle` (no FK into Event / User), gateway routes every public endpoint. Split items 3–5 → Week 9 |
-| Thu | Dry-run answers | Polish |
+| Thu | Dry-run answers | Polish | **Part 2 not run (2026-10-08).** Part 3 carried boards closed. |
 | Fri | Long mock (HLD + LLD) | — |
 
 ---
@@ -99,3 +99,5 @@ Details and traps: [week-09.md](week-09.md). Compose and health vs ready were W5
 Hibernate is **five topics** (Anton 2026-09-25: go deeper). SQL logging on for every Hibernate lab.
 | Thu | Kubernetes `Deployment` + `Service` + `ConfigMap` / `Secret` (kind or minikube) | Probes on Actuator, requests / limits, rolling update, HPA |
 | Fri | Spring AI `ChatClient` endpoint | One read-only tool (no booking tool) |
+
+**With the DB split (Wed–Thu, Anton 2026-10-08):** one database per service, three deployables, JWT check only on Event and Booking. Same work: a rate limiter on the gateway. Extra Book taps get **429** there. `book()` and the seat lock do not return **429**. Sold out stays **409**. Not in the repo today. Details: [week-09.md](week-09.md).

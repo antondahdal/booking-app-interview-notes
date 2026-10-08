@@ -67,6 +67,8 @@ Every weekday prompt and every Friday board is one of these. If a prompt is not 
 | Gateway HLD | HLD | W5 Fri | Phone → Gateway → Booking → Auth (`AuthClient`) → Event (`EventClient`). Filter ≠ Auth. `EventClient` = Booking, even in the same jar. Door wait **longer** than Booking 3s. 100 wait on Event’s row, not the door. **409** stays **409**. Booking down → Gateway **502**, no take. No retry Book at the door. Dropped **201** is still a ticket. Circuit **503** / TimeLimiter **502** = Booking fallback, Event may not have run | `EventClient` = Event. All **502**/**503** = Event. Gateway queues the last seat. Retry **502** at the door |
 | Outbox / at-least-once | Slow hop | W6 Mon | Ticket + `PENDING` in one `book()` commit. **201** ≠ print (`@Async` listener). Event **409** never reaches outbox. Same `PENDING` row can print twice (at-least-once). Unique on `bookingId` does not block that. Listener does not wake on restart by itself (poller = Thu) | Unique = no second print. `populateMessageAndSave` is `@Async`. Event writes the ticket |
 | Async HLD | HLD / Slow hop | W6 Fri | Book path vs notify path. Seats commit in Event; ticket + outbox in one Booking commit. Event took seats + Booking fails → compensating release (saga), idempotent on reservation id in **Event**. Hold + confirm alternative (build W7 Thu). 3 pods: `SKIP LOCKED`, claim `PENDING → SENDING` + commit, send outside tx, `claimedAt` timeout | Booking dedupes the release. Lock held during `send()`. Key on `eventId`. Publish writes the row |
+| 429 + queue | 10× / Status | W8 Day 4 (carried W7 Thu) | Gate refuses overflow with **429**. A phone that reaches Book and finds 0 seats gets **409**, including one that waited. Waiting does not take a seat. Uncapped queue → the back times out. Full queue → **429**, not a hang. Load balancer only picks a pod. Not in the repo; build in W9 with the per-service DB | **429** for sold out. Queue takes a seat. Load balancer is the line |
+| URL shortener | HLD | W8 Day 4 (carried W7 Fri) | Save long address + a unique short code. Open looks up the code and redirects. Unknown code **404**. Million opens → cache the pair. Count a click only when that open calls you. Same code must not be overwritten | Browser remembers the jump and you still count every open. Cache sees an open that never reached you |
 
 **Asked, not built (keep as interview words only until code exists):** click id / idempotency key. Do not pretend it is in the app.
 
@@ -86,7 +88,7 @@ Same shape as the OOP “still need” table. Must-have on a mid-level board. Ea
 | 17 | **Async HLD** | HLD | Book path vs notify path. | W6 Fri |
 | 18 | **N+1 and index as bottleneck** | 10× | What the user feels, what you measure. | W7 Mon–Tue |
 | 19 | **Cache** | Truth / 10× | Cache-aside, TTL. Do not cache “1 seat left” as gospel. Book is truth. | **W7 Wed done** (LB + cache board, stampede, Redis down) |
-| 20 | **Classic HLD + 429** | HLD | URL shortener. Rate limit **429** ≠ sold-out **409**. | **W7 Fri (longer)** |
+| 20 | **Classic HLD + 429** | HLD | URL shortener. Rate limit **429** ≠ sold-out **409**. | **Done W8 Day 4** (carried) |
 | 21 | **Mock HLD + one LLD** | HLD / LLD | Week 8 Friday. | W8 Fri |
 | 22 | **Payment for Book** | Slow hop / Status | Webhook twice or never. Idempotency key. Never charge inside the lock. | W9 Mon |
 | 23 | **Flash sale waiting room** | 10× | 1M users, one hot row. Entry token with TTL. More pods ≠ more seats. | W9 Tue |

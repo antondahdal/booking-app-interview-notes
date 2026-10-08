@@ -107,6 +107,25 @@ Compose was **W5 Thu**.
 Health vs ready was **W5 Thu**.
 Do not rerun those as new; build on them.
 
+### Also this week — one database per service, and a rate limiter (Anton 2026-10-08)
+
+These ride on the deploy days (Wed Docker, Thu Kubernetes). They do not replace a Hibernate topic.
+
+From the W8 split, still unbuilt:
+
+- One database per service. Auth, Event, and Booking stop sharing one schema.
+- Three deployables, each its own container.
+- JWT: Auth issues it. Event and Booking only check it.
+
+Rate limiter, same work. Nothing in the repo returns **429** today.
+
+- It sits on the gateway, in front of the pods.
+- Extra Book taps get **429** there. They never reach `book()` and never lock the seat row.
+- Taps that were let in, and the seats are gone, still get **409** from Event.
+- The load balancer only picks a pod. A queue is the line where a phone waits for a worker. The limiter is the gate that refuses the overflow.
+- Fixed window vs token bucket was Part 1 W7 Tue. Do not re-ask the algorithm names.
+- This is the Book gate. It is not the Friday AI-gateway limit.
+
 Anton asked (2026-09-25) to go deeper on Hibernate.
 Hibernate now takes five topics (Mon, Tue, Wed first half).
 Docker is one topic on Wednesday.
@@ -175,6 +194,7 @@ Second-level cache vs Spring `@Cacheable`: one line, when you would not use it (
 | Cascade | `CascadeType.ALL` on `@ManyToOne` (deleting a booking deletes the event). |
 | `readOnly` | Thinking it blocks writes in the DB. It is a hint to Hibernate and the driver. |
 | Docker | `latest` JDK image with the build tools inside the runtime image. |
+| Rate limiter | **429** from `book()` or from the seat lock. Or **429** when the concert is sold out. Sold out stays **409**. The limiter is on the gateway. |
 | Kubernetes | Liveness checks the DB. DB blip → every pod restarts. DB belongs in readiness. |
 | Kubernetes | Secret in a `ConfigMap`. Or a Secret thought of as encrypted (it is base64 by default). |
 | Spring AI | Letting the model call `book()`. Money and seats need a human confirm, and the model output is not trusted input. |

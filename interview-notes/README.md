@@ -38,6 +38,7 @@ Cheat sheets for the 8-week Event Booking Platform plan. **One file per week** s
 | [lc-patterns.md](lc-patterns.md) | Pattern gate + table (all weeks) |
 | [git.md](git.md) | Three repos, commit vs push, when Anton says push |
 | [ai-spring.md](ai-spring.md) | **Part 2/3 coach protocol** (notes first → set topics → he types; interview Qs on that code) |
+| [who-calls-whom.md](who-calls-whom.md) | **Memorize:** four boxes, method chain for login, Book, and the poller |
 | [cheats.md](cheats.md) | DI, annotations, HTTP statuses, day template |
 
 `INTERVIEW-NOTES.md` at the repo root is only a pointer to this folder.

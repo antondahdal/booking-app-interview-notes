@@ -150,9 +150,9 @@ Name the product → actors → 4–8 classes → fields + 2–4 methods each �
 
 ---
 
-## Next session — after Week 8 Day 3
+## Next session — Week 8 Day 5 (Fri)
 
-Part 3 still **not run** (W8 Day 1, 2, 3 all carried). OOP still-need and leftover lists are empty, so the OOP slot goes to the notification-outbox critique. The sketch was shown on W8 Day 3 (god `NotificationService`, `channel` / `status` as Strings, `EmailNotification` / `SmsNotification` is-a with their own `send()`, no delivery-attempt entity). Anton has not answered "first thing you'd change" yet — start there. Then the 429 + queue board, then the URL shortener.
+W8 Day 4 Part 3 **closed** (notification critique, 429 + queue, URL shortener). Part 2 Thu (dry-run answers, polish) **not run**. Friday is the long mock (HLD + one LLD). Do not rerun those three boards. Rate limiter is Week 9 with the per-service database, not built. Details: [week-08.md](week-08.md).
 
 ## Older — Week 8 Day 1 (Mon), carrying W7 Thu + Fri Part 3
 
