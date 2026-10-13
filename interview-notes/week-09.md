@@ -6,7 +6,119 @@ Goal: good working knowledge of Spring Boot interview questions, Hibernate, Dock
 Same day order: Part 1, then Part 2, then Part 3.
 Sat/Sun **off**.
 
-**Not started yet.** Say `Start Week 9 Day 1` when you get here.
+**Day 1 Part 1 closed** (Mon 2026-10-12).
+#17 overtime, coach patched the next digit.
+#637 on-time, he coded.
+S1 and S2 taught.
+Not pushed.
+Push after Part 3 when Anton says.
+
+## Week 9 Day 1 Part 2 — persistence context (H1)
+
+Anton asked for this written out (2026-10-12). H2 (lazy loading) is not started.
+
+Hibernate is the library that turns an `Event` object into a row in the `events` table, and a row back into an `Event`. Spring Data calls Hibernate when the repository runs. You do not write the `UPDATE` yourself.
+
+The persistence context is Hibernate's memory of entity objects for **one database transaction**. Spring opens that memory when a `@Transactional` method starts and closes it when the method commits or rolls back. One transaction, one persistence context. The next request gets its own.
+
+Three different things that get mixed up:
+
+| Thing | What it is |
+|---|---|
+| HTTP request | The phone's call. It is not Hibernate's memory. |
+| `events` table | The rows on disk. |
+| `Event` class | The Java shape of one concert. |
+| Persistence context | The copies Hibernate is **watching** while this transaction is open. |
+
+### Four states of an `Event` object
+
+| State | When | What `setTitle` does |
+|---|---|---|
+| **Transient** | `new Event()`. No id. Hibernate is not watching it. `createEvent` is here until `save()`. | Changes the Java field only. Nothing is in the database yet. |
+| **Managed** | Loaded or saved **inside** the open transaction. `updateEvent`'s `findById` result is this. | Hibernate is watching. On commit it writes an `UPDATE` if a field changed. |
+| **Detached** | It has an id, but the transaction that was watching it is **over**. The object you still hold after `updateEvent` returns is this. | Changes the Java field only. The database does not change. |
+| **Removed** | Marked deleted inside the transaction. | The `DELETE` goes out on commit. |
+
+### What `updateEvent` does now
+
+`EventServiceImpl.updateEvent` is `@Transactional`. It loads the event, calls `setTitle`, and does **not** call `save()`. The response is built from that same `event`.
+
+1. `findById` runs one `SELECT` and puts that `Event` into the persistence context. Hibernate stores a snapshot of the fields from that `SELECT`. The object is **managed**.
+2. `setTitle` changes the managed object. No SQL yet.
+3. `save()` is how you hand Hibernate an object it is **not** already watching. That is `createEvent`: a transient `Event` becomes managed and is inserted. A managed event does not need `save()` to be updated.
+4. When `updateEvent` returns, the transaction commits. Hibernate compares the object to the snapshot. The title differs, so Hibernate writes the `UPDATE`. That comparison is **dirty checking**.
+
+Anton asked how it saves with `save()` removed. That is step 4.
+
+### First-level cache
+
+The persistence context is also a map from id to that Java object. This is the first-level cache. It lives only for this transaction. It is not Redis and not Spring `@Cacheable`.
+
+A second `findById` for the same id, still inside `updateEvent`, does **not** send a second `SELECT`. It returns the same object. The title on it is already the new one, even though the `UPDATE` has not been sent. The `UPDATE` waits until the method finishes.
+
+Anton: the second load returns the updated title. Right.
+
+### After the method returns
+
+The transaction is closed, so that object is **detached**. Another method still holding it and calling `setTitle` does not change the database. Anton: "no it should not." Right.
+
+### `merge`
+
+`merge` is for an `Event` that already has an id but is detached. It copies that object's fields onto the `Event` Hibernate is watching in the **current** transaction, and it **returns the watched one**. The object you passed in stays detached.
+
+On commit, the database has the title that was copied onto the **returned** object. A `setTitle` on the object you passed in does not get written. Change the object `merge` returned if the commit should see the new title.
+
+Anton (2026-10-12): thought Rock would be saved, because the method is `@Transactional` and the persistence context would see a mismatch. The transaction opens the context. It does not enroll the argument. `save` returns a second Java object, and that one is the managed copy. `passedIn` and `returned` share an id and are not the same object. `setTitle("Rock")` on `passedIn` leaves the managed title at Jazz, so dirty checking finds no mismatch. Commit writes Jazz. `setTitle("Rock")` on `returned` would be the mismatch, and commit would write Rock.
+
+### Flush
+
+Hibernate sends the pending `UPDATE` when the transaction commits. It also sends it **before** a query that has to read the new title from the database (a search). `findById` for an id already in this persistence context does not need that: it uses the object in memory.
+
+Anton (2026-10-12): thought the search would not see an `UPDATE` yet, and that the answer would come from the persistence context. A search is SQL. It does not return the managed object the way `findById` does. Hibernate flushes first, so the `UPDATE` is already in the database when the `SELECT` runs, and the search finds the new title.
+
+**Line:** Hibernate watches a managed `Event` for the transaction and writes the `UPDATE` on commit, so a title change on an event I just loaded does not call `save()`. After the method returns the object is detached, and `merge` returns the watched copy.
+
+## Week 9 Day 1 Part 2 — lazy venue (H2)
+
+`Event.venue` is `LAZY`. `spring.jpa.open-in-view=false`. `getEvent` used `findById`, then `getVenue().getName()`. The repository session was already closed, so the phone got **500**. `GlobalExceptionHandler` does not catch `LazyInitializationException`.
+
+Fix: `EventRepository.findByIdAndVenueId` is `JOIN FETCH e.venue` for that one id. `getEvent` calls it. The venue fields are already on the object when the session closes, so `getName()` does not run a new `SELECT`. Anton: "in the object, the join already loaded it." Right.
+
+`getReferenceById` is not used in this app. It returns a proxy, not an `Optional`, and not null. A missing id does not throw until a real field is read.
+
+**EAGER:** `@ManyToOne` is eager unless you set `LAZY`. Making `venue` `EAGER` would also kill the 500, because every `Event` load would bring the venue inside the session. Anton: more database work, more data loaded and held, often unused. Right. `reserveSeats` only changes `availableSeats`. With `EAGER` that lock query still loads the venue row. `JOIN FETCH` on `getEvent` pays for the venue only on the call that shows the name.
+
+## Week 9 Day 1 Part 3 — payment for Book
+
+Charge runs after Event commits and releases the row. Same reason as notification: the bank is slow, and the seat lock must not wait on it. Anton got that.
+
+The bank’s “paid” call can arrive twice. A stored flag for that payment must stop a second ticket and seats taken again. Anton first said “don’t return the confirmation twice.” The confirmation is harmless. The ticket and the seats are the thing that must not repeat.
+
+No “paid” call before the deadline: revert the reservation. Maria has no ticket. If the bank did take the money and the call was lost, ask the card company about the payment id before releasing the seats. Paid → finish the ticket. Not paid → release.
+
+Charge failed is not sold out. Maria hears that the payment did not process. Seats go back.
+
+A special URL does not prove the caller. The bank signs the body. A bad signature is ignored.
+
+**Line:** I charge after the seat row is committed. A repeated “paid” call does not book again. I verify the signature, and I ask the bank about the payment id before an expiry job gives the seats back.
+
+## Week 9 Day 1 Part 3 — LLM basics
+
+Taught before any question (Anton, 2026-10-12). He had not seen this box.
+
+A chat model is a separate box from Event and Booking. It writes the next text. It does not run `findById` and it does not see the `events` table unless those rows are pasted into the text you send.
+
+**Tokens.** The model does not read words. It reads tokens, chunks of about a word or a piece of a word. You pay and you wait per token, in and out.
+
+**Context window.** One call can hold only so much text. That limit is the context window. Your whole database does not fit. You send the question plus the few rows that matter.
+
+**Temperature.** A knob on how much the model varies the wording. 0 is the steady setting. It still does not look up your table. It can name a jazz concert in Haifa that you do not have. That made-up fact is a hallucination. Steady wording is not a database read.
+
+**Cost and latency.** Each call costs money and time. It does not belong inside `book()` or inside the seat lock. Search or “describe this event” can call it. Taking seats cannot wait on it.
+
+**Structured output.** You can require the reply to be JSON of a fixed shape, and map that JSON onto a Java record (`city`, `date`). An essay is not something `book()` can trust.
+
+**Line:** Temperature 0 does not stop the model from inventing a concert. I only trust it when I pasted the real rows, or when the answer is a record I validate. The model stays off the Book hot path.
 
 ---
 
