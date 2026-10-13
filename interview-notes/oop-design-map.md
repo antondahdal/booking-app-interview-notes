@@ -126,7 +126,7 @@ Do not repeat prompts in **design-map.md → Done**. The five families are: **wh
 
 ### Week 9 (Anton 2026-09-25) — HLD whiteboard + AI for developers
 
-OOP still-need is empty, so the OOP slot becomes **AI for developers (~20)**. HLD board ~40. Details and traps: [week-09.md](week-09.md).
+Anton 2026-10-13: AI-for-developers slot is **scrapped**. HLD board only. Details: [week-09.md](week-09.md).
 
 | Day | HLD whiteboard (~40) | AI for developers (~20) |
 |---|---|---|

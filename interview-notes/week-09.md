@@ -315,7 +315,9 @@ Second-level cache vs Spring `@Cacheable`: one line, when you would not use it (
 
 ## Part 3 — HLD whiteboard + AI for developers
 
-OOP still-need list is empty, so the OOP slot becomes the AI talk this week.
+Anton 2026-10-13: scrap the AI-for-developers slot. Do not teach ChatClient, RAG, agents, or the Friday AI assistant. The app boards stay: waiting room, search, deploy.
+
+**Tue Part 3 waiting room closed** (2026-10-13). Line is outside Booking. Entry token lasts a few minutes and does not take a seat. `book()` with 0 seats is **409**. A phone that never reaches `book()` times out. Ten more Booking servers still sell 5,000 seats, because the seats are one event row.
 
 | Piece | Time | What |
 |---|---|---|
@@ -326,7 +328,7 @@ OOP still-need list is empty, so the OOP slot becomes the AI talk this week.
 | Day | HLD whiteboard (~40) | AI for developers (~20) |
 |---|---|---|
 | Mon | **Payment for Book:** Stripe-style provider, webhook back, idempotency key, ledger row, reconcile job. What if the webhook arrives twice or never | **LLM basics for engineers:** tokens, context window, temperature, why it hallucinates, cost and latency per call, structured output (JSON schema → Java record) |
-| Tue | **Flash sale waiting room:** 1M users for 5k seats. Virtual queue, entry token with TTL, protect Booking and the event row | **Spring AI map:** `ChatClient`, prompt templates, advisors (memory, logging), structured output, switching model by config. Where LangChain4j fits |
+| Tue | **Flash sale waiting room:** **Done** 2026-10-13 | **Scrapped** |
 | Wed | **Event search:** search index (OpenSearch) fed from the outbox / CDC, stale-OK browse vs Book truth, reindex | **Embeddings + RAG:** chunking, embedding model, vector store (pgvector), top-k, answer with sources. RAG vs fine-tune. When not to use AI at all |
 | Thu | **Deploy board:** this app on Kubernetes. Ingress, services, HPA, DB outside the cluster, config / secrets, rolling deploy, zero-downtime DB migration (expand, then contract) | **Tools, MCP, agents, guardrails:** function calling, MCP servers, agent loop. Prompt injection, least-privilege tools, human confirm, evals. How to use AI coding tools well (small diffs, tests, review every line) |
 | Fri | **Long HLD — AI assistant for the booking app:** user asks "two seats for jazz in Haifa next Friday". RAG over events, read-only tools, confirm step, then normal Book path. LLM gateway: rate limit, timeout, fallback, cost cap, caching, logging prompts without PII | 2 min recap of the week's AI traps |
