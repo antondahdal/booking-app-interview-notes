@@ -19,6 +19,12 @@ Part 2 was the event-list query count and the Book transaction.
 Part 3 waiting room is closed.
 The AI-for-developers slot is scrapped.
 
+**Day 3 Part 2 closed** (Wed 2026-10-14).
+H5 mapping, cascade, SEQUENCE / batch, locking recap.
+Docker multi-stage, non-root, MaxRAMPercentage, compose `mem_limit`.
+Gateway Book **429**.
+Part 3 event-search board was not reached.
+
 ## Week 9 Day 1 (Mon 2026-10-12)
 
 ### Part 1 — #17, #637, S1, S2
@@ -181,14 +187,12 @@ The event service has an in-memory `CacheManager` bean named `events`, so `@Cach
 Friday closes only what is still unfinished in the app.
 Do not add another topic that day.
 
-Still open after Tuesday:
+Still open after Wednesday:
 
-- Mapping, cascade, ids, batch inserts, locking.
-- Multi-stage Docker image and a memory limit in the container.
-- Gateway rate limit: extra Book taps get **429** before `book()`. Sold out stays **409**.
 - Kubernetes: Deployment, Service, ConfigMap, Secret, probes, limits, rolling update, HPA.
-- One `ChatClient` endpoint and one read-only tool. No tool that books.
 - Click id on Book, so a retry of the same tap is one ticket.
+- Event search board (Wed Part 3, not reached).
+- Friday ChatClient / AI assistant is still scrapped.
 
 ### Part 3 — waiting room
 
@@ -207,7 +211,51 @@ The AI-for-developers slot is scrapped.
 Do not teach ChatClient, RAG, agents, or the Friday AI assistant.
 The app boards stay: waiting room, search, deploy.
 
+## Week 9 Day 3 (Wed 2026-10-14)
+
+### Part 1 — #46, #392, S3, S4
+
+#46 Permutations was coach-written and untimed.
+#392 Is Subsequence was on-time.
+Tuesday’s S3 (proxies) and S4 (scopes / lifecycle / circular beans) were taught today. S5 and S6 were not reached.
+Full LC write-ups are in LC-Practice `notes/review/week-09.md` and `notes/week-09-day-03.md`.
+
+### Part 2 — H5 mapping, cascade, ids, batch, locking
+
+**Hall list, `mappedBy`.** A venue is the hall. An event is one concert in that hall. The concert row already has `venue_id`. `Event.venue` writes that column. The list on `Venue` is the same link from the hall back to its concerts. `mappedBy = "venue"` means that list follows `Event.venue`. Hibernate must not add a second column. We added the list so both sides of the link exist. We did not add a new table.
+
+**Why no cascade remove on `Event.venue`.** Cascade means: do the same save/delete on the linked object. The concert is many-to-one to the hall. Delete one concert with cascade remove on that field, and Hibernate deletes the hall. Other concerts still use that hall. Leave cascade off that field. Orphan removal on the hall’s list would delete a concert just because you dropped it from a Java list. Leave that off too. We delete a concert on purpose, not as a side effect.
+
+**Why change `Event` id from `IDENTITY` to `SEQUENCE`.** This is not because Book is slow. The hot path is the seat row, not inserting concerts. One “create concert” tap is still one INSERT. Batching is for many new rows in the same transaction (a loop, a seed, an import). The change is so that loop can group INSERTs, and so the interview line is true: `batch_size` does nothing while the id is `IDENTITY`.
+
+`IDENTITY` means the database creates the id only when that INSERT runs. Hibernate must wait for the number before the next INSERT. `SEQUENCE` is a counter Hibernate can ask first. `allocationSize` is how many ids it takes in one ask. `hibernate.jdbc.batch_size` is how many INSERTs it sends together. Those two knobs do not read each other. Book does not ask the sequence. Last-seat is an UPDATE of the same concert row.
+
+`@Version` on `Event` is optimistic. `findByIdForUpdate` is `SELECT … FOR UPDATE`. Maria and Dan on the last seats: Dan waits. Maria commits. Then the seat check is **409**.
+
+Two new concerts with null ids and `equals` on id look like one object in a `HashSet`. The set keeps 1.
+
+**Line:** I keep cascade off the concert’s hall link. `IDENTITY` kills insert batching. `SEQUENCE` plus `allocationSize` plus `batch_size` is for many inserts in one transaction, not for Book.
+
+### Part 2 — Docker
+
+**Why two stages.** Maven compiles. The running box only needs a JRE and the jar. The first `FROM` (`AS build`) is the kitchen: Maven, `pom.xml`, `src`, `mvn package`. The second `FROM` (`17-jre`) is the restaurant: copy only the jar with `COPY --from=build`, then `java -jar`. Maven is not a library inside the jar. Auth, Event, Booking, and Gateway each got this. The jar name must match that module’s `artifactId` or the wrong app listens on that port.
+
+**Why non-root.** Default in the restaurant is Linux admin (`root`). `useradd` plus `USER app` means `java -jar` runs as `app`. Look at the last `USER` before `ENTRYPOINT`.
+
+**Why `-XX:MaxRAMPercentage=75.0`.** Java may size the heap from laptop RAM and get killed. The flag is **75 percent**, not 75 MB. It is 75% of **that container’s** memory limit, not 75% of the laptop times four. Without a cap, four services can each try 75% of 16 GB. Compose now has `mem_limit: 512m` on each service, so each heap is about 75% of 512 MB. Kubernetes requests/limits stay Thursday.
+
+**Line:** The runtime image is a JRE plus the jar, not Maven. Heap follows the container cap, not the laptop.
+
+### Part 2 — gateway 429
+
+`BookRateLimitFilter` is a `OncePerRequestFilter` on the gateway. It counts Book POSTs (`/api/events/{id}/bookings`) per phone IP. Over 5, status **429** and no `chain.doFilter`, so `book()` never runs and the seat row is not locked. Login, event list, and my tickets are not this filter. A tap that was let in, seats gone, is still **409** from Event. This is not the waiting-room line. **429** is overflow at the gate. **409** is sold out.
+
+**Line:** Extra Book taps get 429 on the gateway. Sold out stays 409 from Event.
+
+Part 3 (event search) was not reached.
+
 ---
+
 
 ## Part 1 — LC coding + Spring Boot questions
 
