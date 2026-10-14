@@ -93,7 +93,7 @@ Details and traps: [week-09.md](week-09.md). Compose and health vs ready were W5
 | Day | Topic 1 | Topic 2 |
 |---|---|---|
 | Mon | H1 Hibernate persistence context (lifecycle, first-level cache, dirty checking, flush, `merge`) | H2 Lazy loading + proxies (`getReferenceById`, `LazyInitializationException`, open-in-view off) |
-| Tue | H3 N+1 deep (fetch join / `@EntityGraph` / `@BatchSize`, two bags, fetch join + paging, prove query count) | H4 Transactions (propagation, `readOnly`, rollback, isolation) |
+| Tue | H3 N+1 deep (fetch join / `@EntityGraph` / `@BatchSize`, two bags, fetch join + paging, prove query count) | H4 Transactions (propagation, `readOnly`, rollback, isolation) | **Done W9 Day 2 (2026-10-13)** — page of ids, then that page with venues; `readOnly` on the reads; `writeBook` starts the transaction the ticket and both outbox rows share. Plain `@Transactional` is enough (`REQUIRED` is the default). |
 | Wed | H5 Mapping / cascade / IDs / batch inserts / locking | Docker: multi-stage, layers, JVM memory in a container |
 
 Hibernate is **five topics** (Anton 2026-09-25: go deeper). SQL logging on for every Hibernate lab.

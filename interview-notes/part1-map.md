@@ -83,7 +83,9 @@ Short extras if a day needs them (only if not done): #344 Reverse String.
 
 Same-week extras: #79 Word Search, #77 Combinations, #228 Summary Ranges.
 
-Mon 2026-10-12: **#17** Letter Combinations (overtime, coach patched the next digit; a third digit is still pairs) + **#637** Average of Levels (on-time, he coded) + **S1** auto-config and **S2** profiles (both taught). **Part 1 closed.** Not pushed.
+Mon 2026-10-12: **#17** Letter Combinations (overtime, coach patched the next digit; a third digit is still pairs) + **#637** Average of Levels (on-time, he coded) + **S1** auto-config and **S2** profiles (both taught). **Part 1 closed.**
+
+Tue 2026-10-13: **#22** Generate Parentheses (coach-written, untimed) + **#108** Sorted Array to BST (coach-written, untimed). **S3** and **S4** were not reached. **Part 1 LCs closed.** Spring questions still open.
 
 ---
 
