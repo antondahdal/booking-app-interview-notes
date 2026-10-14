@@ -248,9 +248,22 @@ Two new concerts with null ids and `equals` on id look like one object in a `Has
 
 ### Part 2 — gateway 429
 
-`BookRateLimitFilter` is a `OncePerRequestFilter` on the gateway. It counts Book POSTs (`/api/events/{id}/bookings`) per phone IP. Over 5, status **429** and no `chain.doFilter`, so `book()` never runs and the seat row is not locked. Login, event list, and my tickets are not this filter. A tap that was let in, seats gone, is still **409** from Event. This is not the waiting-room line. **429** is overflow at the gate. **409** is sold out.
+`BookRateLimitFilter` is a `OncePerRequestFilter` on the gateway. It counts Book POSTs (`/api/events/{id}/bookings`) per phone IP (`getRemoteAddr()`). Over 5, status **429** and no `chain.doFilter`, so `book()` never runs and the seat row is not locked. Login, event list, and my tickets are not this filter. A tap that was let in, seats gone, is still **409** from Event. This is not the waiting-room line. **429** is overflow at the gate. **409** is sold out.
 
-**Line:** Extra Book taps get 429 on the gateway. Sold out stays 409 from Event.
+The count does **not** reset when the HTTP call finishes. `taps` lives on the gateway bean until the process restarts. One phone, a million taps: first 5 go through, the rest are 429, still one map key. A million different IPs: a million keys in RAM that never expire.
+
+`getRemoteAddr()` is the IP the gateway sees, not click id. Two people in the same café can share an IP. Click id is a key on the Book body so the **same tap** is one ticket. Still unbuilt.
+
+**Weak points (say this in the interview, then the production fix):**
+
+- No time window. Five Books in a year still lock you out until restart.
+- In-memory map. Two gateway pods each have their own count, so a phone can get 5 + 5. A million IPs grow RAM forever.
+- Keyed by IP, not by user or tap. NAT / café shares one bucket. A proxy in front can make every phone look like one IP.
+- Not click id. Rate limit stops overflow. Click id stops a double submit of the same tap.
+
+Production: Redis (or the gateway’s rate-limiter) with a window, key per user id when you have JWT, IP only as a coarse backup. Unique click id on Booking so retries are one row.
+
+**Line:** Extra Book taps get 429 on the gateway. Sold out stays 409 from Event. This lab count is per IP, in memory, with no window.
 
 Part 3 (event search) was not reached.
 
