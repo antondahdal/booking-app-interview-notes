@@ -19,7 +19,19 @@ Part 2 was the event-list query count and the Book transaction.
 Part 3 waiting room is closed.
 The AI-for-developers slot is scrapped.
 
-## Week 9 Day 1 Part 2 — persistence context (H1)
+## Week 9 Day 1 (Mon 2026-10-12)
+
+### Part 1 — #17, #637, S1, S2
+
+#17 Letter Combinations was overtime.
+The coach patched the next digit.
+A third digit is still pairs.
+#637 Average of Levels was on-time.
+He coded it.
+S1 auto-configuration and S2 profiles were taught.
+Full LC write-ups are in LC-Practice `notes/review/week-09.md`.
+
+### Part 2 — persistence context (H1)
 
 Anton asked for this written out (2026-10-12). H2 (lazy loading) is not started.
 
@@ -84,7 +96,7 @@ Anton (2026-10-12): thought the search would not see an `UPDATE` yet, and that t
 
 **Line:** Hibernate watches a managed `Event` for the transaction and writes the `UPDATE` on commit, so a title change on an event I just loaded does not call `save()`. After the method returns the object is detached, and `merge` returns the watched copy.
 
-## Week 9 Day 1 Part 2 — lazy venue (H2)
+### Part 2 — lazy venue (H2)
 
 `Event.venue` is `LAZY`. `spring.jpa.open-in-view=false`. `getEvent` used `findById`, then `getVenue().getName()`. The repository session was already closed, so the phone got **500**. `GlobalExceptionHandler` does not catch `LazyInitializationException`.
 
@@ -94,34 +106,7 @@ Fix: `EventRepository.findByIdAndVenueId` is `JOIN FETCH e.venue` for that one i
 
 **EAGER:** `@ManyToOne` is eager unless you set `LAZY`. Making `venue` `EAGER` would also kill the 500, because every `Event` load would bring the venue inside the session. Anton: more database work, more data loaded and held, often unused. Right. `reserveSeats` only changes `availableSeats`. With `EAGER` that lock query still loads the venue row. `JOIN FETCH` on `getEvent` pays for the venue only on the call that shows the name.
 
-## Week 9 Day 2 Part 2 — event list query count and the Book transaction
-
-Coach wrote this in the app (Anton 2026-10-13). He asked what was new, then why `REQUIRED` is on `writeBook` when nothing is already open.
-
-The event list used to load the venue with the page, and Hibernate pulled every row. It now loads a page of event ids, then those events and their venues in one query. Five events, page of two, is three SQL statements. `EventListQueryCountTest` covers that. An empty id page returns without calling the venue query.
-
-`getEvent` and the event list are `@Transactional(readOnly = true)`. Hibernate skips dirty checking on those reads. "My tickets" calls auth first, then reads the rows in its own read-only transaction.
-
-`book()` has no transaction. It waits on Auth and Event first. `writeBook` is the method that opens one. The ticket and both outbox rows commit or roll back together inside that one transaction. If the Book rolls back, the outbox rows roll back with the ticket.
-
-A plain `@Transactional` is enough. `Propagation.REQUIRED` is already the default, so writing it out changes nothing. `REQUIRED` means join a transaction if one is already open, otherwise start one. None is open on `book()`, so `writeBook` starts it.
-
-The event service has an in-memory `CacheManager` bean named `events`, so `@Cacheable("events")` has a cache to use.
-
-**Line:** I page the ids first, then load that page with the venue in one query, and the ticket and the outbox share the transaction that `writeBook` starts.
-
-Anton (2026-10-13): Friday closes only what is still unfinished in the app. Do not add another topic that day.
-
-Still open after Tuesday:
-
-- Mapping, cascade, ids, batch inserts, locking.
-- Multi-stage Docker image and a memory limit in the container.
-- Gateway rate limit: extra Book taps get **429** before `book()`. Sold out stays **409**.
-- Kubernetes: Deployment, Service, ConfigMap, Secret, probes, limits, rolling update, HPA.
-- One `ChatClient` endpoint and one read-only tool. No tool that books.
-- Click id on Book, so a retry of the same tap is one ticket.
-
-## Week 9 Day 1 Part 3 — payment for Book
+### Part 3 — payment for Book
 
 Charge runs after Event commits and releases the row. Same reason as notification: the bank is slow, and the seat lock must not wait on it. Anton got that.
 
@@ -135,7 +120,7 @@ A special URL does not prove the caller. The bank signs the body. A bad signatur
 
 **Line:** I charge after the seat row is committed. A repeated “paid” call does not book again. I verify the signature, and I ask the bank about the payment id before an expiry job gives the seats back.
 
-## Week 9 Day 1 Part 3 — LLM basics
+### Part 3 — LLM basics
 
 Taught before any question (Anton, 2026-10-12). He had not seen this box.
 
@@ -152,6 +137,75 @@ A chat model is a separate box from Event and Booking. It writes the next text. 
 **Structured output.** You can require the reply to be JSON of a fixed shape, and map that JSON onto a Java record (`city`, `date`). An essay is not something `book()` can trust.
 
 **Line:** Temperature 0 does not stop the model from inventing a concert. I only trust it when I pasted the real rows, or when the answer is a record I validate. The model stays off the Book hot path.
+
+## Week 9 Day 2 (Tue 2026-10-13)
+
+### Part 1 — #22, #108, S3, S4
+
+#22 Generate Parentheses was coach-written and untimed.
+He did not know the pattern and stayed to learn it.
+#108 Convert Sorted Array to BST was coach-written and untimed.
+He named heap, then BFS, then intervals.
+The middle value of the current slice is the root.
+S3 and S4 were not reached.
+Full LC write-ups are in LC-Practice `notes/review/week-09.md`.
+
+### Part 2 — event list query count and the Book transaction
+
+Coach wrote this in the app.
+He asked what was new, then why `REQUIRED` is on `writeBook` when nothing is already open.
+
+The event list loads a page of event ids, then those events and their venues in one query.
+Five events, page of two, is three SQL statements.
+`EventListQueryCountTest` covers that.
+An empty id page returns without calling the venue query.
+
+`getEvent` and the event list are `@Transactional(readOnly = true)`.
+Hibernate skips dirty checking on those reads.
+"My tickets" calls auth first, then reads the rows in its own read-only transaction.
+
+`book()` has no transaction.
+It waits on Auth and Event first.
+`writeBook` is the method that opens one.
+The ticket and both outbox rows commit or roll back together.
+If the Book rolls back, the outbox rows roll back with the ticket.
+
+A plain `@Transactional` is enough.
+`Propagation.REQUIRED` is already the default, so writing it out changes nothing.
+None is open on `book()`, so `writeBook` starts it.
+
+The event service has an in-memory `CacheManager` bean named `events`, so `@Cacheable("events")` has a cache to use.
+
+**Line:** I page the ids first, then load that page with the venue in one query, and the ticket and the outbox share the transaction that `writeBook` starts.
+
+Friday closes only what is still unfinished in the app.
+Do not add another topic that day.
+
+Still open after Tuesday:
+
+- Mapping, cascade, ids, batch inserts, locking.
+- Multi-stage Docker image and a memory limit in the container.
+- Gateway rate limit: extra Book taps get **429** before `book()`. Sold out stays **409**.
+- Kubernetes: Deployment, Service, ConfigMap, Secret, probes, limits, rolling update, HPA.
+- One `ChatClient` endpoint and one read-only tool. No tool that books.
+- Click id on Book, so a retry of the same tap is one ticket.
+
+### Part 3 — waiting room
+
+The line is outside Booking.
+The entry token lasts a few minutes and does not take a seat.
+`book()` with 0 seats is **409**.
+A phone that never reaches `book()` times out.
+Ten more Booking servers still sell 5,000 seats, because the seats are one event row.
+
+He first said **429** when `book()` saw 0 seats.
+**429** is the line turning a phone away before `book()` runs.
+He then said a phone still in the line hears **409**.
+That phone never calls `book()`, so the line drops it when the wait expires.
+
+The AI-for-developers slot is scrapped.
+Do not teach ChatClient, RAG, agents, or the Friday AI assistant.
+The app boards stay: waiting room, search, deploy.
 
 ---
 
