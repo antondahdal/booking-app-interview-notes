@@ -25,6 +25,12 @@ Docker multi-stage, non-root, MaxRAMPercentage, compose `mem_limit`.
 Gateway Book **429**.
 Part 3 event-search board was not reached.
 
+**Day 4 closed** (Thu 2026-10-15).
+LCs were already closed (#35, #34).
+S5 through S8 taught.
+Kubernetes YAML for Event and Booking: Deployment, Service, ConfigMap, Secret, probes, memory request and limit, rolling update, Event HPA.
+Part 3 deploy board was not reached.
+
 ## Week 9 Day 1 (Mon 2026-10-12)
 
 ### Part 1 — #17, #637, S1, S2
@@ -187,12 +193,13 @@ The event service has an in-memory `CacheManager` bean named `events`, so `@Cach
 Friday closes only what is still unfinished in the app.
 Do not add another topic that day.
 
-Still open after Wednesday:
+Still open after Thursday:
 
-- Kubernetes: Deployment, Service, ConfigMap, Secret, probes, limits, rolling update, HPA.
-- Click id on Book, so a retry of the same tap is one ticket.
+- Deploy board (Thu Part 3, not reached): ingress, database outside the cluster, expand-then-contract schema change.
 - Event search board (Wed Part 3, not reached).
+- Click id on Book, so a retry of the same tap is one ticket.
 - Friday ChatClient / AI assistant is still scrapped.
+- The Kubernetes files were not applied to a cluster.
 
 ### Part 3 — waiting room
 
@@ -266,6 +273,42 @@ Production: Redis (or the gateway’s rate-limiter) with a window, key per user 
 **Line:** Extra Book taps get 429 on the gateway. Sold out stays 409 from Event. This lab count is per IP, in memory, with no window.
 
 Part 3 (event search) was not reached.
+
+## Week 9 Day 4 (Thu 2026-10-15)
+
+### Part 1 — S5, S6, S7, S8
+
+LCs were already closed. #35 Search Insert Position was on-time. #34 Find First and Last Position was overtime. Write-ups are in LC-Practice.
+
+**S5 request path.** A bad token dies in the JWT filter. `BookingController` does not run. That 401 never reaches `@ControllerAdvice`. He said the filter stops it.
+
+**S6 validation.** He thought Book had no validation. `seats` has `@Min(1)`, and `book()` has `@Valid`. A missing field becomes 0 and fails that minimum. The status is 400, from Boot’s default handler, before `book()` runs. `GlobalExceptionHandler` does not write that body. Sold out is 409 from `InsufficientSeatsException` in that handler. He said bad data is 400.
+
+**S7 virtual threads.** The light part is a thread parked on an HTTP call, Auth or Event. A virtual thread can wait there without holding an operating-system thread the whole time. The heavy part starts when the seat row is locked and a database connection is held. Booking’s own write holds a connection the same way. He first had Auth unchanged and all of Event heavy. He then said the lock on the event row, holding the connection, is the heavy part.
+
+**S8 testing slices.** He was not sure. `BookingControllerTest` is the web layer with a fake service. A green run means the POST became 201 or 409 from that fake. `EventListQueryCountTest` counts real SQL. H2 does not lock a row the way Postgres `FOR UPDATE` does, so the last-seat lock needs Postgres.
+
+**Line:** A bad token dies in the filter. A bad body is 400. Sold out is 409. Virtual threads make the HTTP wait cheap and do not shorten the row lock. The controller test proves the mapping. The query-count test proves the SQL.
+
+### Part 2 — Kubernetes
+
+Coach wrote the files. Comments are on the lines. Nothing was applied to a cluster.
+
+**Deployment and Service.** `k8s/event.yaml` and `k8s/booking.yaml`. Docker still builds the image. A Deployment keeps a pod of that image running and replaces it when it dies. The Service is the steady name (`event` on 8083, `booking` on 8080). The new pod gets a new address. The Service follows the label, so Booking still calls `http://event:8083`. He said Docker builds the image, Kubernetes runs it on a pod and replaces it when it dies. He pointed at the booking Service as the name Gateway calls.
+
+**ConfigMap and Secret.** `k8s/config.yaml`. Database URL and the Auth and Event hostnames are in ConfigMaps. `JWT_SECRET` and `APP_INTERNAL_TOKEN` are in the Secret `app-secret`. `envFrom` on each Deployment copies those keys into the pod. Without that block the objects exist and the Java process never sees them. Base64 is encoding. A shell inside the pod can print `JWT_SECRET`. The Secret keeps the key out of the ConfigMap and out of git. It does not hide the value from that process. The values in the file are placeholders. He said base64 is encoding, and the key is `app-secret`.
+
+**Probes.** Liveness is `/actuator/health/liveness`. Failure kills the pod. Readiness is `/actuator/health/readiness`. Failure takes the pod off the Service. The pod stays. Three Event pods share one database URL. If that database is down, readiness fails on all of them and none get traffic. None are restarted. He first said every pod restarts. He then said if the database is down, no pod gets traffic until it is up.
+
+**Memory.** Request `256Mi` is the slice the scheduler reserves before it places the pod. Limit `512Mi` is the kill line. The Dockerfile’s 75% is 75% of that limit. He said past 512 the pod is killed, and 256 is free space so the pod can start.
+
+**Rolling update.** `maxSurge: 1` and `maxUnavailable: 0`. The new pod starts first. Readiness passes. Then the old pod is removed. The Service name stays. He said start the new one, and when it is good, kill the old one.
+
+**HPA.** `k8s/event-hpa.yaml` changes Event’s replica count, from 1 to 3, when CPU is over 70% of the `100m` request. More Event pods still share one seat row. He heard that and closed the day. He did not say the line back.
+
+**Line:** The Service name stays when a pod is replaced. The JWT key is a Secret, stored as base64. Readiness drops traffic when the database is down and does not restart the pod. The memory limit kills the pod. A rolling update starts the new pod before it kills the old one. An HPA adds pods. It does not add seats.
+
+Part 3 (deploy board) was not reached.
 
 ---
 

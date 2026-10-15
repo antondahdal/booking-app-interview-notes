@@ -97,7 +97,7 @@ Details and traps: [week-09.md](week-09.md). Compose and health vs ready were W5
 | Wed | H5 Mapping / cascade / IDs / batch inserts / locking | Docker: multi-stage, layers, JVM memory in a container |
 
 Hibernate is **five topics** (Anton 2026-09-25: go deeper). SQL logging on for every Hibernate lab.
-| Thu | Kubernetes `Deployment` + `Service` + `ConfigMap` / `Secret` (kind or minikube) | Probes on Actuator, requests / limits, rolling update, HPA |
+| Thu | Kubernetes `Deployment` + `Service` + `ConfigMap` / `Secret` (kind or minikube) | Probes on Actuator, requests / limits, rolling update, HPA | **Done W9 Day 4 (2026-10-15)** — YAML only, not applied to a cluster. HPA explained, line not spoken back. Deploy board not reached. |
 | Fri | Spring AI `ChatClient` endpoint | One read-only tool (no booking tool) |
 
 **With the DB split (Wed–Thu, Anton 2026-10-08):** one database per service, three deployables, JWT check only on Event and Booking. Same work: a rate limiter on the gateway. Extra Book taps get **429** there. `book()` and the seat lock do not return **429**. Sold out stays **409**. Not in the repo today. Details: [week-09.md](week-09.md).
