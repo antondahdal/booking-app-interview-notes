@@ -197,7 +197,7 @@ Still open after Thursday:
 
 - Deploy board (Thu Part 3, not reached): ingress, database outside the cluster, expand-then-contract schema change.
 - Event search board (Wed Part 3, not reached).
-- Click id on Book, so a retry of the same tap is one ticket.
+- Click id on Book is built. Write-up is under Day 4, Part 2.
 - Friday ChatClient / AI assistant is still scrapped.
 - The Kubernetes files were not applied to a cluster.
 
@@ -259,7 +259,7 @@ Two new concerts with null ids and `equals` on id look like one object in a `Has
 
 The count does **not** reset when the HTTP call finishes. `taps` lives on the gateway bean until the process restarts. One phone, a million taps: first 5 go through, the rest are 429, still one map key. A million different IPs: a million keys in RAM that never expire.
 
-`getRemoteAddr()` is the IP the gateway sees, not click id. Two people in the same café can share an IP. Click id is a key on the Book body so the **same tap** is one ticket. Still unbuilt.
+`getRemoteAddr()` is the IP the gateway sees, not click id. Two people in the same café can share an IP. Click id is a key on the Book body so the **same tap** is one ticket. That key is in the app now. See Day 4, Part 2.
 
 **Weak points (say this in the interview, then the production fix):**
 
@@ -309,6 +309,29 @@ Coach wrote the files. Comments are on the lines. Nothing was applied to a clust
 **Line:** The Service name stays when a pod is replaced. The JWT key is a Secret, stored as base64. Readiness drops traffic when the database is down and does not restart the pod. The memory limit kills the pod. A rolling update starts the new pod before it kills the old one. An HPA adds pods. It does not add seats.
 
 Part 3 (deploy board) was not reached.
+
+### Part 2 — click id
+
+Coach wrote this in Booking and Event on 2026-10-15.
+
+The Book body requires `clickId` (`@NotBlank`, max 64). A missing id is **400** before `book()` runs.
+
+`BookingService.book` asks Auth who the caller is, then looks up a ticket by that id.
+
+- Same user, same event, same seats: return that ticket. Event is not called.
+- Different user, event, or seat count: **409** (`ClickIdMismatchException`).
+
+If there is no ticket yet, Booking sends the id on the seat-reservation body. `EventService.reserveSeats` locks the concert row, then looks up the hold by `clickId`.
+
+- Same event and same seats: return that hold. Seats are not taken again.
+- Different event or seats: **409**. The seat change rolls back.
+- No hold yet: decrement, then insert the hold. `seat_holds.click_id` is unique.
+
+`BookingWriter.writeBook` saves the ticket with the same id (`bookings.click_id` is unique) and the two outbox rows in one commit. If the other try inserted the ticket first, that write rolls back and Booking returns the ticket that won.
+
+JWT is who. Correlation id is the log sticker. Click id is which tap.
+
+**Line:** I retry Book only with the same click id. Event stores it on the hold, so the second try does not take another seat.
 
 ---
 

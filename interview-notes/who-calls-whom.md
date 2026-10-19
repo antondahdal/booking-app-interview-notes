@@ -105,7 +105,9 @@ Chain to say:
 
 `BookingController.book` → `BookingService.book` → `AuthClient.checkIfExist` → `UserController.getUser` → `AuthService.checkIfExist` → `EventClient.reserveSeats` → `EventController.reserveSeats` → `EventService.reserveSeats` → `BookingWriter.writeBook`.
 
-`EventService.reserveSeats` locks the concert row, takes the seats, and saves a hold for 10 minutes. `BookingWriter.writeBook` saves the ticket and two outbox rows in one commit. Email is not called here. Confirm is not called here.
+`EventService.reserveSeats` locks the concert row, takes the seats, and saves a hold for 10 minutes. The hold stores `clickId`. The same id for the same event and the same seat count returns that hold and does not take another seat. A different event or seat count for that id is **409**.
+
+`BookingService.book` looks up the ticket by `clickId` before it calls Event. The same user, event, and seats returns that ticket and does not call Event. `BookingWriter.writeBook` saves the ticket with that id and two outbox rows in one commit. `bookings.click_id` is unique. Email is not called here. Confirm is not called here.
 
 On Event and on Auth, the JWT filter already ran `JwtService.parseToken` before those controllers. That is `verifyWith(key)`, the same `JWT_SECRET`.
 
