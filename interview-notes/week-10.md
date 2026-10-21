@@ -9,6 +9,10 @@ Week 10: Mon 2026-10-19 to Fri 2026-10-23.
 Week 11: Mon 2026-10-26 to Fri 2026-10-30.
 Sat/Sun **off**.
 
+**Book path, in call order:** [book-path.md](book-path.md). Read that from start to end. The day notes are the quiz, not the order.
+
+**Split-the-bill study notes:** [split-bill-api.md](split-bill-api.md). API and balances. Closed 2026-10-21.
+
 **Day 1 Part 1 closed** (Mon 2026-10-19).
 LCs done. S1 and S2 done. Ch 11 token bucket recap done.
 Do not re-ask S5. Do not repeat the Ch 10 consistent-hashing prompt from Week 8.
