@@ -14,6 +14,8 @@ Answer what he asked. Finish **one topic** before the next. Wrong → correct, s
 
 **Walk the story** (Anton 2026-09-21): first time a type appears, 3–5 sentences, then the lines. Do not repeat “Not HTTP. Not a table.” After done/ok: **only the check**, wait for his answer. No Maven/import quizzes. If phrasing failed, restate, do not write a long correction. Coach stays short.
 
+**Question order** (Anton 2026-10-26): method names only, one line, then one short question. File, method, the ask. Do not ask a later hop while an earlier one is open.
+
 ## Start of Part 2
 
 1. Notes first. Lock today’s slots (including extras already written there).
